@@ -464,16 +464,7 @@
   .lang-opts { display:grid; gap:8px; }
   .lang-opts button { font:inherit; font-size:16px; padding:12px 14px; border-radius:10px; border:2px solid var(--border); background:var(--bg-raised); color:var(--text); text-align:left; cursor:pointer; }
   .lang-opts button.cur { border-color:var(--accent); font-weight:700; }
-  /* attendance pill in header */
-  .att-btn { border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:var(--text-on-header); font:inherit; font-size:12.5px; font-weight:600; padding:6px 11px; border-radius:16px; cursor:pointer; white-space:nowrap; }
-  .att-btn:hover { background:rgba(255,255,255,.16); }
-  .att-btn.in { border-color:#2EAA6E; } .att-btn.done { opacity:.75; }
   .hdr-right { display:flex; align-items:center; gap:10px; }
-  @media (max-width: 520px) { .att-btn .att-long { display:none; } }
-  .att-table { width:100%; border-collapse:collapse; font-size:13px; }
-  .att-table th, .att-table td { padding:7px 6px; border-bottom:1px solid var(--border); text-align:left; }
-  .att-table th { color:var(--text-dim); font-weight:600; font-size:12px; }
-  .att-table .absent { color:var(--text-dim); } .att-table .open { color:#C27C0E; }
   /* devices + activity */
   .dev-row { display:flex; gap:10px; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); }
   .dev-row .ic { font-size:22px; width:30px; text-align:center; }
@@ -689,7 +680,6 @@
         <div class="brand-name">KG Chatboat</div>
       </div>
       <div class="hdr-right">
-      <button class="att-btn" id="att-btn" style="display:none;"></button>
       <div class="me" id="me-box">
         <div class="me-menu" id="me-menu">
           <button id="menu-status"><span class="st-label st-available" id="menu-status-label"><i></i>Available</span></button>
@@ -697,7 +687,6 @@
           <button id="menu-links">🔗 Client links</button>
           <button id="menu-saved">⭐ Saved messages</button>
           <button id="menu-lang">🌐 Language</button>
-          <button id="menu-att">🕘 Attendance</button>
           <button id="menu-devices">📱 My devices</button>
           <button id="menu-theme">🎨 Theme</button>
           <button id="menu-edit-profile">Edit profile</button>
@@ -897,7 +886,6 @@
         <button data-tab="holds">📌 Hold requests</button>
         <button data-tab="discounts">💲 Discounts</button>
         <button data-tab="parties">🤝 Parties</button>
-        <button data-tab="attendance">🕘 Attendance</button>
         <button data-tab="activity">📜 Activity</button>
         <button data-tab="settings">⚙️ Settings</button>
         <button data-tab="backup">💾 Backup</button>
@@ -1120,13 +1108,6 @@
       <div class="panel-head" id="dev-title">📱 My devices</div>
       <div class="panel-body" id="dev-body"></div>
       <div class="panel-foot"><button class="small-btn" id="dev-close">Close</button></div>
-    </div>
-  </div>
-  <div class="modal-back" id="att-modal">
-    <div class="panel wide">
-      <div class="panel-head" id="att-title">🕘 My attendance</div>
-      <div class="panel-body" id="att-body"></div>
-      <div class="panel-foot"><button class="small-btn" id="att-close">Close</button></div>
     </div>
   </div>
   <div class="lightbox" id="lightbox">
@@ -4651,86 +4632,6 @@ if ("serviceWorker" in navigator) {
     draw();
   };
 
-  // =====================================================================
-  // ---------- 🕘 Attendance ----------
-  // =====================================================================
-  let attToday = null;
-  const hm = (ts) => ts ? new Date(ts).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "";
-  const hoursBetween = (a, b) => (a && b) ? (new Date(b) - new Date(a)) / 3600000 : null;
-  const fmtHours = (h) => h == null ? "" : Math.floor(h) + "h " + String(Math.round((h % 1) * 60)).padStart(2, "0") + "m";
-  async function loadAttendance() {
-    const { data } = await sb.from("attendance").select("*").eq("user_id", myId).eq("day", isoDay(Date.now())).maybeSingle();
-    attToday = data || null; paintAtt();
-  }
-  function paintAtt() {
-    const b = $("att-btn"); b.style.display = myId ? "" : "none";
-    if (!attToday || !attToday.check_in) { b.className = "att-btn"; b.innerHTML = '🕘 <span class="att-long">Check in</span>'; b.title = "Mark your attendance for today"; }
-    else if (!attToday.check_out) { b.className = "att-btn in"; b.innerHTML = '✅ <span class="att-long">In ' + hm(attToday.check_in) + ' · Check out</span>'; b.title = "Checked in at " + hm(attToday.check_in) + ". Tap to check out."; }
-    else { b.className = "att-btn done"; b.innerHTML = '🏁 <span class="att-long">' + hm(attToday.check_in) + "–" + hm(attToday.check_out) + '</span>'; b.title = "Today: " + fmtHours(hoursBetween(attToday.check_in, attToday.check_out)); }
-  }
-  $("att-btn").addEventListener("click", async () => {
-    const now = new Date().toISOString(), day = isoDay(Date.now());
-    if (!attToday || !attToday.check_in) {
-      const { error } = await sb.from("attendance").insert({ user_id: myId, day, check_in: now });
-      if (error && !/duplicate/i.test(error.message)) { showBanner("Couldn't check in: " + error.message, true); return; }
-      showBanner("✅ Checked in at " + hm(now) + "."); setTimeout(() => showBanner(""), 1800);
-    } else if (!attToday.check_out) {
-      if (!confirm("Check out now (" + hm(now) + ")?")) return;
-      const { error } = await sb.from("attendance").update({ check_out: now }).eq("user_id", myId).eq("day", day);
-      if (error) { showBanner("Couldn't check out: " + error.message, true); return; }
-      showBanner("🏁 Checked out at " + hm(now) + "."); setTimeout(() => showBanner(""), 1800);
-    } else { openMyAttendance(); return; }
-    loadAttendance();
-  });
-  async function openMyAttendance() {
-    $("att-title").textContent = "🕘 My attendance"; $("att-modal").classList.add("open");
-    const body = $("att-body"); body.innerHTML = '<div class="side-empty">Loading…</div>';
-    const d = new Date(), first = isoDay(new Date(d.getFullYear(), d.getMonth(), 1)), last = isoDay(new Date(d.getFullYear(), d.getMonth() + 1, 0));
-    const { data } = await sb.from("attendance").select("*").eq("user_id", myId).gte("day", first).lte("day", last).order("day", { ascending: false });
-    const rows = data || [], total = rows.reduce((a, r) => a + (hoursBetween(r.check_in, r.check_out) || 0), 0);
-    body.innerHTML = '<div class="sec-label"></div><table class="att-table"><tr><th>Date</th><th>In</th><th>Out</th><th>Hours</th></tr></table>';
-    body.firstChild.textContent = d.toLocaleDateString(undefined, { month: "long", year: "numeric" }) + " · " + rows.length + " days present · " + fmtHours(total);
-    const tb = body.querySelector("table");
-    if (!rows.length) body.insertAdjacentHTML("beforeend", '<div class="side-empty">No attendance this month yet. Tap 🕘 Check in at the top.</div>');
-    rows.forEach(r => { const tr = document.createElement("tr"); [fmtDay(r.day), hm(r.check_in), r.check_out ? hm(r.check_out) : "—", fmtHours(hoursBetween(r.check_in, r.check_out))].forEach((v, i) => { const td = document.createElement("td"); td.textContent = v; if (i === 2 && !r.check_out) td.className = "open"; tr.appendChild(td); }); tb.appendChild(tr); });
-  }
-  $("menu-att").addEventListener("click", () => { meMenu.classList.remove("open"); openMyAttendance(); });
-  $("att-close").addEventListener("click", () => $("att-modal").classList.remove("open"));
-  adminTabs.attendance = async () => {
-    const body = $("admin-body");
-    body.innerHTML = `<div class="act-filters"><input type="date" id="att-day"><input type="month" id="att-month"><button class="small-btn" id="att-xls">⬇ Month as Excel</button></div><div id="att-list"></div>`;
-    $("att-day").value = isoDay(Date.now()); $("att-month").value = isoDay(Date.now()).slice(0, 7);
-    const draw = async () => {
-      const day = $("att-day").value, box = $("att-list"); box.innerHTML = '<div class="side-empty">Loading…</div>';
-      const [{ data: users }, { data: rows }] = await Promise.all([sb.from("profiles").select("id,name,status").eq("status", "active"), sb.from("attendance").select("*").eq("day", day)]);
-      const by = {}; (rows || []).forEach(r => by[r.user_id] = r);
-      const list = (users || []).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-      const present = list.filter(u => by[u.id] && by[u.id].check_in).length;
-      box.innerHTML = '<div class="sec-label"></div><table class="att-table"><tr><th>Name</th><th>In</th><th>Out</th><th>Hours</th><th>Status</th></tr></table>';
-      box.firstChild.textContent = fmtDay(day) + " · " + present + " present · " + (list.length - present) + " absent";
-      const tb = box.querySelector("table");
-      list.forEach(u => {
-        const r = by[u.id], tr = document.createElement("tr");
-        const st = !r || !r.check_in ? "Absent" : !r.check_out ? (day === isoDay(Date.now()) ? "In office" : "No check-out") : "Present";
-        [u.name, r ? hm(r.check_in) : "", r && r.check_out ? hm(r.check_out) : "", r ? fmtHours(hoursBetween(r.check_in, r.check_out)) : "", st].forEach((v, i) => { const td = document.createElement("td"); td.textContent = v; if (i === 4) td.className = st === "Absent" ? "absent" : st === "Present" ? "" : "open"; tr.appendChild(td); });
-        tb.appendChild(tr);
-      });
-    };
-    $("att-day").addEventListener("change", draw);
-    $("att-xls").addEventListener("click", async () => {
-      const [y, m] = $("att-month").value.split("-").map(Number); if (!y) return;
-      const first = isoDay(new Date(y, m - 1, 1)), last = isoDay(new Date(y, m, 0));
-      const [{ data: users }, { data: rows }] = await Promise.all([sb.from("profiles").select("id,name,status"), sb.from("attendance").select("*").gte("day", first).lte("day", last).order("day")]);
-      const nm = {}; (users || []).forEach(u => nm[u.id] = u.name);
-      const XLSX = await loadSheetJs(), wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Date", "Name", "In", "Out", "Hours"]].concat((rows || []).map(r => [r.day, nm[r.user_id] || "", hm(r.check_in), hm(r.check_out), Number((hoursBetween(r.check_in, r.check_out) || 0).toFixed(2))]))), "Daily");
-      const sum = {}; (rows || []).forEach(r => { const s0 = sum[r.user_id] = sum[r.user_id] || { d: 0, h: 0 }; s0.d++; s0.h += hoursBetween(r.check_in, r.check_out) || 0; });
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Name", "Days present", "Total hours"]].concat((users || []).filter(u => u.status === "active" || sum[u.id]).map(u => [u.name, (sum[u.id] || {}).d || 0, Number(((sum[u.id] || {}).h || 0).toFixed(2))]))), "Summary");
-      XLSX.writeFile(wb, "KG_attendance_" + $("att-month").value + ".xlsx");
-    });
-    draw();
-  };
-
   // ---------- boot ----------
   let signingUp = false, enteredFor = null, statusChannel = null;
   let inRecovery = /type=recovery/.test(location.hash);   // opened from a password-reset email
@@ -4764,7 +4665,6 @@ if ("serviceWorker" in navigator) {
     subscribeRealtime();
     startPresence();
     loadSaved();
-    loadAttendance();
     maybeOfferNotifications();
     const want = new URLSearchParams(location.search).get("chat");
     if (want) { history.replaceState(null, "", location.pathname); if (want !== "team") openChat(want); }
@@ -4785,7 +4685,7 @@ if ("serviceWorker" in navigator) {
   }
   function leaveChat() {
     if (realtimeChannel) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
-    stopPresence(); savedSet.clear(); attToday = null; $("att-btn").style.display = "none";
+    stopPresence(); savedSet.clear();
     enteredFor = null; messages = []; currentGroupId = null;
   }
 
