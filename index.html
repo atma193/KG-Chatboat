@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<script>try { var t = localStorage.getItem("kg-theme"); if (t && t !== "auto") document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
@@ -20,15 +21,76 @@
     --bubble-mine: #10162B; --bubble-mine-text: #F3EFE4; --bubble-theirs: #FFFFFF;
     --danger: #B3432F; color-scheme: light;
   }
+  :root { --quote-mine: rgba(255,255,255,.14); }
+  /* ---------- Themes (each person picks one: name menu → 🎨 Theme) ---------- */
+  /* auto = KG Navy & Gold, dark when the phone / PC is in dark mode */
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
+    :root:not([data-theme]), :root[data-theme="auto"] {
       --bg: #0B0E18; --bg-raised: #141927; --bg-header: #080B15;
       --text: #E9E6DC; --text-dim: #93939C; --border: #242A3B;
       --accent: #D8A94B; --accent-ink: #2A2010;
       --bubble-mine: #D8A94B; --bubble-mine-text: #1B1304; --bubble-theirs: #141927;
-      --danger: #E28068; color-scheme: dark;
+      --danger: #E28068; color-scheme: dark; --quote-mine: rgba(0,0,0,.12);
     }
   }
+  :root[data-theme="kg-dark"] {
+    --bg: #0B0E18; --bg-raised: #141927; --bg-header: #080B15;
+    --text: #E9E6DC; --text-dim: #93939C; --text-on-header: #F3EFE4; --border: #242A3B;
+    --accent: #D8A94B; --accent-ink: #2A2010;
+    --bubble-mine: #D8A94B; --bubble-mine-text: #1B1304; --bubble-theirs: #141927;
+    --danger: #E28068; color-scheme: dark; --quote-mine: rgba(0,0,0,.12);
+  }
+  :root[data-theme="teams"] {
+    --bg: #F5F5F5; --bg-raised: #FFFFFF; --bg-header: #464775;
+    --text: #242424; --text-dim: #616161; --text-on-header: #FFFFFF; --border: #E0E0E0;
+    --accent: #6264A7; --accent-ink: #FFFFFF;
+    --bubble-mine: #E8EBFA; --bubble-mine-text: #242424; --bubble-theirs: #FFFFFF;
+    --danger: #C4314B; color-scheme: light; --quote-mine: rgba(98,100,167,.12);
+  }
+  :root[data-theme="teams-dark"] {
+    --bg: #1F1F1F; --bg-raised: #292929; --bg-header: #2B2B40;
+    --text: #F0F0F0; --text-dim: #ADADAD; --text-on-header: #FFFFFF; --border: #3D3D3D;
+    --accent: #7F85F5; --accent-ink: #FFFFFF;
+    --bubble-mine: #3D3E66; --bubble-mine-text: #FFFFFF; --bubble-theirs: #292929;
+    --danger: #F1707B; color-scheme: dark; --quote-mine: rgba(255,255,255,.10);
+  }
+  :root[data-theme="whatsapp"] {
+    --bg: #EFEAE2; --bg-raised: #FFFFFF; --bg-header: #008069;
+    --text: #111B21; --text-dim: #667781; --text-on-header: #FFFFFF; --border: #E2DED6;
+    --accent: #00A884; --accent-ink: #FFFFFF;
+    --bubble-mine: #D9FDD3; --bubble-mine-text: #111B21; --bubble-theirs: #FFFFFF;
+    --danger: #EA0038; color-scheme: light; --quote-mine: rgba(0,0,0,.06);
+  }
+  :root[data-theme="whatsapp-dark"] {
+    --bg: #0B141A; --bg-raised: #111B21; --bg-header: #202C33;
+    --text: #E9EDEF; --text-dim: #8696A0; --text-on-header: #E9EDEF; --border: #222D34;
+    --accent: #00A884; --accent-ink: #FFFFFF;
+    --bubble-mine: #005C4B; --bubble-mine-text: #E9EDEF; --bubble-theirs: #202C33;
+    --danger: #F15C6D; color-scheme: dark; --quote-mine: rgba(0,0,0,.18);
+  }
+  :root[data-theme="classic"] {
+    --bg: #F4F6FA; --bg-raised: #FFFFFF; --bg-header: #1F4E9C;
+    --text: #1C1C1E; --text-dim: #6B6F76; --text-on-header: #FFFFFF; --border: #DDE3EC;
+    --accent: #2F6FE0; --accent-ink: #FFFFFF;
+    --bubble-mine: #2F6FE0; --bubble-mine-text: #FFFFFF; --bubble-theirs: #FFFFFF;
+    --danger: #C9372C; color-scheme: light; --quote-mine: rgba(255,255,255,.18);
+  }
+  :root[data-theme="rose"] {
+    --bg: #FBF6F4; --bg-raised: #FFFFFF; --bg-header: #5B2333;
+    --text: #2A1A1E; --text-dim: #7A6A6E; --text-on-header: #FBEFEF; --border: #EEDFDC;
+    --accent: #C26A7A; --accent-ink: #FFFFFF;
+    --bubble-mine: #5B2333; --bubble-mine-text: #FBEFEF; --bubble-theirs: #FFFFFF;
+    --danger: #B3432F; color-scheme: light; --quote-mine: rgba(255,255,255,.14);
+  }
+  .theme-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; padding-bottom:6px; }
+  .theme-card { border:2px solid var(--border); border-radius:12px; overflow:hidden; cursor:pointer; background:var(--bg-raised); text-align:left; padding:0; font:inherit; color:var(--text); }
+  .theme-card.cur { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent); }
+  .theme-card .tp-h { height:22px; display:flex; align-items:center; padding:0 8px; gap:5px; }
+  .theme-card .tp-h i { width:8px; height:8px; border-radius:50%; opacity:.75; }
+  .theme-card .tp-b { padding:8px; display:flex; flex-direction:column; gap:5px; height:74px; }
+  .theme-card .tp-m { height:14px; border-radius:7px; width:62%; }
+  .theme-card .tp-m.me { align-self:flex-end; width:50%; }
+  .theme-card .tp-n { padding:7px 9px 8px; font-size:12.5px; font-weight:600; border-top:1px solid var(--border); display:flex; justify-content:space-between; }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; padding-top: env(safe-area-inset-top,0px); padding-bottom: env(safe-area-inset-bottom,0px); }
   body { background: var(--bg); color: var(--text); font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; display:flex; flex-direction:column; }
@@ -43,7 +105,7 @@
   .side-list { flex:1; overflow-y:auto; padding:0 6px 10px; }
   .side-item { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; cursor:pointer; }
   .side-item:hover { background:rgba(127,127,127,.10); }
-  .side-item.active { background:rgba(185,134,46,.16); }
+  .side-item.active { background:color-mix(in srgb, var(--accent) 16%, transparent); }
   .side-item .avatar { width:36px; height:36px; }
   .side-text { min-width:0; flex:1; }
   .side-name { font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -121,7 +183,7 @@
   .pill.pending { color:#C27C0E; } .pill.disabled { color:var(--danger); } .pill.admin { color:var(--accent); } .pill.active { color:#2E8B6E; }
   .panel.wide { max-width:640px; }
   .prof-photo { width:84px; height:84px; margin:4px auto 10px; font-size:28px; cursor:pointer; }
-  .notif-banner { display:none; align-items:center; gap:10px; padding:8px 14px; font-size:13px; background:rgba(185,134,46,.14); border-bottom:1px solid var(--border); }
+  .notif-banner { display:none; align-items:center; gap:10px; padding:8px 14px; font-size:13px; background:color-mix(in srgb, var(--accent) 14%, transparent); border-bottom:1px solid var(--border); }
   .notif-banner.open { display:flex; }
   .notif-banner .grow { flex:1; }
   /* online dot */
@@ -144,7 +206,7 @@
   .st-label.st-available i { background:#2EAA6E; } .st-label.st-busy i, .st-label.st-dnd i { background:#D13438; }
   .st-label.st-away i, .st-label.st-brb i { background:#F2B100; } .st-label.st-offline i { border:1.5px solid #8A8D93; box-sizing:border-box; }
   #status-menu button { gap:10px; }
-  #status-menu button.cur { font-weight:700; background:rgba(185,134,46,.12); }
+  #status-menu button.cur { font-weight:700; background:color-mix(in srgb, var(--accent) 12%, transparent); }
   #status-menu .sm-head { padding:9px 14px 5px; font-size:11.5px; font-weight:700; letter-spacing:.06em; color:var(--text-dim); text-transform:uppercase; }
   .cc-status { margin-top:6px; font-size:13px; }
   .chat-title .avatar, .chat-title .group-icon { width:36px; height:36px; }
@@ -162,7 +224,7 @@
   .quote { border-left:3px solid var(--accent); background:rgba(127,127,127,.12); border-radius:6px; padding:4px 8px; margin-bottom:5px; font-size:12.5px; cursor:pointer; max-width:100%; }
   .quote .qn { font-weight:700; color:var(--accent); font-size:12px; }
   .quote .qt { opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .row.mine .quote { background:rgba(255,255,255,.14); }
+  .row.mine .quote { background:var(--quote-mine); }
   .row.flash .bubble { animation: flash 1.6s ease; }
   @keyframes flash { 0%,40% { box-shadow:0 0 0 3px var(--accent); } 100% { box-shadow:0 0 0 0 transparent; } }
   /* mentions + links */
@@ -173,13 +235,13 @@
   .mention-pop { position:absolute; bottom:100%; left:12px; right:12px; max-width:360px; background:var(--bg-raised); border:1px solid var(--border); border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.2); max-height:240px; overflow-y:auto; display:none; z-index:15; margin-bottom:6px; }
   .mention-pop.open { display:block; }
   .mention-pop .pick-row { cursor:pointer; padding:7px 10px; }
-  .mention-pop .pick-row.sel, .mention-pop .pick-row:hover { background:rgba(185,134,46,.14); }
+  .mention-pop .pick-row.sel, .mention-pop .pick-row:hover { background:color-mix(in srgb, var(--accent) 14%, transparent); }
   footer { position:relative; }
   /* reactions */
   .reacts { display:flex; gap:4px; flex-wrap:wrap; margin:3px 2px 0; }
   .row.mine .reacts { justify-content:flex-end; }
   .react-chip { border:1px solid var(--border); background:var(--bg-raised); border-radius:12px; padding:1px 7px; font-size:12.5px; cursor:pointer; display:flex; gap:4px; align-items:center; color:var(--text); }
-  .react-chip.mine { border-color:var(--accent); background:rgba(185,134,46,.16); }
+  .react-chip.mine { border-color:var(--accent); background:color-mix(in srgb, var(--accent) 16%, transparent); }
   .react-row { display:flex; gap:2px; padding:6px 8px; border-bottom:1px solid var(--border); }
   .react-row button { font-size:20px; width:36px; height:36px; padding:0; justify-content:center; border-radius:50%; }
   /* audio + voice */
@@ -205,7 +267,7 @@
   .search-hit:hover { background:rgba(127,127,127,.08); }
   .search-hit .h1 { font-size:12px; color:var(--text-dim); display:flex; justify-content:space-between; gap:8px; }
   .search-hit .h2 { font-size:13.5px; margin-top:2px; }
-  .search-hit mark { background:rgba(185,134,46,.35); color:inherit; border-radius:3px; }
+  .search-hit mark { background:color-mix(in srgb, var(--accent) 35%, transparent); color:inherit; border-radius:3px; }
   .composer-locked { text-align:center; font-size:13px; color:var(--text-dim); padding:10px; display:none; }
   /* stone + hold cards */
   .stone-card, .hold-card { background:var(--bg-raised); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:9px 11px; width:100%; font-size:13px; white-space:normal; box-sizing:border-box; }
@@ -249,7 +311,7 @@
   .chat-head { display:flex; align-items:center; gap:2px; padding:14px 8px 4px 16px; flex-shrink:0; }
   .chat-h1 { font-size:20px; font-weight:700; flex:1; }
   .chat-head .title-btn { color:var(--text); }
-  .chat-head .title-btn.on { background:rgba(185,134,46,.18); color:var(--accent); }
+  .chat-head .title-btn.on { background:color-mix(in srgb, var(--accent) 18%, transparent); color:var(--accent); }
   .chips { display:flex; gap:5px; padding:8px 12px 6px; flex-wrap:wrap; flex-shrink:0; }
   .chip { border:1px solid var(--border); background:var(--bg-raised); color:var(--text); border-radius:16px; padding:4px 10px; font:inherit; font-size:12px; cursor:pointer; white-space:nowrap; }
   .chip:hover { background:rgba(127,127,127,.1); }
@@ -330,7 +392,7 @@
   .tpill.open { background:rgba(75,83,188,.14); color:#4B53BC; } .tpill.done { background:rgba(46,139,110,.15); color:#2E8B6E; } .tpill.overdue { background:rgba(179,67,47,.15); color:var(--danger); }
   .poll-card .pq { font-size:14.5px; font-weight:700; margin-bottom:8px; }
   .popt { position:relative; border:1px solid var(--border); border-radius:8px; padding:7px 10px; margin-bottom:6px; cursor:pointer; overflow:hidden; display:flex; gap:8px; align-items:center; }
-  .popt .fill { position:absolute; inset:0 auto 0 0; background:rgba(185,134,46,.18); z-index:0; transition:width .25s; }
+  .popt .fill { position:absolute; inset:0 auto 0 0; background:color-mix(in srgb, var(--accent) 18%, transparent); z-index:0; transition:width .25s; }
   .popt > span { position:relative; z-index:1; }
   .popt .pl { flex:1; } .popt .pc { font-weight:700; font-variant-numeric:tabular-nums; }
   .popt.mine { border-color:var(--accent); } .popt.mine .pl::before { content:"✓ "; color:var(--accent); font-weight:700; }
@@ -551,6 +613,7 @@
         <div class="me-menu" id="me-menu">
           <button id="menu-status"><span class="st-label st-available" id="menu-status-label"><i></i>Available</span></button>
           <button id="menu-mytasks">✅ My tasks &amp; reminders</button>
+          <button id="menu-theme">🎨 Theme</button>
           <button id="menu-edit-profile">Edit profile</button>
           <button id="menu-notif">🔔 Notifications</button>
           <button id="menu-admin" style="display:none;">🛡️ Admin panel</button>
@@ -867,6 +930,14 @@
       <div class="tabs" id="mt-tabs"><button data-t="mine" class="active">Assigned to me</button><button data-t="created">Created by me</button><button data-t="sched">⏰ Scheduled</button></div>
       <div class="panel-body" id="mt-body"></div>
       <div class="panel-foot"><button class="small-btn" id="mt-close">Close</button></div>
+    </div>
+  </div>
+  <div class="modal-back" id="theme-modal">
+    <div class="panel wide">
+      <div class="panel-head">🎨 Choose a theme</div>
+      <div class="panel-body"><div class="theme-grid" id="theme-grid"></div>
+        <div class="side-sub" style="margin:6px 0 4px;">Only changes how the app looks for you, on this device.</div></div>
+      <div class="panel-foot"><button class="small-btn primary" id="theme-close">Done</button></div>
     </div>
   </div>
   <div class="lightbox" id="lightbox">
@@ -3602,6 +3673,48 @@ if ("serviceWorker" in navigator) {
       r.appendChild(cb); r.appendChild(tx); body.appendChild(r);
     });
   }
+
+  // ---------- 🎨 Themes ----------
+  const THEMES = [
+    { id: "auto",          name: "KG Auto",        note: "Light / dark like your device", h: "#10162B", bg: "#FAF8F3", me: "#10162B", them: "#FFFFFF", a: "#B9862E" },
+    { id: "kg",            name: "KG Navy & Gold", h: "#10162B", bg: "#FAF8F3", me: "#10162B", them: "#FFFFFF", a: "#B9862E" },
+    { id: "kg-dark",       name: "KG Dark",        h: "#080B15", bg: "#0B0E18", me: "#D8A94B", them: "#141927", a: "#D8A94B" },
+    { id: "teams",         name: "Teams Purple",   h: "#464775", bg: "#F5F5F5", me: "#E8EBFA", them: "#FFFFFF", a: "#6264A7" },
+    { id: "teams-dark",    name: "Teams Dark",     h: "#2B2B40", bg: "#1F1F1F", me: "#3D3E66", them: "#292929", a: "#7F85F5" },
+    { id: "whatsapp",      name: "WhatsApp Green", h: "#008069", bg: "#EFEAE2", me: "#D9FDD3", them: "#FFFFFF", a: "#00A884" },
+    { id: "whatsapp-dark", name: "WhatsApp Dark",  h: "#202C33", bg: "#0B141A", me: "#005C4B", them: "#202C33", a: "#00A884" },
+    { id: "classic",       name: "Classic Blue",   h: "#1F4E9C", bg: "#F4F6FA", me: "#2F6FE0", them: "#FFFFFF", a: "#2F6FE0" },
+    { id: "rose",          name: "Rose",           h: "#5B2333", bg: "#FBF6F4", me: "#5B2333", them: "#FFFFFF", a: "#C26A7A" },
+  ];
+  function currentTheme() { try { return localStorage.getItem("kg-theme") || "auto"; } catch (e) { return "auto"; } }
+  function applyTheme(id) {
+    // "kg" is the light KG look even when the device is dark; "auto" follows the device
+    if (!id || id === "auto") document.documentElement.removeAttribute("data-theme");
+    else if (id === "kg") document.documentElement.setAttribute("data-theme", "light");
+    else document.documentElement.setAttribute("data-theme", id);
+    try { localStorage.setItem("kg-theme", id || "auto"); } catch (e) {}
+    const hdr = getComputedStyle(document.documentElement).getPropertyValue("--bg-header").trim() || "#10162B";
+    const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute("content", hdr);
+  }
+  function drawThemes() {
+    const cur = currentTheme(), grid = $("theme-grid"); grid.innerHTML = "";
+    THEMES.forEach(t => {
+      const c = document.createElement("button"); c.type = "button"; c.className = "theme-card" + (t.id === cur ? " cur" : "");
+      c.innerHTML = '<div class="tp-h"><i></i><i></i><i></i></div><div class="tp-b"><div class="tp-m"></div><div class="tp-m me"></div><div class="tp-m"></div></div><div class="tp-n"><span></span><span></span></div>';
+      c.querySelector(".tp-h").style.background = t.h; c.querySelectorAll(".tp-h i").forEach(i => i.style.background = "#fff");
+      c.querySelector(".tp-b").style.background = t.bg;
+      c.querySelectorAll(".tp-m").forEach(m => { m.style.background = m.classList.contains("me") ? t.me : t.them; m.style.border = "1px solid rgba(0,0,0,.08)"; });
+      c.querySelector(".tp-n span").textContent = t.name; c.querySelector(".tp-n span:last-child").textContent = t.id === cur ? "✓" : "";
+      c.querySelector(".tp-n span:last-child").style.color = t.a;
+      c.title = t.note || t.name;
+      c.addEventListener("click", () => { applyTheme(t.id); drawThemes(); });
+      grid.appendChild(c);
+    });
+  }
+  $("menu-theme").addEventListener("click", () => { meMenu.classList.remove("open"); drawThemes(); $("theme-modal").classList.add("open"); });
+  $("theme-close").addEventListener("click", () => $("theme-modal").classList.remove("open"));
+  $("theme-modal").addEventListener("click", (e) => { if (e.target.id === "theme-modal") $("theme-modal").classList.remove("open"); });
+  applyTheme(currentTheme());
 
   // ---------- boot ----------
   let signingUp = false, enteredFor = null, statusChannel = null;
