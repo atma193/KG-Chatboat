@@ -174,7 +174,9 @@
   .wait-icon { font-size:44px; text-align:center; margin-bottom:10px; }
   .wait-text { text-align:center; font-size:14px; color:#4B4F56; line-height:1.55; margin-bottom:18px; }
   .tabs { display:flex; gap:4px; padding:0 20px; border-bottom:1px solid var(--border); }
-  .tabs button { border:none; background:none; color:var(--text-dim); font:inherit; font-size:13.5px; font-weight:600; padding:9px 10px; cursor:pointer; border-bottom:2px solid transparent; }
+  .tabs button { border:none; background:none; color:var(--text-dim); font:inherit; font-size:13.5px; font-weight:600; padding:9px 10px; cursor:pointer; white-space:nowrap; flex-shrink:0; border-bottom:2px solid transparent; }
+  .tabs { overflow-x:auto; scrollbar-width:thin; }
+  #admin-modal .panel { max-width:940px; }
   .tabs button.active { color:var(--text); border-bottom-color:var(--accent); }
   .user-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
   .user-row .avatar { width:36px; height:36px; }
@@ -405,6 +407,83 @@
   .my-item.done .side-name { text-decoration:line-through; opacity:.6; }
   .field { width:100%; padding:9px 12px; border-radius:9px; border:1px solid var(--border); background:var(--bg); color:var(--text); font:inherit; font-size:14px; margin-bottom:10px; box-sizing:border-box; }
   .quick-times { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+  /* scanner */
+  .scan-box { position:relative; background:#000; border-radius:12px; overflow:hidden; aspect-ratio:4/3; margin-bottom:10px; }
+  .scan-box video { width:100%; height:100%; object-fit:cover; display:block; }
+  .scan-box .frame { position:absolute; inset:18% 12%; border:3px solid rgba(255,255,255,.85); border-radius:12px; box-shadow:0 0 0 999px rgba(0,0,0,.35); }
+  .scan-box .msg { position:absolute; left:0; right:0; bottom:8px; text-align:center; color:#fff; font-size:12.5px; text-shadow:0 1px 3px #000; }
+  #scan-lib { width:100%; }
+  /* discount card */
+  .disc-card { background:var(--bg-raised); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:9px 11px; width:100%; box-sizing:border-box; font-size:13px; white-space:normal; }
+  .disc-card .stone-card { margin:6px 0; background:var(--bg); }
+  .disc-card.approved { border-color:#2E8B6E; } .disc-card.rejected { border-color:var(--danger); }
+  .disc-ask { font-size:15px; font-weight:700; margin:4px 0; }
+  .disc-diff { font-size:12px; color:var(--text-dim); }
+  /* client link */
+  .link-box { display:flex; gap:6px; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:9px; padding:8px 10px; margin:8px 0; word-break:break-all; font-size:13px; }
+  .link-row { padding:9px 0; border-bottom:1px solid var(--border); display:flex; gap:8px; align-items:center; }
+  .link-row .side-text { min-width:0; }
+  /* public client page */
+  #client-view { position:fixed; inset:0; overflow-y:auto; background:#F6F4EE; color:#1C1C1E; z-index:80; display:none; }
+  #client-view.open { display:block; }
+  .cv-head { background:#10162B; color:#F3EFE4; padding:22px 18px 18px; text-align:center; }
+  .cv-head .wm { font-family:Georgia,serif; letter-spacing:6px; font-size:22px; font-weight:600; }
+  .cv-head .tg { font-family:Georgia,serif; font-style:italic; font-size:11px; letter-spacing:1.5px; opacity:.75; margin-top:4px; text-transform:uppercase; }
+  .cv-wrap { max-width:960px; margin:0 auto; padding:18px 14px 110px; }
+  .cv-title { font-size:20px; font-weight:700; } .cv-sub { color:#6B6F76; font-size:13px; margin:4px 0 14px; }
+  .cv-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
+  .cv-card { background:#fff; border:1px solid #E7E2D6; border-radius:14px; padding:12px 14px; position:relative; }
+  .cv-card.pick { border-color:#B9862E; box-shadow:0 0 0 2px #B9862E; }
+  .cv-card .id { font-size:12px; color:#6B6F76; font-weight:600; } .cv-card .mn { font-size:16px; font-weight:700; margin:3px 0 8px; }
+  .cv-card .g { display:grid; grid-template-columns:auto 1fr; gap:3px 10px; font-size:13px; } .cv-card .g .k { color:#6B6F76; }
+  .cv-card .price { font-size:17px; font-weight:700; margin-top:8px; color:#10162B; }
+  .cv-card .lk { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .cv-card .lk a, .cv-card .lk button { font:inherit; font-size:12.5px; font-weight:600; border:1px solid #E7E2D6; background:#FAF8F3; color:#10162B; border-radius:8px; padding:6px 10px; text-decoration:none; cursor:pointer; }
+  .cv-card .lk button.on { background:#B9862E; color:#fff; border-color:#B9862E; }
+  .cv-bar { position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid #E7E2D6; padding:10px 14px; display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap; }
+  .cv-bar a { background:#25D366; color:#fff; font-weight:700; text-decoration:none; padding:10px 16px; border-radius:10px; font-size:14px; }
+  .cv-bar span { font-size:13px; color:#6B6F76; }
+  .cv-empty { text-align:center; padding:60px 20px; color:#6B6F76; }
+  /* important */
+  .bubble.urgent { box-shadow:0 0 0 2px var(--danger) !important; }
+  .urgent-tag { font-size:11px; font-weight:800; letter-spacing:.06em; color:var(--danger); margin-bottom:3px; }
+  .row.mine .urgent-tag { color:inherit; }
+  .urgent-bar { display:none; align-items:center; gap:10px; margin-bottom:8px; padding:7px 10px; border-left:3px solid var(--danger); background:color-mix(in srgb, var(--danger) 10%, transparent); border-radius:8px; font-size:12.5px; }
+  .urgent-bar.open { display:flex; } .urgent-bar .grow { flex:1; } .urgent-bar .x { cursor:pointer; color:var(--text-dim); font-size:17px; padding:0 4px; }
+  /* files / media / links */
+  .media-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:6px; }
+  .media-grid .mi { aspect-ratio:1; border-radius:8px; overflow:hidden; background:color-mix(in srgb, var(--text) 8%, transparent); cursor:pointer; position:relative; }
+  .media-grid img { width:100%; height:100%; object-fit:cover; display:block; }
+  .media-grid .mi span { position:absolute; left:4px; bottom:3px; font-size:10px; color:#fff; text-shadow:0 1px 2px #000; }
+  .fl-row { display:flex; gap:10px; align-items:center; padding:8px 2px; border-bottom:1px solid var(--border); }
+  .fl-row .file-icon { width:34px; height:34px; }
+  .fl-row .side-text { cursor:pointer; min-width:0; }
+  .fl-row a.lnk2 { color:var(--accent); word-break:break-all; font-size:13px; }
+  /* saved */
+  .saved-tag { font-size:11px; color:var(--accent); margin:2px 4px 0; }
+  .lang-opts { display:grid; gap:8px; }
+  .lang-opts button { font:inherit; font-size:16px; padding:12px 14px; border-radius:10px; border:2px solid var(--border); background:var(--bg-raised); color:var(--text); text-align:left; cursor:pointer; }
+  .lang-opts button.cur { border-color:var(--accent); font-weight:700; }
+  /* attendance pill in header */
+  .att-btn { border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:var(--text-on-header); font:inherit; font-size:12.5px; font-weight:600; padding:6px 11px; border-radius:16px; cursor:pointer; white-space:nowrap; }
+  .att-btn:hover { background:rgba(255,255,255,.16); }
+  .att-btn.in { border-color:#2EAA6E; } .att-btn.done { opacity:.75; }
+  .hdr-right { display:flex; align-items:center; gap:10px; }
+  @media (max-width: 520px) { .att-btn .att-long { display:none; } }
+  .att-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .att-table th, .att-table td { padding:7px 6px; border-bottom:1px solid var(--border); text-align:left; }
+  .att-table th { color:var(--text-dim); font-weight:600; font-size:12px; }
+  .att-table .absent { color:var(--text-dim); } .att-table .open { color:#C27C0E; }
+  /* devices + activity */
+  .dev-row { display:flex; gap:10px; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); }
+  .dev-row .ic { font-size:22px; width:30px; text-align:center; }
+  .this-dev { font-size:10.5px; font-weight:700; color:#2E8B6E; border:1px solid #2E8B6E; border-radius:6px; padding:0 5px; margin-left:6px; }
+  .act-row { padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .act-row .t1 { display:flex; justify-content:space-between; gap:8px; }
+  .act-row .t1 b { font-weight:600; } .act-row .t1 span { color:var(--text-dim); font-size:12px; white-space:nowrap; }
+  .act-row .t2 { color:var(--text-dim); font-size:12.5px; margin-top:2px; word-break:break-word; }
+  .act-filters { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
+  .act-filters select, .act-filters input { padding:7px 9px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font:inherit; font-size:13px; }
   .modal-back { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:none; align-items:center; justify-content:center; padding:20px; }
   .modal-back.open { display:flex; }
   .contact-card { background:var(--bg-raised); color:var(--text); border-radius:16px; width:100%; max-width:340px; padding:26px 22px 18px; text-align:center; position:relative; box-shadow:0 25px 60px rgba(0,0,0,.3); }
@@ -609,16 +688,24 @@
         <div class="brand-mark"><img src="./icon-192.png" alt="KG"></div>
         <div class="brand-name">KG Chatboat</div>
       </div>
+      <div class="hdr-right">
+      <button class="att-btn" id="att-btn" style="display:none;"></button>
       <div class="me" id="me-box">
         <div class="me-menu" id="me-menu">
           <button id="menu-status"><span class="st-label st-available" id="menu-status-label"><i></i>Available</span></button>
           <button id="menu-mytasks">✅ My tasks &amp; reminders</button>
+          <button id="menu-links">🔗 Client links</button>
+          <button id="menu-saved">⭐ Saved messages</button>
+          <button id="menu-lang">🌐 Language</button>
+          <button id="menu-att">🕘 Attendance</button>
+          <button id="menu-devices">📱 My devices</button>
           <button id="menu-theme">🎨 Theme</button>
           <button id="menu-edit-profile">Edit profile</button>
           <button id="menu-notif">🔔 Notifications</button>
           <button id="menu-admin" style="display:none;">🛡️ Admin panel</button>
           <button id="menu-logout">Log out</button>
         </div>
+      </div>
       </div>
     </header>
     <div class="shell-body">
@@ -655,6 +742,7 @@
       <div id="chat-title-av"></div>
       <div class="grow" id="chat-title-text"><div class="t" id="chat-title-name">Team Chat</div><div class="s" id="chat-title-sub">Everyone</div></div>
       <button class="title-btn" id="meet-chat-btn" title="Start a video meeting in this chat"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6.5" width="12.5" height="11" rx="2.5"/><path d="M15.5 10.5l5-3v9l-5-3z"/></svg></button>
+      <button class="title-btn" id="files-btn" title="Photos, files and links in this chat">📁</button>
       <button class="title-btn" id="search-btn" title="Search messages">🔍</button>
       <button class="small-btn" id="group-info-btn" style="display:none;">Members</button>
     </div>
@@ -664,6 +752,7 @@
     <main id="main"></main>
     <footer>
       <div class="edit-bar" id="edit-bar"><div class="grow"><b>Editing message</b> · <span id="edit-bar-text"></span></div><span class="x" id="edit-cancel" title="Cancel edit">&times;</span></div>
+      <div class="urgent-bar" id="urgent-bar"><span>❗</span><span class="grow"><b>Important</b> — everyone in this chat is alerted, even if they muted it</span><span class="x" id="urgent-x" title="Not important">&times;</span></div>
       <div class="edit-bar" id="reply-bar"><div class="grow"><b id="reply-bar-name">Replying</b> · <span id="reply-bar-text"></span></div><span class="x" id="reply-cancel" title="Cancel reply">&times;</span></div>
       <div class="mention-pop" id="mention-pop"></div>
       <div class="pending-wrap" id="pending-wrap"></div>
@@ -729,6 +818,8 @@
   <div class="act-menu" id="plus-menu">
     <button id="camera-btn">📷 Camera</button>
     <button id="stone-btn">💎 Share a stone</button>
+    <button id="scan-btn">🔍 Scan stock packet</button>
+    <button id="urgent-btn">❗ Mark as important</button>
     <button id="poll-btn">📊 Poll</button>
     <button id="task-btn">✅ Task</button>
     <button id="sched-btn">⏰ Schedule / remind me</button>
@@ -751,6 +842,7 @@
     <div class="react-row" id="react-row"></div>
     <button id="act-reply">↩️ Reply</button>
     <button id="act-pin">📌 Pin</button>
+    <button id="act-save">⭐ Save message</button>
     <button id="act-task">✅ Create task</button>
     <button id="act-remind">⏰ Remind me</button>
     <button id="act-edit">✏️ Edit</button>
@@ -803,7 +895,11 @@
         <button data-tab="users" class="active">Users</button>
         <button data-tab="stock">💎 Stock</button>
         <button data-tab="holds">📌 Hold requests</button>
+        <button data-tab="discounts">💲 Discounts</button>
         <button data-tab="parties">🤝 Parties</button>
+        <button data-tab="attendance">🕘 Attendance</button>
+        <button data-tab="activity">📜 Activity</button>
+        <button data-tab="settings">⚙️ Settings</button>
         <button data-tab="backup">💾 Backup</button>
       </div>
       <div class="panel-body" id="admin-body"></div>
@@ -834,7 +930,7 @@
           <label>Rate $/ct<span class="rng"><input id="sf-r1" type="number" min="0" placeholder="min"><input id="sf-r2" type="number" min="0" placeholder="max"></span></label>
           <label>Sort<select id="sf-sort"><option value="stock_id">Stock ID</option><option value="carat:desc">Carat ↓</option><option value="carat">Carat ↑</option><option value="rate">Rate ↑</option><option value="rate:desc">Rate ↓</option><option value="back">Back % (best first)</option></select></label>
           <label style="justify-content:flex-end;"><span style="display:flex; gap:6px; align-items:center; font-size:12.5px; color:var(--text);"><input type="checkbox" id="sf-avail" checked style="width:auto;"> Available only</span></label>
-          <label style="justify-content:flex-end;"><button class="small-btn" id="sf-clear" type="button">Clear filters</button></label>
+          <label style="justify-content:flex-end;"><span style="display:flex; gap:6px;"><button class="small-btn" id="sf-clear" type="button">Clear filters</button><button class="small-btn" id="sf-scan" type="button">🔍 Scan</button></span></label>
         </div>
         <div id="stone-results"></div>
       </div>
@@ -842,6 +938,7 @@
         <span class="grow" id="sel-info">Tick stones to share several at once</span>
         <button class="small-btn wa-btn" id="sel-wa" disabled>WhatsApp</button>
         <button class="small-btn" id="sel-xls" disabled>⬇ Excel</button>
+        <button class="small-btn" id="sel-link" disabled>🔗 Client link</button>
         <button class="small-btn primary" id="sel-share" disabled>Share in chat</button>
         <button class="small-btn" id="stone-close">Close</button>
       </div>
@@ -940,6 +1037,98 @@
       <div class="panel-foot"><button class="small-btn primary" id="theme-close">Done</button></div>
     </div>
   </div>
+  <div class="modal-back" id="scan-modal">
+    <div class="panel">
+      <div class="panel-head">🔍 Scan stock packet</div>
+      <div class="panel-body">
+        <div class="scan-box" id="scan-box"><video id="scan-video" playsinline muted></video><div id="scan-lib"></div><div class="frame"></div><div class="msg" id="scan-msg">Point the camera at the barcode / QR code</div></div>
+        <div class="sec-label">Or type the code</div>
+        <div style="display:flex; gap:6px;"><input class="field" id="scan-code" placeholder="Stock ID or certificate number" style="margin:0;"><button class="small-btn primary" id="scan-go">Find</button></div>
+        <div class="panel-note" id="scan-note"></div>
+      </div>
+      <div class="panel-foot"><button class="small-btn" id="scan-close">Close</button></div>
+    </div>
+  </div>
+  <div class="modal-back" id="disc-modal">
+    <div class="panel">
+      <div class="panel-head">💲 Ask for a discount</div>
+      <div class="panel-body">
+        <div id="disc-stone" style="margin-bottom:8px;"></div>
+        <div class="sec-label">Party</div><input class="field" id="disc-party" list="party-dl" autocomplete="off" placeholder="e.g. ABC Jewels">
+        <div class="sec-label">Asked price</div>
+        <div style="display:flex; gap:8px;"><label class="side-sub" style="flex:1;">Back %<input class="field" id="disc-back" type="number" step="0.01" placeholder="-35.00"></label>
+          <label class="side-sub" style="flex:1;">Rate $/ct<input class="field" id="disc-rate" type="number" step="1" placeholder="3380"></label></div>
+        <div class="disc-diff" id="disc-diff"></div>
+        <div class="sec-label">Note (optional)</div><input class="field" id="disc-note" maxlength="200" placeholder="e.g. party buying 5 stones, cash payment">
+        <div class="side-sub">Posted in this chat. An admin approves or rejects it.</div>
+        <div class="panel-note" id="disc-msg"></div>
+      </div>
+      <div class="panel-foot"><button class="small-btn" id="disc-cancel">Cancel</button><button class="small-btn primary" id="disc-send">Send request</button></div>
+    </div>
+  </div>
+  <div class="modal-back" id="link-modal">
+    <div class="panel">
+      <div class="panel-head">🔗 Client selection link</div>
+      <div class="panel-body" id="link-body">
+        <div class="side-sub" id="link-count" style="margin-bottom:8px;"></div>
+        <div class="sec-label">Title</div><input class="field" id="link-title" maxlength="80" placeholder="e.g. Ovals 1–2 ct for ABC">
+        <div class="sec-label">Party (optional)</div><input class="field" id="link-party" list="party-dl" autocomplete="off">
+        <div class="sec-label">Link valid for</div>
+        <select class="field" id="link-days"><option value="3">3 days</option><option value="7" selected>7 days</option><option value="30">30 days</option><option value="0">No expiry</option></select>
+        <label class="side-sub" style="display:flex; gap:6px; align-items:center;"><input type="checkbox" id="link-prices" checked> Show prices (Rate, Amount, Back %)</label>
+        <div class="side-sub" style="margin-top:8px;">The client opens it in any browser — no app or login. Your name and mobile are shown so they can WhatsApp you.</div>
+        <div class="panel-note" id="link-note"></div>
+      </div>
+      <div class="panel-body" id="link-done" style="display:none;"></div>
+      <div class="panel-foot"><button class="small-btn" id="link-cancel">Close</button><button class="small-btn primary" id="link-create">Create link</button></div>
+    </div>
+  </div>
+  <div class="modal-back" id="links-modal">
+    <div class="panel wide">
+      <div class="panel-head">🔗 Client links</div>
+      <div class="panel-body" id="links-body"></div>
+      <div class="panel-foot"><button class="small-btn" id="links-close">Close</button></div>
+    </div>
+  </div>
+  <div id="client-view"></div>
+  <div class="modal-back" id="saved-modal">
+    <div class="panel wide">
+      <div class="panel-head">⭐ Saved messages</div>
+      <div class="panel-body" id="saved-body"></div>
+      <div class="panel-foot"><button class="small-btn" id="saved-close">Close</button></div>
+    </div>
+  </div>
+  <div class="modal-back" id="files-modal">
+    <div class="panel wide">
+      <div class="panel-head" id="files-title">📁 In this chat</div>
+      <div class="tabs" id="files-tabs"><button data-t="media" class="active">Media</button><button data-t="files">Files</button><button data-t="links">Links</button><button data-t="stones">Stones</button></div>
+      <div class="panel-body" id="files-body" style="padding-top:10px;"></div>
+      <div class="panel-foot"><button class="small-btn" id="files-close">Close</button></div>
+    </div>
+  </div>
+  <div class="modal-back" id="lang-modal">
+    <div class="panel">
+      <div class="panel-head">🌐 Language / ભાષા / भाषा</div>
+      <div class="panel-body"><div class="lang-opts" id="lang-opts">
+        <button data-l="en">English</button><button data-l="gu">ગુજરાતી (Gujarati)</button><button data-l="hi">हिन्दी (Hindi)</button><button data-l="mr">मराठी (Marathi)</button>
+      </div><div class="side-sub" style="margin-top:10px;">Changes buttons and menus on this device. Messages stay as people wrote them.</div></div>
+      <div class="panel-foot"><button class="small-btn primary" id="lang-close">Done</button></div>
+    </div>
+  </div>
+  <div class="modal-back" id="dev-modal">
+    <div class="panel">
+      <div class="panel-head" id="dev-title">📱 My devices</div>
+      <div class="panel-body" id="dev-body"></div>
+      <div class="panel-foot"><button class="small-btn" id="dev-close">Close</button></div>
+    </div>
+  </div>
+  <div class="modal-back" id="att-modal">
+    <div class="panel wide">
+      <div class="panel-head" id="att-title">🕘 My attendance</div>
+      <div class="panel-body" id="att-body"></div>
+      <div class="panel-foot"><button class="small-btn" id="att-close">Close</button></div>
+    </div>
+  </div>
   <div class="lightbox" id="lightbox">
     <div class="lb-top"><span id="lb-caption"></span><span style="display:flex; gap:8px;"><a id="lb-open" target="_blank" rel="noopener">Open original</a><button id="lb-close">Close ✕</button></span></div>
     <div class="lb-stage" id="lb-stage"><img id="lb-img" alt=""></div>
@@ -1002,6 +1191,48 @@ if ("serviceWorker" in navigator) {
     try { sb = window.supabase.createClient(SB_URL, SB_KEY); }
     catch (e) { setupError = "Supabase setup error: " + e.message; }
   }
+  // ---------- public client selection page (?sel=…) — no login needed ----------
+  const selToken = new URLSearchParams(location.search).get("sel");
+  if (selToken && sb) {
+    Object.values(views).forEach(v => v.style.display = "none"); chatShell.style.display = "none";
+    const cv = $("client-view"); cv.classList.add("open");
+    cv.innerHTML = '<div class="cv-head"><div class="wm">K.GIRDHARLAL</div><div class="tg">There\'s more to making diamonds</div></div><div class="cv-wrap"><div class="cv-empty">Loading…</div></div>';
+    const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const num = (v, d) => v == null || v === "" ? "" : Number(v).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+    const okUrl = (u) => /^https?:\/\//i.test(u || "") ? u : "";
+    sb.rpc("get_selection", { p_id: selToken }).then(({ data, error }) => {
+      const wrap = cv.querySelector(".cv-wrap");
+      if (error || !data) { wrap.innerHTML = '<div class="cv-empty"><b>This link has expired or is not valid.</b><br>Please ask your K.GIRDHARLAL contact for a new one.</div>'; return; }
+      const st = data.stones || [], picks = new Set();
+      document.title = (data.title || "Diamond selection") + " · K.GIRDHARLAL";
+      wrap.innerHTML = '<div class="cv-title">' + esc(data.title || "Diamond selection") + '</div><div class="cv-sub">' +
+        (data.party ? "Prepared for " + esc(data.party) + " · " : "") + st.length + " stone" + (st.length === 1 ? "" : "s") +
+        (data.expires_at ? " · valid till " + new Date(data.expires_at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }) : "") + '</div><div class="cv-grid"></div>';
+      const grid = wrap.querySelector(".cv-grid");
+      st.forEach(s0 => {
+        const c = document.createElement("div"); c.className = "cv-card";
+        const rows = [["Cut / Pol / Sym", [s0.cut, s0.polish, s0.symmetry].filter(Boolean).join(" / ")], ["Fluorescence", s0.fluorescence], ["Lab", [s0.lab, s0.cert_no].filter(Boolean).join(" ")], ["Measurements", s0.measurements]]
+          .filter(r => r[1]).map(r => '<span class="k">' + esc(r[0]) + '</span><span>' + esc(r[1]) + '</span>').join("");
+        const price = data.show_prices && s0.rate != null ? '<div class="price">$' + num(s0.rate, 0) + ' /ct' + (s0.amount != null ? ' · $' + num(s0.amount, 0) : "") + '</div>' + (s0.back != null ? '<div class="cv-sub" style="margin:2px 0 0;">Back ' + num(s0.back, 2) + '%</div>' : "") : "";
+        const links = [["🎥 Video", okUrl(s0.video_url)], ["📄 Certificate", okUrl(s0.cert_url)], ["🖼 Image", okUrl(s0.image_url)]].filter(l => l[1]).map(l => '<a target="_blank" rel="noopener" href="' + esc(l[1]) + '">' + l[0] + '</a>').join("");
+        c.innerHTML = '<div class="id">' + esc(s0.stock_id) + '</div><div class="mn">' + esc([s0.shape, s0.carat != null ? num(s0.carat, 2) + " ct" : "", s0.color, s0.clarity].filter(Boolean).join(" · ")) + '</div><div class="g">' + rows + '</div>' + price + '<div class="lk">' + links + '<button type="button">☆ Interested</button></div>';
+        const b = c.querySelector("button");
+        b.addEventListener("click", () => { picks.has(s0.stock_id) ? picks.delete(s0.stock_id) : picks.add(s0.stock_id); b.classList.toggle("on", picks.has(s0.stock_id)); b.textContent = picks.has(s0.stock_id) ? "★ Interested" : "☆ Interested"; c.classList.toggle("pick", picks.has(s0.stock_id)); drawBar(); });
+        grid.appendChild(c);
+      });
+      const bar = document.createElement("div"); bar.className = "cv-bar"; cv.appendChild(bar);
+      const digits = String(data.contact_mobile || "").replace(/\D/g, ""), wa = digits ? (digits.length === 10 ? "91" + digits : digits) : "";
+      function drawBar() {
+        const list = [...picks];
+        const txt = "Hello" + (data.contact_name ? " " + data.contact_name : "") + ", about your selection \"" + (data.title || "diamonds") + "\"" + (list.length ? " — I'm interested in: " + list.join(", ") : "") + ".";
+        bar.innerHTML = (list.length ? '<span>' + list.length + ' selected</span>' : '<span>Tap ☆ on the stones you like</span>') +
+          (wa ? '<a target="_blank" rel="noopener" href="https://wa.me/' + wa + '?text=' + encodeURIComponent(txt) + '">WhatsApp ' + esc(data.contact_name || "us") + '</a>' : "");
+      }
+      drawBar();
+    });
+    return;
+  }
+
   if (!sb) {
     ["login-note","signup-note","forgot-note"].forEach(id => note(id, setupError, "error"));
     // Keep buttons clickable so the user always sees WHY nothing happens
@@ -1042,6 +1273,7 @@ if ("serviceWorker" in navigator) {
     const email = $("login-email").value.trim(), password = $("login-password").value;
     if (!email || !password) { note("login-note","Enter your email and password.","error"); return; }
     note("login-note","Signing in…");
+    try { localStorage.removeItem("kg-device"); localStorage.setItem("kg-last-active", String(Date.now())); } catch (e) {}
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) { note("login-note", error.message, "error"); return; }
     note("login-note","");
@@ -1103,7 +1335,7 @@ if ("serviceWorker" in navigator) {
     note("forgot-note","Reset link sent — check your email.","ok");
   });
 
-  $("menu-logout").addEventListener("click", async () => { await sb.auth.signOut(); });
+  $("menu-logout").addEventListener("click", async () => { await logoutThisDevice(); });
 
   // ---------- chat state ----------
   let myId = null, myProfile = null;
@@ -1213,6 +1445,8 @@ if ("serviceWorker" in navigator) {
           if (error) { $("admin-note").textContent = "Couldn't update: " + error.message; b.disabled = false; return; }
           $("admin-note").textContent = (u.name || "User") + " updated."; adminTabs.users(); loadContacts();
         }); btns.appendChild(b); };
+      const dv = document.createElement("button"); dv.className = "small-btn"; dv.textContent = "📱"; dv.title = "Devices";
+      dv.addEventListener("click", () => openDevices(u.id, u.name)); btns.appendChild(dv);
       if (u.id !== myId) {
         if (u.status === "pending") { mk("Approve", "primary", { status: "active" }); mk("Reject", "danger", { status: "disabled" }, "Reject " + (u.name||"this user") + "? They won't be able to use the app."); }
         else if (u.status === "active") {
@@ -1260,7 +1494,7 @@ if ("serviceWorker" in navigator) {
   async function notifyMessage(m) {
     if (m.sender_id === myId) return;
     if (myEffective() === "dnd") return;
-    if (isMuted(m.group_id || "team") && !(m.mentions && m.mentions.includes(myId))) return;
+    if (isMuted(m.group_id || "team") && !(m.mentions && m.mentions.includes(myId)) && !m.urgent) return;
     const sameChatVisible = document.visibilityState === "visible" && (m.group_id || null) === currentGroupId;
     if (sameChatVisible) return;
     if (document.visibilityState !== "visible") bumpTitle();
@@ -1271,7 +1505,7 @@ if ("serviceWorker" in navigator) {
     try {
       const reg = await navigator.serviceWorker.ready;
       const g = groupById(m.group_id);
-      const title = m.mentions && m.mentions.includes(myId) ? "@ " + who + " mentioned you" : (!m.group_id ? who + " · Team Chat" : g && g.kind === "direct" ? who : who + " · " + chat);
+      const title = m.urgent ? "❗ Important · " + who : m.mentions && m.mentions.includes(myId) ? "@ " + who + " mentioned you" : (!m.group_id ? who + " · Team Chat" : g && g.kind === "direct" ? who : who + " · " + chat);
       reg.showNotification(title, {
         body: body.slice(0, 160), icon: "./icon-192.png", badge: "./icon-192.png", tag: "kg-" + (m.group_id || "team"), renotify: true,
         data: { chat: m.group_id || "team" } });
@@ -1309,7 +1543,7 @@ if ("serviceWorker" in navigator) {
     showView("wait");
   }
   $("wait-refresh").addEventListener("click", async () => { const { data } = await sb.auth.getSession(); if (data.session) enterChat(data.session); });
-  $("wait-logout").addEventListener("click", async () => { await sb.auth.signOut(); });
+  $("wait-logout").addEventListener("click", async () => { await logoutThisDevice(); });
 
   // ---------- contacts sidebar ----------
   const sidebar = $("sidebar"), sideBackdrop = $("side-backdrop"), contactListEl = $("contact-list"), sideSearch = $("side-search");
@@ -1457,8 +1691,12 @@ if ("serviceWorker" in navigator) {
     return d.toLocaleDateString(undefined, { day: "numeric", month: "numeric" });
   };
   function chatEntries() {
-    return [{ key: "team", g: null }].concat(groups.map(g => ({ key: g.id, g })))
+    const all = [{ key: "team", g: null }].concat(groups.map(g => ({ key: g.id, g })))
       .map(e => Object.assign(e, { title: chatTitleOf(e.g), s: summaries[e.key] || {}, p: prefs[e.key] || {} }));
+    const bestDirect = {};
+    all.forEach(e => { if (e.g && e.g.kind === "direct") { const o = otherMember(e.g), cur = bestDirect[o];
+      if (!cur || String(e.s.last_at || "") > String(cur.s.last_at || "")) bestDirect[o] = e; } });
+    return all.filter(e => !(e.g && e.g.kind === "direct") || bestDirect[otherMember(e.g)] === e);
   }
   function chatIcon(e) {
     if (!e.g) { const ic = document.createElement("div"); ic.className = "team-icon"; ic.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>'; return ic; }
@@ -1651,19 +1889,23 @@ if ("serviceWorker" in navigator) {
   }
 
   // start (or reopen) a private chat with someone
+  let directBusy = false;
   async function openDirect(uid) {
-    if (!uid || uid === myId) return;
+    if (!uid || uid === myId || directBusy) return;
     let g = groups.find(x => x.kind === "direct" && x.members.includes(uid));
     if (!g) {
-      const { data: ng, error } = await sb.from("chat_groups").insert({ name: "Private chat", kind: "direct", created_by: myId }).select().single();
-      if (error || !ng) { showBanner("Couldn't start chat" + (error ? ": " + error.message : "."), true); return; }
-      const r = await sb.from("group_members").insert([{ group_id: ng.id, user_id: myId }, { group_id: ng.id, user_id: uid }]);
-      if (r.error) { showBanner("Couldn't start chat: " + r.error.message, true); return; }
-      await loadGroups(); g = groupById(ng.id);
+      directBusy = true;   // ignore double taps
+      try {
+        // the server returns the existing private chat, or creates one — never two
+        const { data: gid, error } = await sb.rpc("get_or_create_direct", { p_other: uid });
+        if (error || !gid) { showBanner("Couldn't start chat" + (error ? ": " + error.message : "."), true); return; }
+        await loadGroups(); loadSummaries(); g = groupById(gid);
+      } finally { directBusy = false; }
     }
     closeSidebar(); $("contact-modal").classList.remove("open");
     if (g) openChat(g.id);
   }
+
 
   // people picker used by Create group and Add people
   function buildPicker(container, people, opts) {
@@ -1861,6 +2103,7 @@ if ("serviceWorker" in navigator) {
     }
     await loadHolds(list.map(m => m.hold_id).filter(Boolean));
     await loadTasksPolls(list);
+    await loadDiscounts(list.map(m => m.discount_id).filter(Boolean));
     if (!subset) await loadPins();
     if (key === currentGroupId) render(true);
   }
@@ -1877,7 +2120,7 @@ if ("serviceWorker" in navigator) {
     pinIdx = 0; renderPinBar(); render(true);
   }
   const findMsg = (id) => messages.find(m => m.id === id) || replyCache[id];
-  const snippet = (m) => !m ? "Original message" : m.deleted ? "🚫 Deleted message" : m.meeting ? "📹 Meeting" : m.task_id ? "✅ Task" + (tasksById[m.task_id] ? ": " + tasksById[m.task_id].title : "") : m.poll_id ? "📊 Poll" + (pollsById[m.poll_id] ? ": " + pollsById[m.poll_id].question : "") : m.stone_list ? "💎 " + m.stone_list.length + " stones" : (m.text || (m.attachment_type && m.attachment_type.startsWith("audio/") ? "🎤 Voice note" : m.attachment_type && m.attachment_type.startsWith("image/") ? "📷 Photo" : m.attachment_name ? "📎 " + m.attachment_name : m.stone ? "💎 Stone " + (m.stone.stock_id || "") : m.hold_id ? "📌 Hold request" : "Message"));
+  const snippet = (m) => !m ? "Original message" : m.deleted ? "🚫 Deleted message" : m.discount_id ? "💲 Discount request" : m.meeting ? "📹 Meeting" : m.task_id ? "✅ Task" + (tasksById[m.task_id] ? ": " + tasksById[m.task_id].title : "") : m.poll_id ? "📊 Poll" + (pollsById[m.poll_id] ? ": " + pollsById[m.poll_id].question : "") : m.stone_list ? "💎 " + m.stone_list.length + " stones" : (m.text || (m.attachment_type && m.attachment_type.startsWith("audio/") ? "🎤 Voice note" : m.attachment_type && m.attachment_type.startsWith("image/") ? "📷 Photo" : m.attachment_name ? "📎 " + m.attachment_name : m.stone ? "💎 Stone " + (m.stone.stock_id || "") : m.hold_id ? "📌 Hold request" : "Message"));
 
   function renderPinBar() {
     const bar = $("pin-bar");
@@ -1972,6 +2215,12 @@ if ("serviceWorker" in navigator) {
         if (i >= 0) { messages[i] = Object.assign({}, messages[i], m); render(); }
       })
       .on("postgres_changes", { event:"*", schema:"public", table:"group_members" }, () => loadGroups().then(loadSummaries))
+      .on("postgres_changes", { event:"*", schema:"public", table:"discount_requests" }, async (payload) => {
+        const d = payload.new; if (!d || !d.id) return; discounts[d.id] = Object.assign(discounts[d.id] || {}, d);
+        await ensureProfiles([d.requested_by, d.decided_by].filter(Boolean));
+        if (messages.some(m => m.discount_id === d.id)) render(true);
+        if ($("admin-modal").classList.contains("open") && adminTab === "discounts") adminTabs.discounts();
+      })
       .on("postgres_changes", { event:"*", schema:"public", table:"tasks" }, (payload) => {
         const t = payload.new; if (!t || !t.id) return; tasksById[t.id] = Object.assign(tasksById[t.id] || {}, t);
         if (messages.some(m => m.task_id === t.id)) render(true);
@@ -2086,6 +2335,7 @@ if ("serviceWorker" in navigator) {
       bubble.className = "bubble deleted";
       bubble.textContent = "🚫 " + (mine ? "You deleted this message" : "This message was deleted");
     } else {
+      if (m.urgent) { const u = document.createElement("div"); u.className = "urgent-tag"; u.textContent = "❗ IMPORTANT"; bubble.appendChild(u); bubble.classList.add("urgent"); }
       if (m.forwarded) { const f = document.createElement("div"); f.className = "fwd-label"; f.textContent = "↪ Forwarded"; bubble.appendChild(f); }
       if (m.reply_to) {
         const t = findMsg(m.reply_to), qd = document.createElement("div"); qd.className = "quote";
@@ -2147,6 +2397,7 @@ if ("serviceWorker" in navigator) {
     if (mine && !m.deleted) { col.appendChild(statusEl(m)); if (m._status === "failed") row.classList.add("failed"); }
     else if (m.edited_at && !m.deleted) { const t = document.createElement("div"); t.className = "edited-tag"; t.textContent = "Edited"; col.appendChild(t); }
     if (pins.some(p => p.message_id === m.id)) { const t = document.createElement("div"); t.className = "edited-tag"; t.textContent = "📌 Pinned"; col.appendChild(t); }
+    if (savedSet.has(m.id)) { const t = document.createElement("div"); t.className = "saved-tag"; t.textContent = "⭐ Saved"; col.appendChild(t); }
     row.appendChild(col);
     return row;
   }
@@ -2257,9 +2508,10 @@ if ("serviceWorker" in navigator) {
     const replyId = replyTo ? replyTo.id : null; if (replyTo) cancelReply();
     closeMentionPop();
     const ments = mentionIdsIn(text);
+    const isUrgent = urgentNext; setUrgent(false);
     const locals = jobs.map((j, idx) => {
       const m = { id: newId(), sender_id: myId, group_id: currentGroupId, text: j.text || "", created_at: new Date().toISOString(), _status: "sending", _file: j.file || null,
-                  reply_to: idx === 0 ? replyId : null, mentions: idx === 0 && ments.length ? ments : null };
+                  reply_to: idx === 0 ? replyId : null, mentions: idx === 0 && ments.length ? ments : null, urgent: idx === 0 && isUrgent };
       if (j.file) Object.assign(m, { attachment_url: j.file.previewUrl || "#", attachment_name: j.file.name, attachment_type: j.file.blob.type, attachment_size: j.file.blob.size });
       messages.push(m); return m;
     });
@@ -2278,6 +2530,8 @@ if ("serviceWorker" in navigator) {
       if (m.stone_list) row.stone_list = m.stone_list;
       if (m.task_id) row.task_id = m.task_id;
       if (m.poll_id) row.poll_id = m.poll_id;
+      if (m.discount_id) row.discount_id = m.discount_id;
+      if (m.urgent) row.urgent = true;
       if (m.meeting) row.meeting = m.meeting;
       if (m._file) {
         if (!m._uploadedUrl) {
@@ -2388,6 +2642,8 @@ if ("serviceWorker" in navigator) {
     $("act-reply").style.display = local || !canPost() ? "none" : "";
     $("act-task").style.display = local || !canPost() || m.task_id || m.poll_id ? "none" : "";
     $("act-remind").style.display = local ? "none" : "";
+    $("act-save").style.display = local ? "none" : "";
+    $("act-save").textContent = savedSet.has(m.id) ? "☆ Unsave" : "⭐ Save message";
     $("act-pin").style.display = !local && canPin() ? "" : "none";
     $("act-pin").textContent = pins.some(p => p.message_id === m.id) ? "📌 Unpin" : "📌 Pin";
     $("act-edit").style.display = mine && !local ? "" : "none";
@@ -2636,7 +2892,7 @@ if ("serviceWorker" in navigator) {
   }
   function paintMyStatus() {
     const st = myEffective(), lab = $("menu-status-label");
-    lab.className = "st-label st-" + st; lab.lastChild.textContent = STATUS_TEXT[st] + (myChoice === "offline" ? " (appear offline)" : "") + "  ▸";
+    lab.className = "st-label st-" + st; lab.lastChild.textContent = tx(STATUS_TEXT[st]) + (myChoice === "offline" ? " (" + tx("Appear offline") + ")" : "") + "  ▸";
     const av = meBox.querySelector(".avatar");
     if (av && !av.parentElement.classList.contains("av-wrap")) { const w = document.createElement("span"); w.className = "av-wrap"; av.replaceWith(w); w.appendChild(av); const d = document.createElement("span"); w.appendChild(d); }
     const dot = meBox.querySelector(".av-wrap > span:last-child"); if (dot) { dot.className = "dot st st-" + st; dot.title = STATUS_TEXT[st]; }
@@ -2882,6 +3138,9 @@ if ("serviceWorker" in navigator) {
       wa.addEventListener("click", (e) => { e.stopPropagation(); shareWhatsApp(stoneText(st)); });
       links.appendChild(wa);
       if (opts.hold !== false) {
+        const db2 = document.createElement("button"); db2.className = "small-btn"; db2.textContent = "💲 Ask discount";
+        db2.addEventListener("click", (e) => { e.stopPropagation(); openDiscountForm(st); });
+        links.appendChild(db2);
         const hb = document.createElement("button"); hb.className = "small-btn primary"; hb.textContent = "📌 Request hold";
         hb.addEventListener("click", (e) => { e.stopPropagation(); openHoldForm(st); });
         links.appendChild(hb);
@@ -2967,7 +3226,7 @@ if ("serviceWorker" in navigator) {
   function updateSelBar() {
     const n = stoneSel.size;
     $("sel-info").textContent = n ? n + " stone" + (n === 1 ? "" : "s") + " ticked" : "Tick stones to share several at once";
-    ["sel-wa","sel-xls","sel-share"].forEach(id => $(id).disabled = !n);
+    ["sel-wa","sel-xls","sel-share","sel-link"].forEach(id => $(id).disabled = !n);
   }
   const selList = () => Array.from(stoneSel.values()).map(stoneSnap);
   $("sel-wa").addEventListener("click", () => shareWhatsApp(stonesText(selList())));
@@ -3116,6 +3375,10 @@ if ("serviceWorker" in navigator) {
     return card;
   }
   extraCard = (m) => {
+    if (m.discount_id) {
+      if (!discounts[m.discount_id] && !discLoading.has(m.discount_id)) { discLoading.add(m.discount_id); loadDiscounts([m.discount_id]).then(() => { discLoading.delete(m.discount_id); render(true); }); }
+      return discountCard(discounts[m.discount_id]);
+    }
     if (m.task_id) return taskCard(m);
     if (m.poll_id) return pollCard(m);
     if (m.stone_list && m.stone_list.length) return stoneListCard(m);
@@ -3308,6 +3571,7 @@ if ("serviceWorker" in navigator) {
       add("Stock", [sk].concat(stock.map(r => sk.map(k => r[k] ?? ""))));
       add("Users", [["Name", "Mobile", "Email", "Status", "Role", "Joined", "Last seen"]].concat(users.map(u => [u.name, u.mobile, u.email || "", u.status, u.role, dt(u.created_at), dt(u.last_seen_at)])));
       XLSX.writeFile(wb, "KG_Chatboat_backup_" + localDay(Date.now()) + ".xlsx");
+      sb.rpc("log_event", { p_action: "backup_downloaded", p_target: msgs.length + " messages", p_details: null }).then(() => {}, () => {});
       $("admin-note").textContent = "Backup downloaded: " + msgs.length.toLocaleString() + " messages, " + holdsAll.length + " holds, " + stock.length.toLocaleString() + " stones.";
     } catch (e) { $("admin-note").textContent = "Backup failed: " + e.message; }
     btn.disabled = false;
@@ -3381,6 +3645,7 @@ if ("serviceWorker" in navigator) {
         for (let i = 0; i < gone.length; i += 200) await sb.from("stones").delete().in("stock_id", gone.slice(i, i + 200));
         note.textContent = "Done: " + rows.length.toLocaleString() + " stones uploaded, " + gone.length.toLocaleString() + " removed.";
       } else note.textContent = "Done: " + rows.length.toLocaleString() + " stones uploaded.";
+      sb.rpc("log_event", { p_action: "stock_uploaded", p_target: rows.length + " stones", p_details: { replace: $("stk-replace").checked } }).then(() => {}, () => {});
       stockParsed = null; adminTabs.stock();
     } catch (e) { note.textContent = "Upload failed: " + e.message; btn.disabled = false; }
   }
@@ -3716,6 +3981,756 @@ if ("serviceWorker" in navigator) {
   $("theme-modal").addEventListener("click", (e) => { if (e.target.id === "theme-modal") $("theme-modal").classList.remove("open"); });
   applyTheme(currentTheme());
 
+  // =====================================================================
+  // ---------- 🔍 Scan stock packet (barcode / QR) ----------
+  // =====================================================================
+  const SCAN_LIB = "https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js";
+  let scanStream = null, scanTimer = null, scanLib = null, scanDone = false;
+  function loadScript(src, globalName) {
+    if (window[globalName]) return Promise.resolve(window[globalName]);
+    return new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = src; sc.onload = () => window[globalName] ? res(window[globalName]) : rej(new Error("didn't load")); sc.onerror = () => rej(new Error("Couldn't load the scanner — check internet.")); document.head.appendChild(sc); });
+  }
+  async function openScanner() {
+    scanDone = false; $("scan-code").value = ""; $("scan-note").textContent = ""; $("scan-msg").textContent = "Starting camera…";
+    $("scan-modal").classList.add("open");
+    const video = $("scan-video");
+    try {
+      if ("BarcodeDetector" in window) {
+        // built into Chrome on Android / most PCs
+        const det = new BarcodeDetector({ formats: ["qr_code", "code_128", "code_39", "ean_13", "ean_8", "itf", "codabar", "data_matrix", "upc_a"] });
+        scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        video.style.display = ""; $("scan-lib").style.display = "none"; video.srcObject = scanStream; await video.play();
+        $("scan-msg").textContent = "Point the camera at the barcode / QR code";
+        scanTimer = setInterval(async () => { try { const r = await det.detect(video); if (r && r[0] && r[0].rawValue) onScanned(r[0].rawValue); } catch (e) {} }, 300);
+      } else {
+        // iPhone / other browsers: small scanning library
+        const H = await loadScript(SCAN_LIB, "Html5Qrcode");
+        video.style.display = "none"; $("scan-lib").style.display = "";
+        scanLib = new H("scan-lib");
+        await scanLib.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 240, height: 160 } }, (txt) => onScanned(txt));
+        $("scan-msg").textContent = "Point the camera at the barcode / QR code";
+      }
+    } catch (e) {
+      $("scan-msg").textContent = "Camera not available — type the code below.";
+      $("scan-note").textContent = /denied|NotAllowed/i.test(String(e && (e.name || e.message))) ? "Camera permission was blocked. Allow it in the browser's site settings." : "";
+    }
+  }
+  function stopScanner() {
+    clearInterval(scanTimer); scanTimer = null;
+    if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+    if (scanLib) { try { scanLib.stop().catch(() => {}); } catch (e) {} scanLib = null; }
+    $("scan-modal").classList.remove("open");
+  }
+  async function onScanned(raw) {
+    if (scanDone) return; scanDone = true;
+    if (navigator.vibrate) navigator.vibrate(60);
+    await findByCode(raw);
+  }
+  async function findByCode(raw) {
+    let code = String(raw || "").trim();
+    // QR codes sometimes contain a full link or "label: value" — take the stone code part
+    const m = code.match(/(?:stock|lot|id|cert|report)[^A-Za-z0-9]*([A-Za-z0-9\-\/]+)/i); if (m) code = m[1];
+    if (/^https?:\/\//i.test(code)) code = code.split(/[\/?=#&]/).filter(Boolean).pop();
+    if (!code) return;
+    $("scan-msg").textContent = "Found code " + code + " — searching…";
+    const { data } = await sb.from("stones").select("stock_id").or("stock_id.eq." + code.replace(/[,()]/g, "") + ",cert_no.eq." + code.replace(/[,()]/g, "")).limit(1);
+    stopScanner();
+    $("plus-menu").classList.remove("open");
+    $("stone-modal").classList.add("open"); $("sf-clear").click();
+    $("stone-q").value = data && data[0] ? data[0].stock_id : code; updateSelBar(); runStoneSearch();
+    if (!data || !data[0]) showBanner("No stone with exact code " + code + " — showing closest matches.", true);
+  }
+  $("scan-btn").addEventListener("click", openScanner);
+  $("sf-scan").addEventListener("click", () => { $("stone-modal").classList.remove("open"); openScanner(); });
+  $("scan-go").addEventListener("click", () => { scanDone = true; findByCode($("scan-code").value); });
+  $("scan-code").addEventListener("keydown", (e) => { if (e.key === "Enter") { scanDone = true; findByCode($("scan-code").value); } });
+  $("scan-close").addEventListener("click", stopScanner);
+
+  // =====================================================================
+  // ---------- 🔗 Client selection link ----------
+  // =====================================================================
+  let linkStones = [];
+  function openLinkForm(list) {
+    linkStones = list; loadParties();
+    $("link-count").textContent = list.length + " stone" + (list.length === 1 ? "" : "s") + " selected";
+    $("link-title").value = ""; $("link-party").value = ""; $("link-days").value = "7"; $("link-prices").checked = true; $("link-note").textContent = "";
+    $("link-body").style.display = ""; $("link-done").style.display = "none"; $("link-create").style.display = "";
+    $("link-modal").classList.add("open"); $("link-title").focus();
+  }
+  $("sel-link").addEventListener("click", () => { const l = selList(); if (l.length) openLinkForm(l); });
+  $("link-cancel").addEventListener("click", () => $("link-modal").classList.remove("open"));
+  const linkUrl = (id) => location.origin + location.pathname + "?sel=" + id;
+  $("link-create").addEventListener("click", async () => {
+    const btn = $("link-create"); btn.disabled = true;
+    try {
+      const days = Number($("link-days").value), id = newId();
+      const row = { id, title: $("link-title").value.trim() || (linkStones.length + " diamonds"), party: $("link-party").value.trim() || null, stones: linkStones,
+        show_prices: $("link-prices").checked, contact_name: myProfile.name, contact_mobile: myProfile.mobile, created_by: myId,
+        expires_at: days ? new Date(Date.now() + days * 86400000).toISOString() : null };
+      const { error } = await sb.from("client_selections").insert(row);
+      if (error) { $("link-note").textContent = "Couldn't create link: " + error.message; return; }
+      sb.rpc("log_event", { p_action: "client_link_created", p_target: row.title, p_details: { stones: linkStones.length, party: row.party } }).then(() => {}, () => {});
+      const url = linkUrl(id);
+      $("link-body").style.display = "none"; btn.style.display = "none";
+      const done = $("link-done"); done.style.display = ""; done.innerHTML = '<div class="sec-label">Link ready</div><div class="link-box"></div><div class="sc-links"></div><div class="side-sub" style="margin-top:8px;"></div>';
+      done.querySelector(".link-box").textContent = url;
+      done.lastChild.textContent = row.show_prices ? "Prices are shown." : "Prices are hidden from the client.";
+      const bar = done.querySelector(".sc-links");
+      const mk = (label, cls, fn) => { const b = document.createElement("button"); b.className = "small-btn " + cls; b.textContent = label; b.addEventListener("click", fn); bar.appendChild(b); };
+      mk("Copy link", "primary", async () => { try { await navigator.clipboard.writeText(url); showBanner("Link copied."); setTimeout(() => showBanner(""), 1200); } catch (e) {} });
+      mk("WhatsApp", "wa-btn", () => shareWhatsApp((row.party ? "Dear " + row.party + ", " : "") + "please see our diamond selection \"" + row.title + "\":\n" + url));
+      mk("Open", "", () => window.open(url, "_blank", "noopener"));
+    } finally { btn.disabled = false; }
+  });
+  $("menu-links").addEventListener("click", () => { meMenu.classList.remove("open"); drawLinks(); $("links-modal").classList.add("open"); });
+  $("links-close").addEventListener("click", () => $("links-modal").classList.remove("open"));
+  async function drawLinks() {
+    const body = $("links-body"); body.innerHTML = '<div class="side-empty">Loading…</div>';
+    const { data } = await sb.from("client_selections").select("id,title,party,stones,show_prices,created_by,created_at,expires_at,views,last_viewed_at").order("created_at", { ascending: false }).limit(200);
+    body.innerHTML = "";
+    if (!data || !data.length) { body.innerHTML = '<div class="side-empty">No client links yet. In 💎 Share a stone, tick stones → 🔗 Client link.</div>'; return; }
+    await ensureProfiles(data.map(d => d.created_by).filter(Boolean));
+    data.forEach(d => {
+      const r = document.createElement("div"); r.className = "link-row";
+      const t = document.createElement("div"); t.className = "side-text"; t.innerHTML = '<div class="side-name"></div><div class="side-sub"></div>';
+      const expired = d.expires_at && new Date(d.expires_at) < new Date();
+      t.firstChild.textContent = d.title + (d.party ? " · " + d.party : "");
+      t.lastChild.textContent = [(d.stones || []).length + " stones", "👁 " + d.views + " view" + (d.views === 1 ? "" : "s") + (d.last_viewed_at ? " (last " + new Date(d.last_viewed_at).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) + ")" : ""),
+        expired ? "⌛ expired" : d.expires_at ? "till " + new Date(d.expires_at).toLocaleDateString(undefined, { day: "numeric", month: "short" }) : "no expiry", d.show_prices ? "" : "prices hidden", d.created_by !== myId ? "by " + nameOf(d.created_by) : ""].filter(Boolean).join(" · ");
+      const cp = document.createElement("button"); cp.className = "small-btn"; cp.textContent = "Copy"; cp.disabled = !!expired;
+      cp.addEventListener("click", async () => { try { await navigator.clipboard.writeText(linkUrl(d.id)); showBanner("Link copied."); setTimeout(() => showBanner(""), 1200); } catch (e) {} });
+      const del = document.createElement("button"); del.className = "small-btn danger"; del.textContent = "Delete";
+      del.addEventListener("click", async () => { if (!confirm("Delete this link? The client won't be able to open it any more.")) return; await sb.from("client_selections").delete().eq("id", d.id); drawLinks(); });
+      r.appendChild(t); r.appendChild(cp); r.appendChild(del); body.appendChild(r);
+    });
+  }
+
+  // =====================================================================
+  // ---------- 💲 Discount approval ----------
+  // =====================================================================
+  const discounts = {}, discLoading = new Set();
+  let discStone = null;
+  async function loadDiscounts(ids) {
+    const need = ids.filter(id => id && !discounts[id]); if (!need.length) return;
+    const { data } = await sb.from("discount_requests").select("*").in("id", need);
+    (data || []).forEach(d => discounts[d.id] = d);
+    await ensureProfiles((data || []).flatMap(d => [d.requested_by, d.decided_by]).filter(Boolean));
+  }
+  function discDiff() {
+    const st = discStone || {}, rap = Number(st.rap_rate) || null, rate = Number($("disc-rate").value) || null;
+    if (!rate) { $("disc-diff").textContent = st.rate != null ? "List: " + (st.back != null ? "Back " + fmtNum(st.back, 2) + "% · " : "") + "$" + fmtNum(st.rate, 0) + "/ct" : ""; return; }
+    const ct = Number(st.carat) || 0, dRate = st.rate != null ? rate - st.rate : null;
+    $("disc-diff").textContent = (st.rate != null ? "List $" + fmtNum(st.rate, 0) + "/ct → asked $" + fmtNum(rate, 0) + "/ct (" + (dRate >= 0 ? "+" : "") + fmtNum(dRate, 0) + "/ct" : "") +
+      (ct && dRate != null ? ", " + (dRate >= 0 ? "+" : "−") + "$" + fmtNum(Math.abs(dRate * ct), 0) + " on " + fmtNum(ct, 2) + " ct)" : st.rate != null ? ")" : "") + (rap ? "" : " · no Rap price in stock file");
+  }
+  function openDiscountForm(st) {
+    if (!canPost()) { showBanner("You can't post in this chat — open Team Chat or a group first.", true); return; }
+    loadParties(); discStone = stoneSnap(st);
+    $("disc-stone").innerHTML = ""; $("disc-stone").appendChild(stoneCard(discStone, { buttons: false }));
+    $("disc-party").value = ""; $("disc-note").value = ""; $("disc-msg").textContent = "";
+    $("disc-back").value = discStone.back != null ? discStone.back : ""; $("disc-rate").value = discStone.rate != null ? Math.round(discStone.rate) : "";
+    discDiff(); $("disc-modal").classList.add("open"); $("disc-party").focus();
+  }
+  $("disc-back").addEventListener("input", () => { const rap = Number(discStone && discStone.rap_rate); const b = Number($("disc-back").value); if (rap && $("disc-back").value !== "") $("disc-rate").value = Math.round(rap * (1 + b / 100)); discDiff(); });
+  $("disc-rate").addEventListener("input", () => { const rap = Number(discStone && discStone.rap_rate); const r = Number($("disc-rate").value); if (rap && r) $("disc-back").value = ((r / rap - 1) * 100).toFixed(2); discDiff(); });
+  $("disc-cancel").addEventListener("click", () => $("disc-modal").classList.remove("open"));
+  $("disc-send").addEventListener("click", async () => {
+    const party = $("disc-party").value.trim(); if (!party) { $("disc-msg").textContent = "Enter the party name."; return; }
+    const back = $("disc-back").value === "" ? null : Number($("disc-back").value), rate = $("disc-rate").value === "" ? null : Number($("disc-rate").value);
+    if (back == null && rate == null) { $("disc-msg").textContent = "Enter the asked Back % or Rate."; return; }
+    const btn = $("disc-send"); btn.disabled = true;
+    try {
+      const id = newId(), row = { id, stock_id: discStone.stock_id || null, stone: discStone, party, asked_back: back, asked_rate: rate, note: $("disc-note").value.trim() || null, group_id: currentGroupId, requested_by: myId };
+      const { error } = await sb.from("discount_requests").insert(row);
+      if (error) { $("disc-msg").textContent = "Couldn't send: " + error.message; return; }
+      discounts[id] = Object.assign({ status: "pending", created_at: new Date().toISOString() }, row);
+      if (!parties.some(pt => pt.name.toLowerCase() === party.toLowerCase())) sb.from("parties").insert({ name: party }).then(() => loadParties(true));
+      $("disc-modal").classList.remove("open");
+      sendSpecial({ text: "", discount_id: id });
+    } finally { btn.disabled = false; }
+  });
+  async function decideDiscount(d, status) {
+    let decision_note = null;
+    if (status === "rejected") { decision_note = prompt("Reason for rejecting (optional):", ""); if (decision_note === null) return; }
+    else if (!confirm("Approve " + (d.asked_back != null ? "Back " + fmtNum(d.asked_back, 2) + "%" : "") + (d.asked_rate != null ? " ($" + fmtNum(d.asked_rate, 0) + "/ct)" : "") + " for " + d.party + " on " + (d.stock_id || "this stone") + "?")) return;
+    const patch = { status, decided_by: myId, decided_at: new Date().toISOString(), decision_note: decision_note || null };
+    const { error } = await sb.from("discount_requests").update(patch).eq("id", d.id).eq("status", "pending");
+    if (error) { showBanner("Couldn't update: " + error.message, true); return; }
+    Object.assign(d, patch); render(true);
+    if ($("admin-modal").classList.contains("open") && adminTab === "discounts") adminTabs.discounts();
+  }
+  const DISC_LABEL = { pending: "⏳ Pending", approved: "✅ Approved", rejected: "❌ Rejected" };
+  function discountCard(d) {
+    const c = document.createElement("div"); c.className = "disc-card " + (d ? d.status : "");
+    if (!d) { c.textContent = "💲 Discount request (loading…)"; return c; }
+    const head = document.createElement("div"); head.className = "sc-head";
+    head.innerHTML = '<span class="sc-id">💲 Discount request</span><span class="hold-pill"></span>';
+    head.lastChild.className = "hold-pill " + d.status; head.lastChild.textContent = DISC_LABEL[d.status] || d.status;
+    c.appendChild(head);
+    const ask = document.createElement("div"); ask.className = "disc-ask";
+    ask.textContent = "Asked: " + [d.asked_back != null ? "Back " + fmtNum(d.asked_back, 2) + "%" : "", d.asked_rate != null ? "$" + fmtNum(d.asked_rate, 0) + "/ct" : ""].filter(Boolean).join(" · ");
+    c.appendChild(ask);
+    const st = d.stone || {};
+    if (st.rate != null && d.asked_rate != null) {
+      const diff = document.createElement("div"); diff.className = "disc-diff"; const dr = d.asked_rate - st.rate, ct = Number(st.carat) || 0;
+      diff.textContent = "List " + (st.back != null ? "Back " + fmtNum(st.back, 2) + "% · " : "") + "$" + fmtNum(st.rate, 0) + "/ct → difference " + (dr >= 0 ? "+" : "−") + "$" + fmtNum(Math.abs(dr), 0) + "/ct" + (ct ? " (" + (dr >= 0 ? "+" : "−") + "$" + fmtNum(Math.abs(dr * ct), 0) + " total)" : "");
+      c.appendChild(diff);
+    }
+    if (d.stone) c.appendChild(stoneCard(d.stone, { buttons: false }));
+    const g = document.createElement("div"); g.className = "sc-grid";
+    const add = (k, v) => { if (!v) return; const a = document.createElement("span"); a.className = "k"; a.textContent = k; const b = document.createElement("span"); b.textContent = v; g.appendChild(a); g.appendChild(b); };
+    add("Party", d.party); add("Note", d.note); add("Asked by", nameOf(d.requested_by));
+    if (d.status !== "pending") add(d.status === "approved" ? "Approved by" : "Rejected by", nameOf(d.decided_by) + (d.decided_at ? " · " + new Date(d.decided_at).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : ""));
+    add("Reason", d.decision_note);
+    c.appendChild(g);
+    const pk = [...g.querySelectorAll(".k")].find(k => k.textContent === "Party");
+    if (pk && pk.nextSibling) { pk.nextSibling.className = "party-link"; pk.nextSibling.addEventListener("click", (e) => { e.stopPropagation(); openPartyHistory(d.party); }); }
+    if (d.status === "pending" && amAppAdmin()) {
+      const bar = document.createElement("div"); bar.className = "sc-links";
+      const r = document.createElement("button"); r.className = "small-btn danger"; r.textContent = "Reject"; r.addEventListener("click", (e) => { e.stopPropagation(); decideDiscount(d, "rejected"); });
+      const a = document.createElement("button"); a.className = "small-btn primary"; a.textContent = "Approve"; a.addEventListener("click", (e) => { e.stopPropagation(); decideDiscount(d, "approved"); });
+      bar.appendChild(r); bar.appendChild(a); c.appendChild(bar);
+    }
+    return c;
+  }
+  adminTabs.discounts = async () => {
+    const body = $("admin-body"); body.innerHTML = '<div class="side-empty">Loading…</div>';
+    const { data, error } = await sb.from("discount_requests").select("*").order("created_at", { ascending: false }).limit(200);
+    if (error) { body.innerHTML = '<div class="side-empty">Couldn\'t load discount requests.</div>'; return; }
+    (data || []).forEach(d => discounts[d.id] = Object.assign(discounts[d.id] || {}, d));
+    await ensureProfiles((data || []).flatMap(d => [d.requested_by, d.decided_by]).filter(Boolean));
+    const list = (data || []).map(d => discounts[d.id]).sort((a, b) => (a.status === "pending" ? 0 : 1) - (b.status === "pending" ? 0 : 1));
+    body.innerHTML = '<div class="sec-label"></div>'; body.firstChild.textContent = list.filter(d => d.status === "pending").length + " pending · " + list.length + " total (latest 200)";
+    if (!list.length) { body.insertAdjacentHTML("beforeend", '<div class="side-empty">No discount requests yet. On a stone card tap "💲 Ask discount".</div>'); return; }
+    list.forEach(d => { const c = discountCard(d); c.style.marginBottom = "10px"; body.appendChild(c); });
+  };
+
+  // =====================================================================
+  // ---------- ❗ Important ----------
+  // =====================================================================
+  let urgentNext = false;
+  function setUrgent(on) { urgentNext = !!on; $("urgent-bar").classList.toggle("open", urgentNext); }
+  $("urgent-btn").addEventListener("click", () => { setUrgent(!urgentNext); composerInput.focus(); });
+  $("urgent-x").addEventListener("click", () => setUrgent(false));
+
+  // =====================================================================
+  // ---------- ⭐ Saved messages ----------
+  // =====================================================================
+  const savedSet = new Set();
+  async function loadSaved() {
+    const { data } = await sb.from("saved_messages").select("message_id").eq("user_id", myId);
+    savedSet.clear(); (data || []).forEach(r => savedSet.add(r.message_id)); render(true);
+  }
+  async function toggleSaved(m) {
+    if (!m || m._status) return;
+    const was = savedSet.has(m.id);
+    was ? savedSet.delete(m.id) : savedSet.add(m.id); render(true);
+    const res = was ? await sb.from("saved_messages").delete().eq("user_id", myId).eq("message_id", m.id)
+                    : await sb.from("saved_messages").insert({ user_id: myId, message_id: m.id });
+    if (res.error && !/duplicate/i.test(res.error.message || "")) { was ? savedSet.add(m.id) : savedSet.delete(m.id); render(true); showBanner("Couldn't save: " + res.error.message, true); return; }
+    showBanner(was ? "Removed from saved messages." : "⭐ Saved. Find it in your name menu → Saved messages."); setTimeout(() => showBanner(""), 1800);
+  }
+  $("act-save").addEventListener("click", () => { closeActMenu(); toggleSaved(actMsg); });
+  $("menu-saved").addEventListener("click", () => { meMenu.classList.remove("open"); drawSaved(); $("saved-modal").classList.add("open"); });
+  $("saved-close").addEventListener("click", () => $("saved-modal").classList.remove("open"));
+  async function drawSaved() {
+    const body = $("saved-body"); body.innerHTML = '<div class="side-empty">Loading…</div>';
+    const { data: rows } = await sb.from("saved_messages").select("*").eq("user_id", myId).order("created_at", { ascending: false }).limit(300);
+    const ids = (rows || []).map(r => r.message_id);
+    if (!ids.length) { body.innerHTML = '<div class="side-empty">Nothing saved yet. Tap ⋮ on any message → ⭐ Save message.</div>'; return; }
+    const { data: msgs } = await sb.from("messages").select("*").in("id", ids);
+    const byId = {}; (msgs || []).forEach(m => byId[m.id] = m);
+    await ensureProfiles((msgs || []).map(m => m.sender_id).filter(Boolean));
+    body.innerHTML = "";
+    ids.forEach(id => {
+      const m = byId[id]; if (!m) return;
+      const r = document.createElement("div"); r.className = "search-hit";
+      const h1 = document.createElement("div"); h1.className = "h1";
+      const a = document.createElement("span"); a.textContent = (m.sender_id === myId ? "You" : nameOf(m.sender_id)) + " · " + chatTitleOf(groupById(m.group_id || null));
+      const b = document.createElement("span"); b.textContent = new Date(m.created_at).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+      h1.appendChild(a); h1.appendChild(b);
+      const h2 = document.createElement("div"); h2.className = "h2"; h2.textContent = snippet(m).slice(0, 220);
+      const un = document.createElement("button"); un.className = "small-btn"; un.style.marginTop = "6px"; un.textContent = "☆ Unsave";
+      un.addEventListener("click", async (e) => { e.stopPropagation(); await sb.from("saved_messages").delete().eq("user_id", myId).eq("message_id", id); savedSet.delete(id); render(true); drawSaved(); });
+      r.appendChild(h1); r.appendChild(h2); r.appendChild(un);
+      r.addEventListener("click", () => { $("saved-modal").classList.remove("open"); jumpTo(id); });
+      body.appendChild(r);
+    });
+  }
+
+  // =====================================================================
+  // ---------- 📁 Media / Files / Links / Stones in a chat ----------
+  // =====================================================================
+  let filesTab = "media";
+  $("files-btn").addEventListener("click", () => { filesTab = "media"; [...$("files-tabs").children].forEach(b => b.classList.toggle("active", b.dataset.t === "media")); $("files-title").textContent = "📁 " + chatTitleOf(groupById(currentGroupId)); $("files-modal").classList.add("open"); drawFiles(); });
+  $("files-close").addEventListener("click", () => $("files-modal").classList.remove("open"));
+  $("files-tabs").addEventListener("click", (e) => { const b = e.target.closest("button[data-t]"); if (!b) return; filesTab = b.dataset.t; [...$("files-tabs").children].forEach(x => x.classList.toggle("active", x === b)); drawFiles(); });
+  const inChat = (q) => currentGroupId ? q.eq("group_id", currentGroupId) : q.is("group_id", null);
+  const fmtWhenShort = (ts) => new Date(ts).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  async function drawFiles() {
+    const body = $("files-body"), tab = filesTab; body.innerHTML = '<div class="side-empty">Loading…</div>';
+    const go = (id) => { $("files-modal").classList.remove("open"); jumpTo(id); };
+    if (tab === "media" || tab === "files") {
+      const { data } = await inChat(sb.from("messages").select("id,sender_id,created_at,attachment_url,attachment_name,attachment_type,attachment_size").not("attachment_url", "is", null).eq("deleted", false)).order("created_at", { ascending: false }).limit(400);
+      if (tab !== filesTab) return;
+      const all = data || [], isImg = (m) => (m.attachment_type || "").startsWith("image/");
+      const list = all.filter(m => tab === "media" ? isImg(m) : !isImg(m));
+      body.innerHTML = "";
+      if (!list.length) { body.innerHTML = '<div class="side-empty">' + (tab === "media" ? "No photos shared in this chat yet." : "No files or voice notes in this chat yet.") + '</div>'; return; }
+      await ensureProfiles(list.map(m => m.sender_id).filter(Boolean));
+      const paths = list.map(m => storagePath(m.attachment_url)).filter(Boolean), signed = {};
+      if (paths.length) { try { const { data: sg } = await sb.storage.from("chat-uploads").createSignedUrls(paths, 3600); (sg || []).forEach(x => { if (x.signedUrl) signed[x.path] = x.signedUrl; }); } catch (e) {} }
+      const urlOf = (m) => { const pth = storagePath(m.attachment_url); return pth ? signed[pth] || "" : m.attachment_url; };
+      if (tab === "media") {
+        const g = document.createElement("div"); g.className = "media-grid";
+        list.forEach(m => { const d = document.createElement("div"); d.className = "mi"; const img = document.createElement("img"); img.loading = "lazy"; img.src = urlOf(m); img.alt = m.attachment_name || "";
+          const sp = document.createElement("span"); sp.textContent = fmtWhenShort(m.created_at); d.appendChild(img); d.appendChild(sp);
+          d.addEventListener("click", () => openLightbox(urlOf(m), (m.attachment_name || "") + " · " + nameOf(m.sender_id))); g.appendChild(d); });
+        body.appendChild(g);
+      } else {
+        list.forEach(m => {
+          const r = document.createElement("div"); r.className = "fl-row";
+          const ic = document.createElement("div"); ic.className = "file-icon"; ic.textContent = (m.attachment_type || "").startsWith("audio/") ? "🎤" : isSheetFile(m.attachment_name) ? "📊" : /\.pdf$/i.test(m.attachment_name || "") ? "📄" : "📎";
+          const t = document.createElement("div"); t.className = "side-text"; t.innerHTML = '<div class="side-name"></div><div class="side-sub"></div>';
+          t.firstChild.textContent = m.attachment_name || "File"; t.lastChild.textContent = [fmtSize(m.attachment_size), nameOf(m.sender_id), fmtWhenShort(m.created_at)].filter(Boolean).join(" · ");
+          t.addEventListener("click", () => go(m.id));
+          const dl = document.createElement("a"); dl.className = "small-btn"; dl.textContent = "⬇"; dl.title = "Download"; dl.href = urlOf(m) || "#"; dl.target = "_blank"; dl.rel = "noopener"; dl.download = m.attachment_name || "file"; dl.style.textDecoration = "none";
+          r.appendChild(ic); r.appendChild(t); r.appendChild(dl);
+          if (isSheetFile(m.attachment_name)) { const pv = document.createElement("button"); pv.className = "small-btn"; pv.textContent = "👁"; pv.title = "Preview"; pv.addEventListener("click", () => { $("files-modal").classList.remove("open"); openSheetPreview(m.attachment_url, m.attachment_name); }); r.appendChild(pv); }
+          body.appendChild(r);
+        });
+      }
+      return;
+    }
+    if (tab === "links") {
+      const { data } = await inChat(sb.from("messages").select("id,sender_id,created_at,text").ilike("text", "%http%").eq("deleted", false)).order("created_at", { ascending: false }).limit(300);
+      if (tab !== filesTab) return;
+      const re = /https?:\/\/[^\s<]+[^\s<.,;:!?)"'\]]/gi, items = [];
+      (data || []).forEach(m => { (m.text.match(re) || []).forEach(u => items.push({ u, m })); });
+      body.innerHTML = "";
+      if (!items.length) { body.innerHTML = '<div class="side-empty">No links shared in this chat yet.</div>'; return; }
+      await ensureProfiles(items.map(i => i.m.sender_id).filter(Boolean));
+      items.forEach(({ u, m }) => {
+        const r = document.createElement("div"); r.className = "fl-row";
+        const ic = document.createElement("div"); ic.className = "file-icon"; ic.textContent = /v360|video|youtu/i.test(u) ? "🎥" : /gia|igi|cert|report/i.test(u) ? "📄" : "🔗";
+        const t = document.createElement("div"); t.className = "side-text";
+        const a = document.createElement("a"); a.className = "lnk2"; a.href = u; a.target = "_blank"; a.rel = "noopener"; a.textContent = u;
+        const sub = document.createElement("div"); sub.className = "side-sub"; sub.textContent = nameOf(m.sender_id) + " · " + fmtWhenShort(m.created_at);
+        t.appendChild(a); t.appendChild(sub);
+        const gb = document.createElement("button"); gb.className = "small-btn"; gb.textContent = "Go to message"; gb.addEventListener("click", () => go(m.id));
+        r.appendChild(ic); r.appendChild(t); r.appendChild(gb); body.appendChild(r);
+      });
+      return;
+    }
+    // stones shared in this chat
+    const [a1, a2] = await Promise.all([
+      inChat(sb.from("messages").select("id,sender_id,created_at,stone").not("stone", "is", null).eq("deleted", false)).order("created_at", { ascending: false }).limit(300),
+      inChat(sb.from("messages").select("id,sender_id,created_at,stone_list").not("stone_list", "is", null).eq("deleted", false)).order("created_at", { ascending: false }).limit(100)]);
+    if (tab !== filesTab) return;
+    const items = [];
+    (a1.data || []).forEach(m => items.push({ st: m.stone, m }));
+    (a2.data || []).forEach(m => (m.stone_list || []).forEach(st => items.push({ st, m })));
+    items.sort((x, y) => (y.m.created_at > x.m.created_at ? 1 : -1));
+    body.innerHTML = "";
+    if (!items.length) { body.innerHTML = '<div class="side-empty">No stones shared in this chat yet.</div>'; return; }
+    await ensureProfiles(items.map(i => i.m.sender_id).filter(Boolean));
+    const x = document.createElement("button"); x.className = "small-btn"; x.style.marginBottom = "8px"; x.textContent = "⬇ All as Excel";
+    x.addEventListener("click", () => downloadStonesXlsx(items.map(i => i.st), "Stones_" + chatTitleOf(groupById(currentGroupId)).replace(/\W+/g, "_")));
+    body.appendChild(x);
+    items.forEach(({ st, m }) => {
+      const r = document.createElement("div"); r.className = "fl-row";
+      const t = document.createElement("div"); t.className = "side-text"; t.innerHTML = '<div class="side-name"></div><div class="side-sub"></div>';
+      t.firstChild.textContent = "💎 " + (st.stock_id || "") + "  " + stoneLine(st);
+      t.lastChild.textContent = [st.rate != null ? "$" + fmtNum(st.rate, 0) + "/ct" : "", st.back != null ? "Back " + fmtNum(st.back, 2) + "%" : "", nameOf(m.sender_id), fmtWhenShort(m.created_at)].filter(Boolean).join(" · ");
+      t.addEventListener("click", () => go(m.id));
+      const w = document.createElement("button"); w.className = "small-btn wa-btn"; w.textContent = "WhatsApp"; w.addEventListener("click", () => shareWhatsApp(stoneText(st)));
+      r.appendChild(t); r.appendChild(w); body.appendChild(r);
+    });
+  }
+
+  // =====================================================================
+  // ---------- 🌐 Language: English / ગુજરાતી / हिन्दी ----------
+  // Translates the app's buttons, menus and labels (never people's messages).
+  // =====================================================================
+  const TR = {
+    // login & account
+    "Email": ["ઇમેઇલ", "ईमेल"], "Password": ["પાસવર્ડ", "पासवर्ड"], "Sign In": ["સાઇન ઇન", "साइन इन"], "Sign up": ["સાઇન અપ", "साइन अप"],
+    "Forgot Password?": ["પાસવર્ડ ભૂલી ગયા?", "पासवर्ड भूल गए?"], "Employee name": ["કર્મચારીનું નામ", "कर्मचारी का नाम"], "Mobile number": ["મોબાઇલ નંબર", "मोबाइल नंबर"],
+    "Confirm password": ["પાસવર્ડ ફરી લખો", "पासवर्ड दोबारा लिखें"], "Create account": ["એકાઉન્ટ બનાવો", "अकाउंट बनाएं"], "Send reset link": ["રીસેટ લિંક મોકલો", "रीसेट लिंक भेजें"],
+    "← Back to login": ["← લોગિન પર પાછા", "← लॉगिन पर वापस"], "Choose photo": ["ફોટો પસંદ કરો", "फोटो चुनें"], "Waiting for approval": ["મંજૂરીની રાહ", "मंज़ूरी का इंतज़ार"],
+    "Check again": ["ફરી તપાસો", "फिर से जांचें"], "Account disabled": ["એકાઉન્ટ બંધ છે", "अकाउंट बंद है"], "Save new password": ["નવો પાસવર્ડ સાચવો", "नया पासवर्ड सेव करें"],
+    "New password": ["નવો પાસવર્ડ", "नया पासवर्ड"], "Confirm new password": ["નવો પાસવર્ડ ફરી લખો", "नया पासवर्ड दोबारा लिखें"],
+    // my menu
+    "Edit profile": ["પ્રોફાઇલ બદલો", "प्रोफ़ाइल बदलें"], "🔔 Notifications": ["🔔 સૂચનાઓ", "🔔 सूचनाएं"], "🛡️ Admin panel": ["🛡️ એડમિન પેનલ", "🛡️ एडमिन पैनल"],
+    "Log out": ["લોગ આઉટ", "लॉग आउट"], "✅ My tasks & reminders": ["✅ મારા કામ અને રિમાઇન્ડર", "✅ मेरे काम और रिमाइंडर"], "🔗 Client links": ["🔗 ક્લાયન્ટ લિંક", "🔗 क्लाइंट लिंक"],
+    "🎨 Theme": ["🎨 થીમ", "🎨 थीम"], "⭐ Saved messages": ["⭐ સાચવેલા મેસેજ", "⭐ सेव किए मैसेज"], "🌐 Language": ["🌐 ભાષા", "🌐 भाषा"],
+    "🕘 Attendance": ["🕘 હાજરી", "🕘 हाज़िरी"], "📱 My devices": ["📱 મારા ડિવાઇસ", "📱 मेरे डिवाइस"],
+    // sidebar
+    "Chat": ["ચેટ", "चैट"], "Unread": ["વાંચ્યા વગરના", "बिना पढ़े"], "Meeting chats": ["મીટિંગ ચેટ", "मीटिंग चैट"], "Unmuted": ["મ્યૂટ નહીં", "म्यूट नहीं"],
+    "Favorites": ["મનપસંદ", "पसंदीदा"], "Chats": ["ચેટ્સ", "चैट्स"], "Contacts": ["સંપર્કો", "संपर्क"], "Team Chat": ["ટીમ ચેટ", "टीम चैट"],
+    "Announcements": ["જાહેરાતો", "घोषणाएं"], "Everyone": ["બધા", "सभी"], "From admins": ["એડમિન તરફથી", "एडमिन की ओर से"], "You can post": ["તમે પોસ્ટ કરી શકો", "आप पोस्ट कर सकते हैं"],
+    "Tap ⋯ on a chat → Add to favorites.": ["ચેટ પર ⋯ દબાવો → મનપસંદમાં ઉમેરો.", "चैट पर ⋯ दबाएं → पसंदीदा में जोड़ें."],
+    "No chats yet. Tap ✏️ to start one.": ["હજી કોઈ ચેટ નથી. ✏️ દબાવીને શરૂ કરો.", "अभी कोई चैट नहीं. ✏️ दबाकर शुरू करें."],
+    "Available": ["ઉપલબ્ધ", "उपलब्ध"], "Busy": ["વ્યસ્ત", "व्यस्त"], "Do not disturb": ["ખલેલ ન પહોંચાડો", "परेशान न करें"], "Be right back": ["હમણાં આવું છું", "अभी आता हूं"],
+    "Away": ["દૂર", "दूर"], "Offline": ["ઑફલાઇન", "ऑफ़लाइन"], "online": ["ઑનલાઇન", "ऑनलाइन"], "⏰ My reminders": ["⏰ મારા રિમાઇન્ડર", "⏰ मेरे रिमाइंडर"],
+    "⭐ Add to favorites": ["⭐ મનપસંદમાં ઉમેરો", "⭐ पसंदीदा में जोड़ें"], "☆ Remove from favorites": ["☆ મનપસંદમાંથી કાઢો", "☆ पसंदीदा से हटाएं"],
+    "🔕 Mute": ["🔕 મ્યૂટ", "🔕 म्यूट"], "🔔 Unmute": ["🔔 અનમ્યૂટ", "🔔 अनम्यूट"], "✔️ Mark as read": ["✔️ વાંચેલું કરો", "✔️ पढ़ा हुआ करें"],
+    "Set your status": ["તમારું સ્ટેટસ", "आपका स्टेटस"], "Available (automatic)": ["ઉપલબ્ધ (આપમેળે)", "उपलब्ध (अपने आप)"], "Appear away": ["દૂર દેખાવ", "दूर दिखें"], "Appear offline": ["ઑફલાઇન દેખાવ", "ऑफ़लाइन दिखें"],
+    // chat area
+    "Members": ["સભ્યો", "सदस्य"], "Today": ["આજે", "आज"], "Yesterday": ["ગઈકાલે", "कल"], "No messages yet": ["હજી કોઈ મેસેજ નથી", "अभी कोई मैसेज नहीं"],
+    "Send the first message.": ["પહેલો મેસેજ મોકલો.", "पहला मैसेज भेजें."], "⬆ Load older messages": ["⬆ જૂના મેસેજ જુઓ", "⬆ पुराने मैसेज देखें"],
+    "Delivered": ["પહોંચી ગયો", "पहुंच गया"], "Read": ["વાંચ્યો", "पढ़ लिया"], "Sending…": ["મોકલાય છે…", "भेजा जा रहा है…"], "⚠ Not sent · Tap to retry": ["⚠ ન ગયો · ફરી મોકલવા દબાવો", "⚠ नहीं गया · दोबारा भेजने के लिए दबाएं"],
+    "Edited": ["બદલેલો", "बदला गया"], "📌 Pinned": ["📌 પિન કરેલો", "📌 पिन किया"], "↪ Forwarded": ["↪ ફોરવર્ડ કરેલો", "↪ फॉरवर्ड किया"], "You": ["તમે", "आप"],
+    "Message the team…": ["ટીમને મેસેજ લખો…", "टीम को मैसेज लिखें…"], "Post an announcement…": ["જાહેરાત લખો…", "घोषणा लिखें…"],
+    "📢 Only admins can post announcements.": ["📢 ફક્ત એડમિન જાહેરાત કરી શકે.", "📢 केवल एडमिन घोषणा कर सकते हैं."],
+    "Get notified about new messages?": ["નવા મેસેજની સૂચના જોઈએ છે?", "नए मैसेज की सूचना चाहिए?"], "Turn on": ["ચાલુ કરો", "चालू करें"], "Not now": ["હમણાં નહીં", "अभी नहीं"],
+    "Pinned message": ["પિન કરેલો મેસેજ", "पिन किया मैसेज"],
+    // message menu
+    "↩️ Reply": ["↩️ જવાબ", "↩️ जवाब"], "📌 Pin": ["📌 પિન", "📌 पिन"], "📌 Unpin": ["📌 પિન હટાવો", "📌 पिन हटाएं"], "✅ Create task": ["✅ કામ બનાવો", "✅ काम बनाएं"],
+    "⏰ Remind me": ["⏰ યાદ અપાવો", "⏰ याद दिलाएं"], "✏️ Edit": ["✏️ બદલો", "✏️ बदलें"], "↪️ Forward": ["↪️ ફોરવર્ડ", "↪️ फॉरवर्ड"], "📋 Copy text": ["📋 લખાણ કૉપી કરો", "📋 टेक्स्ट कॉपी करें"],
+    "🗑️ Delete for everyone": ["🗑️ બધા માટે કાઢો", "🗑️ सबके लिए हटाएं"], "🗑️ Discard": ["🗑️ રદ કરો", "🗑️ रद्द करें"], "⭐ Save message": ["⭐ મેસેજ સાચવો", "⭐ मैसेज सेव करें"], "☆ Unsave": ["☆ સાચવેલું હટાવો", "☆ सेव से हटाएं"],
+    // ＋ menu
+    "📷 Camera": ["📷 કેમેરા", "📷 कैमरा"], "💎 Share a stone": ["💎 સ્ટોન શેર કરો", "💎 स्टोन शेयर करें"], "🔍 Scan stock packet": ["🔍 પેકેટ સ્કેન કરો", "🔍 पैकेट स्कैन करें"],
+    "📊 Poll": ["📊 મતદાન", "📊 पोल"], "✅ Task": ["✅ કામ", "✅ काम"], "⏰ Schedule / remind me": ["⏰ સમય નક્કી કરો / યાદ અપાવો", "⏰ समय तय करें / याद दिलाएं"],
+    "❗ Mark as important": ["❗ મહત્વનું કરો", "❗ ज़रूरी करें"],
+    // common buttons
+    "Cancel": ["રદ કરો", "रद्द करें"], "Close": ["બંધ કરો", "बंद करें"], "Save": ["સાચવો", "सेव करें"], "Done": ["થઈ ગયું", "हो गया"], "Copy": ["કૉપી", "कॉपी"],
+    "Create group": ["ગ્રુપ બનાવો", "ग्रुप बनाएं"], "Start chat": ["ચેટ શરૂ કરો", "चैट शुरू करें"], "New chat": ["નવી ચેટ", "नई चैट"], "Search messages": ["મેસેજ શોધો", "मैसेज खोजें"],
+    "Forward to…": ["ફોરવર્ડ કરો…", "फॉरवर्ड करें…"], "Forward": ["ફોરવર્ડ", "फॉरवर्ड"], "Name": ["નામ", "नाम"], "Mobile": ["મોબાઇલ", "मोबाइल"],
+    "Change photo": ["ફોટો બદલો", "फोटो बदलें"], "Remove photo": ["ફોટો કાઢો", "फोटो हटाएं"], "Add people": ["લોકો ઉમેરો", "लोग जोड़ें"], "Leave group": ["ગ્રુપ છોડો", "ग्रुप छोड़ें"],
+    "Delete group": ["ગ્રુપ કાઢી નાખો", "ग्रुप हटाएं"], "Rename": ["નામ બદલો", "नाम बदलें"], "Remove": ["કાઢો", "हटाएं"], "Add": ["ઉમેરો", "जोड़ें"],
+    "Message info": ["મેસેજ માહિતી", "मैसेज जानकारी"], "Create task": ["કામ બનાવો", "काम बनाएं"], "Post poll": ["મતદાન મૂકો", "पोल डालें"], "Schedule": ["સમય નક્કી કરો", "समय तय करें"],
+    "Send request": ["વિનંતી મોકલો", "अनुरोध भेजें"], "Approve": ["મંજૂર", "मंज़ूर"], "Reject": ["નામંજૂર", "नामंज़ूर"], "Disable": ["બંધ કરો", "बंद करें"], "Enable": ["ચાલુ કરો", "चालू करें"],
+    "Make admin": ["એડમિન બનાવો", "एडमिन बनाएं"], "Remove admin": ["એડમિન હટાવો", "एडमिन हटाएं"], "Admin panel": ["એડમિન પેનલ", "एडमिन पैनल"], "Users": ["યુઝર્સ", "यूज़र्स"],
+    "Share in chat": ["ચેટમાં શેર કરો", "चैट में शेयर करें"], "📌 Request hold": ["📌 હોલ્ડ માંગો", "📌 होल्ड मांगें"], "💲 Ask discount": ["💲 ડિસ્કાઉન્ટ માંગો", "💲 डिस्काउंट मांगें"],
+    "Clear filters": ["ફિલ્ટર કાઢો", "फ़िल्टर हटाएं"], "Shape": ["શેપ", "शेप"], "Carat": ["કેરેટ", "कैरेट"], "Color": ["કલર", "कलर"], "Clarity": ["ક્લેરિટી", "क्लैरिटी"], "Sort": ["ક્રમ", "क्रम"],
+    "Any": ["કોઈપણ", "कोई भी"], "Party": ["પાર્ટી", "पार्टी"], "Note": ["નોંધ", "नोट"], "Hold until": ["હોલ્ડ ક્યાં સુધી", "होल्ड कब तक"], "Requested by": ["માંગનાર", "मांगने वाले"],
+    "Assigned to": ["કોને સોંપ્યું", "किसे सौंपा"], "Due": ["છેલ્લી તારીખ", "आखिरी तारीख"], "✓ Mark done": ["✓ પૂરું થયું", "✓ पूरा हुआ"], "Reopen": ["ફરી ખોલો", "फिर खोलें"],
+    "Close poll": ["મતદાન બંધ કરો", "पोल बंद करें"], "Join meeting": ["મીટિંગમાં જોડાઓ", "मीटिंग में जुड़ें"], "👁 Preview": ["👁 જુઓ", "👁 देखें"],
+    "🔍 Scan": ["🔍 સ્કેન", "🔍 स्कैन"], "🔗 Client link": ["🔗 ક્લાયન્ટ લિંક", "🔗 क्लाइंट लिंक"], "Create link": ["લિંક બનાવો", "लिंक बनाएं"], "Find": ["શોધો", "खोजें"],
+    "Assigned to me": ["મને સોંપેલા", "मुझे सौंपे"], "Created by me": ["મેં બનાવેલા", "मैंने बनाए"], "⏰ Scheduled": ["⏰ નક્કી કરેલા", "⏰ तय किए"],
+    "Media": ["ફોટા", "फोटो"], "Files": ["ફાઇલો", "फ़ाइलें"], "Links": ["લિંક", "लिंक"], "Stones": ["સ્ટોન", "स्टोन"],
+    "Check in": ["હાજરી પૂરો", "हाज़िरी लगाएं"], "Check out": ["નીકળો", "चेक आउट"],
+    "Company announcements · only admins post": ["કંપનીની જાહેરાતો · ફક્ત એડમિન લખી શકે", "कंपनी की घोषणाएं · केवल एडमिन लिख सकते हैं"],
+    "Announcements from admins will appear here.": ["એડમિનની જાહેરાતો અહીં દેખાશે.", "एडमिन की घोषणाएं यहां दिखेंगी."],
+    "Only you can see this · your reminders and notes": ["ફક્ત તમે જોઈ શકો · તમારા રિમાઇન્ડર અને નોંધ", "सिर्फ़ आप देख सकते हैं · आपके रिमाइंडर और नोट्स"],
+    "Search name or mobile…": ["નામ અથવા મોબાઇલ શોધો…", "नाम या मोबाइल खोजें…"], "Filter by name or mobile…": ["નામ અથવા મોબાઇલથી શોધો…", "नाम या मोबाइल से खोजें…"],
+    "Photos, files and links in this chat": ["આ ચેટના ફોટા, ફાઇલો અને લિંક", "इस चैट की फोटो, फ़ाइलें और लिंक"], "Start a video meeting in this chat": ["આ ચેટમાં વીડિયો મીટિંગ શરૂ કરો", "इस चैट में वीडियो मीटिंग शुरू करें"],
+    "Record a voice note": ["વોઇસ નોટ રેકોર્ડ કરો", "वॉइस नोट रिकॉर्ड करें"], "Attach a file or photo": ["ફાઇલ અથવા ફોટો જોડો", "फ़ाइल या फोटो जोड़ें"],
+    "No groups yet. Tap + NEW GROUP.": ["હજી કોઈ ગ્રુપ નથી.", "अभी कोई ग्रुप नहीं."], "Say hello": ["નમસ્તે કહો", "नमस्ते कहें"],
+  };
+  const LANG_IDX = { gu: 0, hi: 1 };
+  const MR = {"Email": "ईमेल", "Password": "पासवर्ड", "Sign In": "साइन इन", "Sign up": "साइन अप", "Forgot Password?": "पासवर्ड विसरलात?", "Employee name": "कर्मचाऱ्याचे नाव", "Mobile number": "मोबाइल नंबर", "Confirm password": "पासवर्ड पुन्हा लिहा", "Create account": "अकाउंट तयार करा", "Send reset link": "रीसेट लिंक पाठवा", "← Back to login": "← लॉगिनवर परत", "Choose photo": "फोटो निवडा", "Waiting for approval": "मंजुरीची वाट", "Check again": "पुन्हा तपासा", "Account disabled": "अकाउंट बंद आहे", "Save new password": "नवीन पासवर्ड सेव्ह करा", "New password": "नवीन पासवर्ड", "Confirm new password": "नवीन पासवर्ड पुन्हा लिहा", "Edit profile": "प्रोफाइल बदला", "🔔 Notifications": "🔔 सूचना", "🛡️ Admin panel": "🛡️ ॲडमिन पॅनल", "Log out": "लॉग आउट", "✅ My tasks & reminders": "✅ माझी कामे आणि रिमाइंडर", "🔗 Client links": "🔗 क्लायंट लिंक", "🎨 Theme": "🎨 थीम", "⭐ Saved messages": "⭐ सेव्ह केलेले मेसेज", "🌐 Language": "🌐 भाषा", "🕘 Attendance": "🕘 हजेरी", "📱 My devices": "📱 माझे डिव्हाइस", "Chat": "चॅट", "Unread": "न वाचलेले", "Meeting chats": "मीटिंग चॅट", "Unmuted": "म्यूट नाही", "Favorites": "आवडते", "Chats": "चॅट्स", "Contacts": "संपर्क", "Team Chat": "टीम चॅट", "Announcements": "घोषणा", "Everyone": "सर्वजण", "From admins": "ॲडमिनकडून", "You can post": "तुम्ही पोस्ट करू शकता", "Tap ⋯ on a chat → Add to favorites.": "चॅटवर ⋯ दाबा → आवडत्यांमध्ये जोडा.", "No chats yet. Tap ✏️ to start one.": "अजून चॅट नाही. ✏️ दाबून सुरू करा.", "Available": "उपलब्ध", "Busy": "व्यस्त", "Do not disturb": "त्रास देऊ नका", "Be right back": "लगेच येतो", "Away": "दूर", "Offline": "ऑफलाइन", "online": "ऑनलाइन", "⏰ My reminders": "⏰ माझे रिमाइंडर", "⭐ Add to favorites": "⭐ आवडत्यांमध्ये जोडा", "☆ Remove from favorites": "☆ आवडत्यांमधून काढा", "🔕 Mute": "🔕 म्यूट", "🔔 Unmute": "🔔 अनम्यूट", "✔️ Mark as read": "✔️ वाचले म्हणून नोंदवा", "Set your status": "तुमचा स्टेटस", "Available (automatic)": "उपलब्ध (आपोआप)", "Appear away": "दूर दिसा", "Appear offline": "ऑफलाइन दिसा", "Members": "सदस्य", "Today": "आज", "Yesterday": "काल", "No messages yet": "अजून मेसेज नाही", "Send the first message.": "पहिला मेसेज पाठवा.", "⬆ Load older messages": "⬆ जुने मेसेज पहा", "Delivered": "पोहोचला", "Read": "वाचला", "Sending…": "पाठवत आहे…", "⚠ Not sent · Tap to retry": "⚠ गेला नाही · पुन्हा पाठवण्यासाठी दाबा", "Edited": "बदललेला", "📌 Pinned": "📌 पिन केलेला", "↪ Forwarded": "↪ फॉरवर्ड केलेला", "You": "तुम्ही", "Message the team…": "टीमला मेसेज लिहा…", "Post an announcement…": "घोषणा लिहा…", "📢 Only admins can post announcements.": "📢 फक्त ॲडमिन घोषणा करू शकतात.", "Get notified about new messages?": "नवीन मेसेजची सूचना हवी आहे?", "Turn on": "चालू करा", "Not now": "आत्ता नको", "Pinned message": "पिन केलेला मेसेज", "↩️ Reply": "↩️ उत्तर", "📌 Pin": "📌 पिन", "📌 Unpin": "📌 पिन काढा", "✅ Create task": "✅ काम तयार करा", "⏰ Remind me": "⏰ आठवण करून द्या", "✏️ Edit": "✏️ बदला", "↪️ Forward": "↪️ फॉरवर्ड", "📋 Copy text": "📋 मजकूर कॉपी करा", "🗑️ Delete for everyone": "🗑️ सर्वांसाठी हटवा", "🗑️ Discard": "🗑️ रद्द करा", "⭐ Save message": "⭐ मेसेज सेव्ह करा", "☆ Unsave": "☆ सेव्हमधून काढा", "📷 Camera": "📷 कॅमेरा", "💎 Share a stone": "💎 स्टोन शेअर करा", "🔍 Scan stock packet": "🔍 पॅकेट स्कॅन करा", "📊 Poll": "📊 मतदान", "✅ Task": "✅ काम", "⏰ Schedule / remind me": "⏰ वेळ ठरवा / आठवण करून द्या", "❗ Mark as important": "❗ महत्त्वाचे करा", "Cancel": "रद्द करा", "Close": "बंद करा", "Save": "सेव्ह करा", "Done": "झाले", "Copy": "कॉपी", "Create group": "ग्रुप तयार करा", "Start chat": "चॅट सुरू करा", "New chat": "नवीन चॅट", "Search messages": "मेसेज शोधा", "Forward to…": "फॉरवर्ड करा…", "Forward": "फॉरवर्ड", "Name": "नाव", "Mobile": "मोबाइल", "Change photo": "फोटो बदला", "Remove photo": "फोटो काढा", "Add people": "लोक जोडा", "Leave group": "ग्रुप सोडा", "Delete group": "ग्रुप हटवा", "Rename": "नाव बदला", "Remove": "काढा", "Add": "जोडा", "Message info": "मेसेज माहिती", "Create task": "काम तयार करा", "Post poll": "मतदान टाका", "Schedule": "वेळ ठरवा", "Send request": "विनंती पाठवा", "Approve": "मंजूर", "Reject": "नामंजूर", "Disable": "बंद करा", "Enable": "चालू करा", "Make admin": "ॲडमिन करा", "Remove admin": "ॲडमिन काढा", "Admin panel": "ॲडमिन पॅनल", "Users": "युजर्स", "Share in chat": "चॅटमध्ये शेअर करा", "📌 Request hold": "📌 होल्ड मागा", "💲 Ask discount": "💲 डिस्काउंट मागा", "Clear filters": "फिल्टर काढा", "Shape": "शेप", "Carat": "कॅरेट", "Color": "कलर", "Clarity": "क्लॅरिटी", "Sort": "क्रम", "Any": "कोणतेही", "Party": "पार्टी", "Note": "टीप", "Hold until": "होल्ड कधीपर्यंत", "Requested by": "मागणारे", "Assigned to": "कोणाला सोपवले", "Due": "शेवटची तारीख", "✓ Mark done": "✓ पूर्ण झाले", "Reopen": "पुन्हा उघडा", "Close poll": "मतदान बंद करा", "Join meeting": "मीटिंगमध्ये सामील व्हा", "👁 Preview": "👁 पहा", "🔍 Scan": "🔍 स्कॅन", "🔗 Client link": "🔗 क्लायंट लिंक", "Create link": "लिंक तयार करा", "Find": "शोधा", "Assigned to me": "मला सोपवलेली", "Created by me": "मी तयार केलेली", "⏰ Scheduled": "⏰ ठरवलेले", "Media": "फोटो", "Files": "फाइल्स", "Links": "लिंक", "Stones": "स्टोन", "Check in": "हजेरी लावा", "Check out": "चेक आउट", "Company announcements · only admins post": "कंपनीच्या घोषणा · फक्त ॲडमिन लिहू शकतात", "Announcements from admins will appear here.": "ॲडमिनच्या घोषणा इथे दिसतील.", "Only you can see this · your reminders and notes": "फक्त तुम्हाला दिसते · तुमचे रिमाइंडर आणि नोंदी", "Search name or mobile…": "नाव किंवा मोबाइल शोधा…", "Filter by name or mobile…": "नाव किंवा मोबाइलने शोधा…", "Photos, files and links in this chat": "या चॅटमधील फोटो, फाइल्स आणि लिंक", "Start a video meeting in this chat": "या चॅटमध्ये व्हिडिओ मीटिंग सुरू करा", "Record a voice note": "व्हॉइस नोट रेकॉर्ड करा", "Attach a file or photo": "फाइल किंवा फोटो जोडा", "No groups yet. Tap + NEW GROUP.": "अजून ग्रुप नाही.", "Say hello": "नमस्कार म्हणा"};   // मराठी
+  let lang = "en"; try { lang = localStorage.getItem("kg-lang") || "en"; } catch (e) {}
+  const TR_SKIP = ".bubble, .stone-card, .slist, .task-card, .poll-card, .disc-card, .hold-card, .sheet-tbl, .search-hit, #client-view, .link-box, .cv-card, script, style";
+  const tx = (key) => { if (lang === "en" || !TR[key]) return key; if (lang === "mr") return MR[key] || key; return TR[key][LANG_IDX[lang]] || key; };
+  let trBusy = false;
+  function trTextNode(n) {
+    const par = n.parentElement; if (!par || par.closest(TR_SKIP)) return;
+    let en = n.__en;
+    if (en === undefined || n.nodeValue !== n.__trOut) en = n.nodeValue;   // new text from the app
+    n.__en = en;
+    const key = en.trim();
+    const out = lang === "en" || !key || !TR[key] ? en : en.replace(key, tx(key));
+    n.__trOut = out; if (out !== n.nodeValue) n.nodeValue = out;
+  }
+  function trAttrs(el) {
+    if (!el.getAttribute || (el.closest && el.closest(TR_SKIP))) return;
+    ["placeholder", "title"].forEach(a => {
+      const cur = el.getAttribute(a); if (cur === null) return;
+      let en = el.getAttribute("data-en-" + a);
+      if (en === null || cur !== el.getAttribute("data-tr-" + a)) en = cur;
+      const k = en.trim(), out = lang === "en" || !TR[k] ? en : tx(k);
+      el.setAttribute("data-en-" + a, en); el.setAttribute("data-tr-" + a, out);
+      if (out !== cur) el.setAttribute(a, out);
+    });
+  }
+  function trWalk(root) {
+    if (!root) return;
+    if (root.nodeType === 3) { trTextNode(root); return; }
+    if (root.nodeType !== 1) return;
+    trAttrs(root);
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    let n; while ((n = w.nextNode())) { if (n.nodeType === 3) trTextNode(n); else trAttrs(n); }
+  }
+  const trObs = new MutationObserver((muts) => {
+    if (lang === "en" && !trBusy) return;
+    for (const m of muts) {
+      if (m.type === "childList") m.addedNodes.forEach(trWalk);
+      else if (m.type === "characterData") trTextNode(m.target);
+      else if (m.type === "attributes" && (m.attributeName === "placeholder" || m.attributeName === "title")) trAttrs(m.target);
+    }
+  });
+  trObs.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["placeholder", "title"] });
+  function setLang(l) {
+    lang = l; try { localStorage.setItem("kg-lang", l); } catch (e) {}
+    document.documentElement.lang = ["gu", "hi", "mr"].includes(l) ? l : "en";
+    trBusy = true; trWalk(document.body); trBusy = false;
+    if (myId) { try { paintMyStatus(); } catch (e) {} }
+  }
+  if (lang !== "en") setLang(lang);
+
+  $("menu-lang").addEventListener("click", () => { meMenu.classList.remove("open"); [...$("lang-opts").children].forEach(b => b.classList.toggle("cur", b.dataset.l === lang)); $("lang-modal").classList.add("open"); });
+  $("lang-opts").addEventListener("click", (e) => { const b = e.target.closest("button[data-l]"); if (!b) return; setLang(b.dataset.l); [...$("lang-opts").children].forEach(x => x.classList.toggle("cur", x === b)); });
+  $("lang-close").addEventListener("click", () => $("lang-modal").classList.remove("open"));
+
+  // =====================================================================
+  // ---------- 📱 Devices + ⏱ auto logout ----------
+  // =====================================================================
+  let deviceId = null, devChannel = null, devTimer = null, autoLogoutMin = 0, setChannel = null, lastActiveSaved = 0;
+  function deviceLabel() {
+    const ua = navigator.userAgent;
+    const os = /iPhone/.test(ua) ? "iPhone" : /iPad/.test(ua) ? "iPad" : /Android/.test(ua) ? "Android" : /Windows/.test(ua) ? "Windows" : /Mac OS X/.test(ua) ? "Mac" : /Linux/.test(ua) ? "Linux" : "Device";
+    const br = /Edg\//.test(ua) ? "Edge" : /SamsungBrowser/.test(ua) ? "Samsung Internet" : /OPR\//.test(ua) ? "Opera" : /Firefox\//.test(ua) ? "Firefox" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "Browser";
+    const app = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) ? " · installed app" : "";
+    return br + " on " + os + app;
+  }
+  async function registerDevice() {
+    try { deviceId = localStorage.getItem("kg-device"); } catch (e) {}
+    if (deviceId) {
+      const { data } = await sb.from("user_devices").select("*").eq("id", deviceId).maybeSingle();
+      if (data && data.revoked) { forceLogout("This device was logged out. Please sign in again."); return false; }
+      if (data && data.user_id === myId) { sb.from("user_devices").update({ last_seen: new Date().toISOString(), label: deviceLabel() }).eq("id", deviceId).then(() => {}); }
+      else deviceId = null;
+    }
+    if (!deviceId) {
+      deviceId = newId();
+      try { localStorage.setItem("kg-device", deviceId); } catch (e) {}
+      await sb.from("user_devices").insert({ id: deviceId, user_id: myId, label: deviceLabel() });
+    }
+    if (!devChannel) devChannel = sb.channel("my-device").on("postgres_changes", { event: "UPDATE", schema: "public", table: "user_devices", filter: "id=eq." + deviceId }, (payload) => {
+      if (payload.new && payload.new.revoked) forceLogout("This device was logged out from another device.");
+    }).subscribe();
+    clearInterval(devTimer);
+    devTimer = setInterval(async () => {
+      if (!deviceId || !myId) return;
+      const { data } = await sb.from("user_devices").select("revoked").eq("id", deviceId).maybeSingle();
+      if (data && data.revoked) return forceLogout("This device was logged out. Please sign in again.");
+      if (document.visibilityState === "visible") sb.from("user_devices").update({ last_seen: new Date().toISOString() }).eq("id", deviceId).then(() => {});
+    }, 120000);
+    return true;
+  }
+  async function forceLogout(msg) {
+    clearInterval(devTimer); devTimer = null;
+    if (devChannel) { sb.removeChannel(devChannel); devChannel = null; }
+    try { localStorage.removeItem("kg-device"); } catch (e) {}
+    deviceId = null;
+    await sb.auth.signOut();
+    showView("login"); note("login-note", msg, "error");
+  }
+  async function logoutThisDevice() {
+    if (deviceId) { try { await sb.from("user_devices").delete().eq("id", deviceId); } catch (e) {} }
+    clearInterval(devTimer); devTimer = null;
+    if (devChannel) { sb.removeChannel(devChannel); devChannel = null; }
+    try { localStorage.removeItem("kg-device"); } catch (e) {}
+    deviceId = null;
+    await sb.auth.signOut();
+  }
+  async function openDevices(uid, name) {
+    const forOther = uid && uid !== myId; uid = uid || myId;
+    $("dev-title").textContent = forOther ? "📱 Devices · " + name : "📱 My devices";
+    const body = $("dev-body"); body.innerHTML = '<div class="side-empty">Loading…</div>'; $("dev-modal").classList.add("open");
+    const { data } = await sb.from("user_devices").select("*").eq("user_id", uid).eq("revoked", false).order("last_seen", { ascending: false });
+    body.innerHTML = "";
+    if (!data || !data.length) { body.innerHTML = '<div class="side-empty">No logged-in devices.</div>'; return; }
+    data.forEach(d => {
+      const r = document.createElement("div"); r.className = "dev-row";
+      const ic = document.createElement("div"); ic.className = "ic"; ic.textContent = /iPhone|Android/.test(d.label || "") ? "📱" : /iPad/.test(d.label || "") ? "📲" : "💻";
+      const t = document.createElement("div"); t.className = "side-text"; t.innerHTML = '<div class="side-name"></div><div class="side-sub"></div>';
+      t.firstChild.textContent = d.label || "Device";
+      if (d.id === deviceId) { const tg = document.createElement("span"); tg.className = "this-dev"; tg.textContent = "THIS DEVICE"; t.firstChild.appendChild(tg); }
+      t.lastChild.textContent = "Active " + fmtLastSeen(d.last_seen).replace(/^last seen /, "") + " · signed in " + new Date(d.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+      const b = document.createElement("button"); b.className = "small-btn danger"; b.textContent = "Log out";
+      b.addEventListener("click", async () => {
+        if (d.id === deviceId && !forOther) { $("dev-modal").classList.remove("open"); return logoutThisDevice(); }
+        if (!confirm("Log out " + (d.label || "this device") + "? It will need the password to sign in again.")) return;
+        const { error } = await sb.from("user_devices").update({ revoked: true }).eq("id", d.id);
+        if (error) { showBanner("Couldn't log out device: " + error.message, true); return; }
+        openDevices(forOther ? uid : null, name);
+      });
+      r.appendChild(ic); r.appendChild(t); r.appendChild(b); body.appendChild(r);
+    });
+    if (!forOther && data.length > 1) {
+      const all = document.createElement("button"); all.className = "small-btn danger"; all.style.marginTop = "10px"; all.textContent = "Log out all other devices";
+      all.addEventListener("click", async () => { if (!confirm("Log out every device except this one?")) return; await sb.from("user_devices").update({ revoked: true }).eq("user_id", myId).neq("id", deviceId); openDevices(); });
+      body.appendChild(all);
+    }
+  }
+  $("menu-devices").addEventListener("click", () => { meMenu.classList.remove("open"); openDevices(); });
+  $("dev-close").addEventListener("click", () => $("dev-modal").classList.remove("open"));
+
+  // auto logout after no use (admin setting)
+  async function loadSettings() {
+    const { data } = await sb.from("app_settings").select("*");
+    (data || []).forEach(r => { if (r.key === "auto_logout_minutes") autoLogoutMin = Number(r.value) || 0; });
+    if (!setChannel) setChannel = sb.channel("app-settings").on("postgres_changes", { event: "*", schema: "public", table: "app_settings" }, (payload) => {
+      const r = payload.new; if (r && r.key === "auto_logout_minutes") autoLogoutMin = Number(r.value) || 0;
+    }).subscribe();
+  }
+  function idleTooLong() {
+    if (!autoLogoutMin) return false;
+    let last = lastActive; try { last = Math.max(last, Number(localStorage.getItem("kg-last-active")) || 0); } catch (e) {}
+    return Date.now() - last > autoLogoutMin * 60000;
+  }
+  ["mousemove", "keydown", "touchstart", "click"].forEach(ev => window.addEventListener(ev, () => {
+    if (Date.now() - lastActiveSaved > 30000) { lastActiveSaved = Date.now(); try { localStorage.setItem("kg-last-active", String(Date.now())); } catch (e) {} }
+  }, { passive: true, capture: true }));
+  setInterval(() => { if (myId && enteredFor && idleTooLong()) forceLogout("Logged out after " + autoLogoutMin + " minutes of no use. Please sign in again."); }, 30000);
+  adminTabs.settings = async () => {
+    await loadSettings();
+    const body = $("admin-body");
+    body.innerHTML = `<div class="sec-label">Auto logout</div>
+      <div class="side-sub" style="margin-bottom:8px;">Log people out automatically when they haven't used the app for a while — useful on personal or shared phones.</div>
+      <select class="field" id="set-autologout" style="max-width:260px;">
+        <option value="0">Off</option><option value="15">After 15 minutes</option><option value="30">After 30 minutes</option><option value="60">After 1 hour</option>
+        <option value="120">After 2 hours</option><option value="240">After 4 hours</option><option value="480">After 8 hours</option><option value="1440">After 24 hours</option></select>
+      <div><button class="small-btn primary" id="set-save">Save</button></div>`;
+    $("set-autologout").value = String(autoLogoutMin);
+    $("set-save").addEventListener("click", async () => {
+      const v = Number($("set-autologout").value);
+      const { error } = await sb.from("app_settings").upsert({ key: "auto_logout_minutes", value: v, updated_at: new Date().toISOString() });
+      if (error) { $("admin-note").textContent = "Couldn't save: " + error.message; return; }
+      autoLogoutMin = v; $("admin-note").textContent = "Saved. Auto logout: " + (v ? v + " minutes" : "off") + ".";
+      sb.rpc("log_event", { p_action: "settings_changed", p_target: "auto logout", p_details: { minutes: v } }).then(() => {}, () => {});
+    });
+  };
+
+  // =====================================================================
+  // ---------- 📜 Activity log (admins) ----------
+  // =====================================================================
+  const ACT = {
+    message_deleted: "🗑️ Deleted a message", message_edited: "✏️ Edited a message", user_active: "✅ User approved / enabled", user_disabled: "🚫 User disabled",
+    user_pending: "⏳ User set to pending", role_changed: "🛡️ Role changed", hold_approved: "📌 Hold approved", hold_rejected: "📌 Hold rejected", hold_expired: "⌛ Hold expired",
+    discount_approved: "💲 Discount approved", discount_rejected: "💲 Discount rejected", group_created: "👥 Group created", group_deleted: "👥 Group deleted",
+    group_renamed: "👥 Group renamed", member_added: "➕ Added to group", member_removed: "➖ Removed from group", device_logged_out: "📱 Device logged out",
+    party_deleted: "🤝 Party deleted", stock_uploaded: "💎 Stock uploaded", backup_downloaded: "💾 Backup downloaded", client_link_created: "🔗 Client link created", settings_changed: "⚙️ Settings changed",
+  };
+  const actDetail = (a) => {
+    const d = a.details || {};
+    if (a.action === "message_edited") return "“" + (d.before || "") + "” → “" + (d.after || "") + "”" + (d.sender && d.sender !== a.actor ? " (message by " + nameOf(d.sender) + ")" : "");
+    if (a.action === "message_deleted") return "“" + (d.text || "") + "”" + (d.sender && d.sender !== a.actor ? " (message by " + nameOf(d.sender) + ")" : "");
+    if (a.action === "role_changed" || /^user_/.test(a.action)) return (d.from || "") + " → " + (d.to || "");
+    if (/^member_/.test(a.action)) return d.name || "";
+    if (a.action === "device_logged_out") return d.device || "";
+    if (a.action === "group_renamed") return "was “" + (d.from || "") + "”";
+    if (a.action === "settings_changed") return d.minutes != null ? "auto logout " + (d.minutes ? d.minutes + " min" : "off") : "";
+    if (d.reason) return "reason: " + d.reason;
+    if (d.stones) return d.stones + " stones" + (d.party ? " · " + d.party : "");
+    return "";
+  };
+  let actRows = [];
+  adminTabs.activity = async () => {
+    const body = $("admin-body"); body.innerHTML = '<div class="side-empty">Loading…</div>';
+    const { data, error } = await sb.from("activity_log").select("*").order("created_at", { ascending: false }).limit(500);
+    if (error) { body.innerHTML = '<div class="side-empty">Couldn\'t load activity.</div>'; return; }
+    actRows = data || [];
+    await ensureProfiles(actRows.flatMap(a => [a.actor, a.details && a.details.sender, a.details && a.details.user]).filter(Boolean));
+    body.innerHTML = `<div class="act-filters"><select id="act-f"><option value="">All activity</option><option value="message">Edited / deleted messages</option><option value="user">Users & roles</option><option value="request">Holds & discounts</option><option value="group">Groups</option><option value="device">Devices</option><option value="other">Stock, backup, links, settings</option></select>
+      <input id="act-q" type="search" placeholder="Search name or text…"><button class="small-btn" id="act-xls">⬇ Excel</button></div><div id="act-list"></div>`;
+    const cat = (a) => /^message_/.test(a.action) ? "message" : /^user_|role_/.test(a.action) ? "user" : /^hold_|^discount_/.test(a.action) ? "request" : /^group_|^member_/.test(a.action) ? "group" : /^device_/.test(a.action) ? "device" : "other";
+    const draw = () => {
+      const f = $("act-f").value, q = $("act-q").value.trim().toLowerCase(), box = $("act-list"); box.innerHTML = "";
+      const list = actRows.filter(a => (!f || cat(a) === f) && (!q || [a.actor ? nameOf(a.actor) : "System", ACT[a.action] || a.action, a.target, actDetail(a)].join(" ").toLowerCase().includes(q)));
+      const h = document.createElement("div"); h.className = "sec-label"; h.textContent = list.length + " entries (latest 500)"; box.appendChild(h);
+      if (!list.length) box.insertAdjacentHTML("beforeend", '<div class="side-empty">Nothing here yet.</div>');
+      list.forEach(a => {
+        const r = document.createElement("div"); r.className = "act-row";
+        r.innerHTML = '<div class="t1"><b></b><span></span></div><div class="t2"></div>';
+        r.querySelector("b").textContent = (a.actor ? nameOf(a.actor) : "System") + " · " + (ACT[a.action] || a.action) + (a.target ? " · " + a.target : "");
+        r.querySelector(".t1 span").textContent = new Date(a.created_at).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+        r.querySelector(".t2").textContent = actDetail(a);
+        box.appendChild(r);
+      });
+    };
+    $("act-f").addEventListener("change", draw); $("act-q").addEventListener("input", draw);
+    $("act-xls").addEventListener("click", async () => {
+      const XLSX = await loadSheetJs();
+      const ws = XLSX.utils.aoa_to_sheet([["Date & time", "By", "Action", "Where / who", "Details"]].concat(actRows.map(a => [new Date(a.created_at).toLocaleString("en-GB"), a.actor ? nameOf(a.actor) : "System", ACT[a.action] || a.action, a.target || "", actDetail(a)])));
+      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Activity"); XLSX.writeFile(wb, "KG_Chatboat_activity_" + localDay(Date.now()) + ".xlsx");
+    });
+    draw();
+  };
+
+  // =====================================================================
+  // ---------- 🕘 Attendance ----------
+  // =====================================================================
+  let attToday = null;
+  const hm = (ts) => ts ? new Date(ts).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) : "";
+  const hoursBetween = (a, b) => (a && b) ? (new Date(b) - new Date(a)) / 3600000 : null;
+  const fmtHours = (h) => h == null ? "" : Math.floor(h) + "h " + String(Math.round((h % 1) * 60)).padStart(2, "0") + "m";
+  async function loadAttendance() {
+    const { data } = await sb.from("attendance").select("*").eq("user_id", myId).eq("day", isoDay(Date.now())).maybeSingle();
+    attToday = data || null; paintAtt();
+  }
+  function paintAtt() {
+    const b = $("att-btn"); b.style.display = myId ? "" : "none";
+    if (!attToday || !attToday.check_in) { b.className = "att-btn"; b.innerHTML = '🕘 <span class="att-long">Check in</span>'; b.title = "Mark your attendance for today"; }
+    else if (!attToday.check_out) { b.className = "att-btn in"; b.innerHTML = '✅ <span class="att-long">In ' + hm(attToday.check_in) + ' · Check out</span>'; b.title = "Checked in at " + hm(attToday.check_in) + ". Tap to check out."; }
+    else { b.className = "att-btn done"; b.innerHTML = '🏁 <span class="att-long">' + hm(attToday.check_in) + "–" + hm(attToday.check_out) + '</span>'; b.title = "Today: " + fmtHours(hoursBetween(attToday.check_in, attToday.check_out)); }
+  }
+  $("att-btn").addEventListener("click", async () => {
+    const now = new Date().toISOString(), day = isoDay(Date.now());
+    if (!attToday || !attToday.check_in) {
+      const { error } = await sb.from("attendance").insert({ user_id: myId, day, check_in: now });
+      if (error && !/duplicate/i.test(error.message)) { showBanner("Couldn't check in: " + error.message, true); return; }
+      showBanner("✅ Checked in at " + hm(now) + "."); setTimeout(() => showBanner(""), 1800);
+    } else if (!attToday.check_out) {
+      if (!confirm("Check out now (" + hm(now) + ")?")) return;
+      const { error } = await sb.from("attendance").update({ check_out: now }).eq("user_id", myId).eq("day", day);
+      if (error) { showBanner("Couldn't check out: " + error.message, true); return; }
+      showBanner("🏁 Checked out at " + hm(now) + "."); setTimeout(() => showBanner(""), 1800);
+    } else { openMyAttendance(); return; }
+    loadAttendance();
+  });
+  async function openMyAttendance() {
+    $("att-title").textContent = "🕘 My attendance"; $("att-modal").classList.add("open");
+    const body = $("att-body"); body.innerHTML = '<div class="side-empty">Loading…</div>';
+    const d = new Date(), first = isoDay(new Date(d.getFullYear(), d.getMonth(), 1)), last = isoDay(new Date(d.getFullYear(), d.getMonth() + 1, 0));
+    const { data } = await sb.from("attendance").select("*").eq("user_id", myId).gte("day", first).lte("day", last).order("day", { ascending: false });
+    const rows = data || [], total = rows.reduce((a, r) => a + (hoursBetween(r.check_in, r.check_out) || 0), 0);
+    body.innerHTML = '<div class="sec-label"></div><table class="att-table"><tr><th>Date</th><th>In</th><th>Out</th><th>Hours</th></tr></table>';
+    body.firstChild.textContent = d.toLocaleDateString(undefined, { month: "long", year: "numeric" }) + " · " + rows.length + " days present · " + fmtHours(total);
+    const tb = body.querySelector("table");
+    if (!rows.length) body.insertAdjacentHTML("beforeend", '<div class="side-empty">No attendance this month yet. Tap 🕘 Check in at the top.</div>');
+    rows.forEach(r => { const tr = document.createElement("tr"); [fmtDay(r.day), hm(r.check_in), r.check_out ? hm(r.check_out) : "—", fmtHours(hoursBetween(r.check_in, r.check_out))].forEach((v, i) => { const td = document.createElement("td"); td.textContent = v; if (i === 2 && !r.check_out) td.className = "open"; tr.appendChild(td); }); tb.appendChild(tr); });
+  }
+  $("menu-att").addEventListener("click", () => { meMenu.classList.remove("open"); openMyAttendance(); });
+  $("att-close").addEventListener("click", () => $("att-modal").classList.remove("open"));
+  adminTabs.attendance = async () => {
+    const body = $("admin-body");
+    body.innerHTML = `<div class="act-filters"><input type="date" id="att-day"><input type="month" id="att-month"><button class="small-btn" id="att-xls">⬇ Month as Excel</button></div><div id="att-list"></div>`;
+    $("att-day").value = isoDay(Date.now()); $("att-month").value = isoDay(Date.now()).slice(0, 7);
+    const draw = async () => {
+      const day = $("att-day").value, box = $("att-list"); box.innerHTML = '<div class="side-empty">Loading…</div>';
+      const [{ data: users }, { data: rows }] = await Promise.all([sb.from("profiles").select("id,name,status").eq("status", "active"), sb.from("attendance").select("*").eq("day", day)]);
+      const by = {}; (rows || []).forEach(r => by[r.user_id] = r);
+      const list = (users || []).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      const present = list.filter(u => by[u.id] && by[u.id].check_in).length;
+      box.innerHTML = '<div class="sec-label"></div><table class="att-table"><tr><th>Name</th><th>In</th><th>Out</th><th>Hours</th><th>Status</th></tr></table>';
+      box.firstChild.textContent = fmtDay(day) + " · " + present + " present · " + (list.length - present) + " absent";
+      const tb = box.querySelector("table");
+      list.forEach(u => {
+        const r = by[u.id], tr = document.createElement("tr");
+        const st = !r || !r.check_in ? "Absent" : !r.check_out ? (day === isoDay(Date.now()) ? "In office" : "No check-out") : "Present";
+        [u.name, r ? hm(r.check_in) : "", r && r.check_out ? hm(r.check_out) : "", r ? fmtHours(hoursBetween(r.check_in, r.check_out)) : "", st].forEach((v, i) => { const td = document.createElement("td"); td.textContent = v; if (i === 4) td.className = st === "Absent" ? "absent" : st === "Present" ? "" : "open"; tr.appendChild(td); });
+        tb.appendChild(tr);
+      });
+    };
+    $("att-day").addEventListener("change", draw);
+    $("att-xls").addEventListener("click", async () => {
+      const [y, m] = $("att-month").value.split("-").map(Number); if (!y) return;
+      const first = isoDay(new Date(y, m - 1, 1)), last = isoDay(new Date(y, m, 0));
+      const [{ data: users }, { data: rows }] = await Promise.all([sb.from("profiles").select("id,name,status"), sb.from("attendance").select("*").gte("day", first).lte("day", last).order("day")]);
+      const nm = {}; (users || []).forEach(u => nm[u.id] = u.name);
+      const XLSX = await loadSheetJs(), wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Date", "Name", "In", "Out", "Hours"]].concat((rows || []).map(r => [r.day, nm[r.user_id] || "", hm(r.check_in), hm(r.check_out), Number((hoursBetween(r.check_in, r.check_out) || 0).toFixed(2))]))), "Daily");
+      const sum = {}; (rows || []).forEach(r => { const s0 = sum[r.user_id] = sum[r.user_id] || { d: 0, h: 0 }; s0.d++; s0.h += hoursBetween(r.check_in, r.check_out) || 0; });
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Name", "Days present", "Total hours"]].concat((users || []).filter(u => u.status === "active" || sum[u.id]).map(u => [u.name, (sum[u.id] || {}).d || 0, Number(((sum[u.id] || {}).h || 0).toFixed(2))]))), "Summary");
+      XLSX.writeFile(wb, "KG_attendance_" + $("att-month").value + ".xlsx");
+    });
+    draw();
+  };
+
   // ---------- boot ----------
   let signingUp = false, enteredFor = null, statusChannel = null;
   let inRecovery = /type=recovery/.test(location.hash);   // opened from a password-reset email
@@ -3735,6 +4750,10 @@ if ("serviceWorker" in navigator) {
     watchMyStatus();
     if (myProfile.status !== "active") { showWait(myProfile.status); return; }
     if (enteredFor === myId && chatShell.style.display === "flex") { paintMe(); return; }   // already in (e.g. token refresh)
+    await loadSettings();
+    if (idleTooLong()) { forceLogout("Logged out after " + autoLogoutMin + " minutes of no use. Please sign in again."); return; }
+    if (!(await registerDevice())) return;
+    try { localStorage.setItem("kg-last-active", String(Date.now())); } catch (e) {}
     enteredFor = myId;
     paintMe();
     showView("chat");
@@ -3744,6 +4763,8 @@ if ("serviceWorker" in navigator) {
     await loadInitialMessages();
     subscribeRealtime();
     startPresence();
+    loadSaved();
+    loadAttendance();
     maybeOfferNotifications();
     const want = new URLSearchParams(location.search).get("chat");
     if (want) { history.replaceState(null, "", location.pathname); if (want !== "team") openChat(want); }
@@ -3764,7 +4785,7 @@ if ("serviceWorker" in navigator) {
   }
   function leaveChat() {
     if (realtimeChannel) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
-    stopPresence();
+    stopPresence(); savedSet.clear(); attToday = null; $("att-btn").style.display = "none";
     enteredFor = null; messages = []; currentGroupId = null;
   }
 
