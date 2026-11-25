@@ -519,6 +519,10 @@
   #fwd-modal { z-index:1200; }
   .pill.stock { background:color-mix(in srgb, var(--accent) 14%, transparent); color:var(--accent); }
   .user-row .small-btn.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .hold-flag { display:inline-block; margin-left:6px; border-radius:6px; padding:1px 6px; font-size:10.5px; font-weight:700; white-space:nowrap; border:1px solid currentColor; }
+  .hold-flag.approved { color:#c0392b; background:color-mix(in srgb, #c0392b 9%, transparent); }
+  .hold-flag.pending { color:#C27C0E; background:color-mix(in srgb, #C27C0E 9%, transparent); }
+  .hold-warn { margin-top:10px; padding:8px 10px; border-radius:8px; font-size:13px; font-weight:600; color:#c0392b; background:color-mix(in srgb, #c0392b 9%, transparent); border:1px solid color-mix(in srgb, #c0392b 35%, transparent); }
   .stock-hdr-btn:hover { background:rgba(255,255,255,.22); }
   /* inside a chat (＋ → Share a stone) the client tools are hidden — they live on the 💎 Stock page */
   #stone-modal[data-mode="chat"] .client-only { display:none !important; }
@@ -1002,6 +1006,7 @@
         <div class="sec-label">Hold until</div><input type="date" id="hold-until" style="width:100%; padding:9px 12px; border-radius:9px; border:1px solid var(--border); background:var(--bg); color:var(--text); font:inherit; margin-bottom:10px;">
         <div class="sec-label">Note (optional)</div><input type="text" id="hold-note" maxlength="200" placeholder="e.g. hold till Friday, memo 2 days">
         <div class="side-sub">The request is posted in this chat. An admin approves or rejects it.</div>
+        <div class="hold-warn" id="hold-warn" style="display:none;"></div>
         <div class="panel-note" id="hold-msg"></div>
       </div>
       <div class="panel-foot"><button class="small-btn" id="hold-cancel">Cancel</button><button class="small-btn primary" id="hold-send">Send request</button></div>
@@ -1099,13 +1104,13 @@
   </div>
   <div class="modal-back" id="disc-modal">
     <div class="panel">
-      <div class="panel-head">💲 Ask for a discount</div>
+      <div class="panel-head">💲 Offer discount</div>
       <div class="panel-body">
         <div id="disc-stone" style="margin-bottom:8px;"></div>
         <div class="sec-label">Party</div><input class="field" id="disc-party" list="party-dl" autocomplete="off" placeholder="e.g. ABC Jewels">
-        <div class="sec-label">Asked price</div>
-        <div style="display:flex; gap:8px;"><label class="side-sub" style="flex:1;">Back %<input class="field" id="disc-back" type="number" step="0.01" placeholder="-35.00"></label>
-          <label class="side-sub" style="flex:1;">Rate $/ct<input class="field" id="disc-rate" type="number" step="1" placeholder="3380"></label></div>
+        <div class="sec-label">Offer</div>
+        <div style="display:flex; gap:8px;"><label class="side-sub" style="flex:1;">Offer discount %<input class="field" id="disc-back" type="number" step="0.01" placeholder="e.g. 33.00"></label>
+          <label class="side-sub" style="flex:1;">Offer price $/ct<input class="field" id="disc-rate" type="number" step="1" placeholder="3380"></label></div>
         <div class="disc-diff" id="disc-diff"></div>
         <div class="sec-label">Note (optional)</div><input class="field" id="disc-note" maxlength="200" placeholder="e.g. party buying 5 stones, cash payment">
         <div class="side-sub">Posted in this chat. An admin approves or rejects it.</div>
@@ -1189,7 +1194,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v39 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v41 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -2142,6 +2147,8 @@ if ("serviceWorker" in navigator) {
   async function loadExtras(subset) {
     const key = currentGroupId;
     const list = (subset || messages).filter(m => !m._status);
+    { const sids = list.flatMap(m => [m.stone && m.stone.stock_id].concat((m.stone_list || []).map(x => x.stock_id))).filter(Boolean);
+      if (sids.length) loadHoldFlags(sids).then(() => { if (key === currentGroupId && sids.some(id => holdFlags[id])) render(true); }); }
     const ids = list.map(m => m.id);
     for (let i = 0; i < ids.length; i += 150) {
       const { data } = await sb.from("message_reactions").select("message_id,user_id,emoji").in("message_id", ids.slice(i, i + 150));
@@ -2173,7 +2180,7 @@ if ("serviceWorker" in navigator) {
     pinIdx = 0; renderPinBar(); render(true);
   }
   const findMsg = (id) => messages.find(m => m.id === id) || replyCache[id];
-  const snippet = (m) => !m ? "Original message" : m.deleted ? "🚫 Deleted message" : m.discount_id ? "💲 Discount request" : m.meeting ? "📹 Meeting" : m.task_id ? "✅ Task" + (tasksById[m.task_id] ? ": " + tasksById[m.task_id].title : "") : m.poll_id ? "📊 Poll" + (pollsById[m.poll_id] ? ": " + pollsById[m.poll_id].question : "") : m.stone_list ? "💎 " + m.stone_list.length + " stones" : (m.text || (m.attachment_type && m.attachment_type.startsWith("audio/") ? "🎤 Voice note" : m.attachment_type && m.attachment_type.startsWith("image/") ? "📷 Photo" : m.attachment_name ? "📎 " + m.attachment_name : m.stone ? "💎 Stone " + (m.stone.stock_id || "") : m.hold_id ? "📌 Hold request" : "Message"));
+  const snippet = (m) => !m ? "Original message" : m.deleted ? "🚫 Deleted message" : m.discount_id ? "💲 Offer discount" : m.meeting ? "📹 Meeting" : m.task_id ? "✅ Task" + (tasksById[m.task_id] ? ": " + tasksById[m.task_id].title : "") : m.poll_id ? "📊 Poll" + (pollsById[m.poll_id] ? ": " + pollsById[m.poll_id].question : "") : m.stone_list ? "💎 " + m.stone_list.length + " stones" : (m.text || (m.attachment_type && m.attachment_type.startsWith("audio/") ? "🎤 Voice note" : m.attachment_type && m.attachment_type.startsWith("image/") ? "📷 Photo" : m.attachment_name ? "📎 " + m.attachment_name : m.stone ? "💎 Stone " + (m.stone.stock_id || "") : m.hold_id ? "📌 Hold request" : "Message"));
 
   function renderPinBar() {
     const bar = $("pin-bar");
@@ -2293,7 +2300,8 @@ if ("serviceWorker" in navigator) {
         const h = payload.new; if (!h || !h.id) return;
         holds[h.id] = Object.assign(holds[h.id] || {}, h);
         await ensureProfiles([h.requested_by, h.decided_by].filter(Boolean));
-        if (messages.some(m => m.hold_id === h.id)) render(true);
+        if (h.stock_id) await loadHoldFlags([h.stock_id]);   // refresh the 📌 ON HOLD badge everywhere
+        if (messages.some(m => m.hold_id === h.id || (m.stone && m.stone.stock_id === h.stock_id) || (m.stone_list || []).some(x => x.stock_id === h.stock_id))) render(true);
         if ($("admin-modal").classList.contains("open") && adminTab === "holds") adminTabs.holds();
       })
       .on("postgres_changes", { event:"*", schema:"public", table:"message_reactions" }, (payload) => {
@@ -3304,6 +3312,7 @@ if ("serviceWorker" in navigator) {
     const head = document.createElement("div"); head.className = "sc-head";
     const idEl = document.createElement("span"); idEl.className = "sc-id"; idEl.textContent = "💎 " + (st.stock_id || "Stone"); head.appendChild(idEl);
     if (st.status) { const p = document.createElement("span"); p.className = "sc-status" + (/avail/i.test(st.status) ? " ok" : ""); p.textContent = st.status; head.appendChild(p); }
+    { const hf = holdFlagEl(st.stock_id); if (hf) head.appendChild(hf); }   // 📌 ON HOLD / ⏳ HOLD REQUESTED
     card.appendChild(head);
     const main = document.createElement("div"); main.className = "sc-main"; main.textContent = stoneLine(st) || "—"; card.appendChild(main);
     const grid = document.createElement("div"); grid.className = "sc-grid";
@@ -3329,7 +3338,7 @@ if ("serviceWorker" in navigator) {
       wa.addEventListener("click", (e) => { e.stopPropagation(); shareWhatsApp(stoneText(st)); });
       links.appendChild(wa);
       if (opts.hold !== false) {
-        const db2 = document.createElement("button"); db2.className = "small-btn"; db2.textContent = "💲 Ask discount";
+        const db2 = document.createElement("button"); db2.className = "small-btn"; db2.textContent = "💲 Offer discount";
         db2.addEventListener("click", (e) => { e.stopPropagation(); openDiscountForm(st); });
         links.appendChild(db2);
         const hb = document.createElement("button"); hb.className = "small-btn primary ib"; hb.innerHTML = ICONS.pin + "<span>Request hold</span>";
@@ -3418,6 +3427,7 @@ if ("serviceWorker" in navigator) {
     box.appendChild(info);
     if (!list.length) { updateSelBar(); return; }
     const qkey = ids.join(","); if (multiStoneSearch.lastQ !== qkey) { multiStoneSearch.lastQ = qkey; list.forEach(st => stoneSel.set(st.stock_id, st)); }   // found stones are ticked → Share / WhatsApp / Excel / Client link at once
+    await loadHoldFlags(list.map(st => st.stock_id)); if (runStoneSearch.last !== stamp) return;
     renderStoneResults(box, list.length);
   }
   const isAvailableStone = (st) => !/memo|hold|sold|out|return|reserved|issue/i.test(String(st.status || ""));
@@ -3463,6 +3473,7 @@ if ("serviceWorker" in navigator) {
       } else box.firstChild.textContent = "No stones match these filters.";
       updateSelBar(); return;
     }
+    await loadHoldFlags(stoneResults.map(st => st.stock_id)); if (runStoneSearch.last !== stamp) return;
     renderStoneResults(box, count);
   }
   // button with a symbol (+ optional label). iconOnly → label becomes the tooltip
@@ -3505,6 +3516,7 @@ if ("serviceWorker" in navigator) {
         td.textContent = v == null || v === "" ? "–" : (f && !isNaN(Number(v)) ? f(v) : String(v));
         td.className = "k-" + k + (NUM_COLS.has(k) ? " num" : "") + (k === "stock_id" ? " sid" : "");
         if (k === "status" && v) { td.textContent = ""; const b = document.createElement("span"); b.className = "st-badge" + (/sold/i.test(String(v)) ? " sold" : isAvailableStone(st) ? " ok" : ""); b.textContent = String(v).toUpperCase(); td.appendChild(b); }
+        if (k === "status") { const hf = holdFlagEl(st.stock_id); if (hf) { if (!v) td.textContent = ""; td.appendChild(hf); } }   // 📌 ON HOLD / ⏳ HOLD REQUESTED (party never shown)
         if (k === "back" && Number(v) < 0) td.classList.add("neg");
         tr.appendChild(td);
       });
@@ -3646,14 +3658,24 @@ if ("serviceWorker" in navigator) {
     $("hold-until").value = isoDay(Date.now() + 2 * 86400000); $("hold-until").min = isoDay(Date.now());
     holdStone = stoneSnap(st);
     $("hold-stone").innerHTML = ""; $("hold-stone").appendChild(stoneCard(holdStone, { buttons: false }));
-    $("hold-party").value = ""; $("hold-note").value = ""; $("hold-msg").textContent = "";
+    $("hold-party").value = ""; $("hold-note").value = ""; $("hold-msg").textContent = ""; $("hold-warn").style.display = "none";
     $("hold-modal").classList.add("open"); $("hold-party").focus();
+    if (holdStone.stock_id) loadHoldFlags([holdStone.stock_id]).then(() => {
+      const f = holdFlags[holdStone.stock_id], w = $("hold-warn"); if (!f) return;
+      w.textContent = f.status === "approved"
+        ? "⚠ This stone is already ON HOLD by someone else" + (f.until ? " till " + fmtDayShort(f.until) : "") + "."
+        : "⚠ Someone has already asked to hold this stone" + (f.until ? " (till " + fmtDayShort(f.until) + ")" : "") + " — waiting for admin.";
+      if (f.mine) w.textContent = w.textContent.replace("by someone else", "(your earlier request)").replace("Someone has", "You have");
+      w.style.display = "";
+    });
   }
   $("hold-cancel").addEventListener("click", () => $("hold-modal").classList.remove("open"));
   $("hold-send").addEventListener("click", async () => {
     const party = $("hold-party").value.trim(), note = $("hold-note").value.trim(), until = $("hold-until").value || null;
     if (!party) { $("hold-msg").textContent = "Enter the party name."; return; }
     if (!canPost()) { $("hold-msg").textContent = "You can't post in this chat — open Team Chat or a group first."; return; }
+    const hf = holdStone && holdFlags[holdStone.stock_id];
+    if (hf && !hf.mine && !confirm((hf.status === "approved" ? "This stone is already ON HOLD by someone else." : "Someone has already asked to hold this stone.") + "\n\nSend your request anyway? The admin will decide.")) return;
     const btn = $("hold-send"); btn.disabled = true;
     try {
       const id = newId();
@@ -3672,10 +3694,37 @@ if ("serviceWorker" in navigator) {
     (data || []).forEach(h => holds[h.id] = h);
     await ensureProfiles((data || []).flatMap(h => [h.requested_by, h.decided_by]).filter(Boolean));
   }
+  // ---- "already on hold" flags for stones (who / which party is never shown) ----
+  const holdFlags = {};   // stock_id → { status: "approved" | "pending", until, mine }
+  async function loadHoldFlags(ids) {
+    ids = Array.from(new Set((ids || []).filter(Boolean))); if (!ids.length) return;
+    const today = isoDay(Date.now());
+    ids.forEach(id => delete holdFlags[id]);
+    for (let i = 0; i < ids.length; i += 150) {
+      const { data } = await sb.from("hold_requests").select("id,stock_id,status,hold_until,requested_by").in("stock_id", ids.slice(i, i + 150)).in("status", ["pending", "approved"]);
+      (data || []).forEach(h => {
+        if (h.hold_until && h.hold_until < today) return;   // expired
+        const cur = holdFlags[h.stock_id];
+        if (!cur || (h.status === "approved" && cur.status !== "approved")) holdFlags[h.stock_id] = { id: h.id, status: h.status, until: h.hold_until, mine: h.requested_by === myId };
+      });
+    }
+  }
+  const fmtDayShort = (d) => d ? new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
+  function holdFlagEl(stockId) {
+    const f = holdFlags[stockId]; if (!f) return null;
+    const b = document.createElement("span"); b.className = "hold-flag " + f.status;
+    b.textContent = f.status === "approved" ? "📌 ON HOLD" : "⏳ HOLD REQUESTED";
+    b.title = (f.status === "approved" ? "Already on hold" : "Someone has already asked to hold this stone") + (f.until ? " · till " + fmtDayShort(f.until) : "") + (f.mine ? " (by you)" : "");
+    return b;
+  }
   async function decideHold(h, status) {
     let decision_note = null;
     if (status === "rejected") { decision_note = prompt("Reason for rejecting (optional):", "") ; if (decision_note === null) return; }
-    else if (!confirm("Approve hold of " + (h.stock_id || "this stone") + " for " + h.party + "?")) return;
+    else {
+      if (h.stock_id) { await loadHoldFlags([h.stock_id]); const f = holdFlags[h.stock_id];
+        if (f && f.status === "approved" && f.id !== h.id && !confirm("⚠ " + h.stock_id + " is already ON HOLD" + (f.until ? " till " + fmtDayShort(f.until) : "") + " for another request.\n\nApprove this one too?")) return; }
+      if (!confirm("Approve hold of " + (h.stock_id || "this stone") + " for " + h.party + "?")) return;
+    }
     const patch = { status, decided_by: myId, decided_at: new Date().toISOString(), decision_note: decision_note || null };
     const { error } = await sb.from("hold_requests").update(patch).eq("id", h.id).eq("status", "pending");
     if (error) { showBanner("Couldn't update request: " + error.message, true); return; }
@@ -4493,9 +4542,9 @@ if ("serviceWorker" in navigator) {
   }
   function discDiff() {
     const st = discStone || {}, rap = Number(st.rap_rate) || null, rate = Number($("disc-rate").value) || null;
-    if (!rate) { $("disc-diff").textContent = st.rate != null ? "List: " + (st.back != null ? "Back " + fmtNum(st.back, 2) + "% · " : "") + "$" + fmtNum(st.rate, 0) + "/ct" : ""; return; }
+    if (!rate) { $("disc-diff").textContent = st.rate != null ? "List: " + (st.back != null ? "discount " + fmtNum(st.back, 2) + "% · " : "") + "$" + fmtNum(st.rate, 0) + "/ct" : ""; return; }
     const ct = Number(st.carat) || 0, dRate = st.rate != null ? rate - st.rate : null;
-    $("disc-diff").textContent = (st.rate != null ? "List $" + fmtNum(st.rate, 0) + "/ct → asked $" + fmtNum(rate, 0) + "/ct (" + (dRate >= 0 ? "+" : "") + fmtNum(dRate, 0) + "/ct" : "") +
+    $("disc-diff").textContent = (st.rate != null ? "List $" + fmtNum(st.rate, 0) + "/ct → offer $" + fmtNum(rate, 0) + "/ct (" + (dRate >= 0 ? "+" : "") + fmtNum(dRate, 0) + "/ct" : "") +
       (ct && dRate != null ? ", " + (dRate >= 0 ? "+" : "−") + "$" + fmtNum(Math.abs(dRate * ct), 0) + " on " + fmtNum(ct, 2) + " ct)" : st.rate != null ? ")" : "") + (rap ? "" : " · no Rap price in stock file");
   }
   function openDiscountForm(st) {
@@ -4517,7 +4566,7 @@ if ("serviceWorker" in navigator) {
   $("disc-send").addEventListener("click", async () => {
     const party = $("disc-party").value.trim(); if (!party) { $("disc-msg").textContent = "Enter the party name."; return; }
     const back = $("disc-back").value === "" ? null : Number($("disc-back").value), rate = $("disc-rate").value === "" ? null : Number($("disc-rate").value);
-    if (back == null && rate == null) { $("disc-msg").textContent = "Enter the asked Back % or Rate."; return; }
+    if (back == null && rate == null) { $("disc-msg").textContent = "Enter the offer discount % or offer price."; return; }
     const btn = $("disc-send"); btn.disabled = true;
     try {
       const id = newId(), row = { id, stock_id: discStone.stock_id || null, stone: discStone, party, asked_back: back, asked_rate: rate, note: $("disc-note").value.trim() || null, group_id: currentGroupId, requested_by: myId };
@@ -4532,7 +4581,7 @@ if ("serviceWorker" in navigator) {
   async function decideDiscount(d, status) {
     let decision_note = null;
     if (status === "rejected") { decision_note = prompt("Reason for rejecting (optional):", ""); if (decision_note === null) return; }
-    else if (!confirm("Approve " + (d.asked_back != null ? "Back " + fmtNum(d.asked_back, 2) + "%" : "") + (d.asked_rate != null ? " ($" + fmtNum(d.asked_rate, 0) + "/ct)" : "") + " for " + d.party + " on " + (d.stock_id || "this stone") + "?")) return;
+    else if (!confirm("Approve offer " + (d.asked_back != null ? "discount " + fmtNum(d.asked_back, 2) + "%" : "") + (d.asked_rate != null ? " ($" + fmtNum(d.asked_rate, 0) + "/ct)" : "") + " for " + d.party + " on " + (d.stock_id || "this stone") + "?")) return;
     const patch = { status, decided_by: myId, decided_at: new Date().toISOString(), decision_note: decision_note || null };
     const { error } = await sb.from("discount_requests").update(patch).eq("id", d.id).eq("status", "pending");
     if (error) { showBanner("Couldn't update: " + error.message, true); return; }
@@ -4542,24 +4591,24 @@ if ("serviceWorker" in navigator) {
   const DISC_LABEL = { pending: "⏳ Pending", approved: "✅ Approved", rejected: "❌ Rejected" };
   function discountCard(d) {
     const c = document.createElement("div"); c.className = "disc-card " + (d ? d.status : "");
-    if (!d) { c.textContent = "💲 Discount request (loading…)"; return c; }
+    if (!d) { c.textContent = "💲 Offer discount (loading…)"; return c; }
     const head = document.createElement("div"); head.className = "sc-head";
-    head.innerHTML = '<span class="sc-id">💲 Discount request</span><span class="hold-pill"></span>';
+    head.innerHTML = '<span class="sc-id">💲 Offer discount</span><span class="hold-pill"></span>';
     head.lastChild.className = "hold-pill " + d.status; head.lastChild.textContent = DISC_LABEL[d.status] || d.status;
     c.appendChild(head);
     const ask = document.createElement("div"); ask.className = "disc-ask";
-    ask.textContent = "Asked: " + [d.asked_back != null ? "Back " + fmtNum(d.asked_back, 2) + "%" : "", d.asked_rate != null ? "$" + fmtNum(d.asked_rate, 0) + "/ct" : ""].filter(Boolean).join(" · ");
+    ask.textContent = "Offer: " + [d.asked_back != null ? "Discount " + fmtNum(d.asked_back, 2) + "%" : "", d.asked_rate != null ? "$" + fmtNum(d.asked_rate, 0) + "/ct" : ""].filter(Boolean).join(" · ");
     c.appendChild(ask);
     const st = d.stone || {};
     if (st.rate != null && d.asked_rate != null) {
       const diff = document.createElement("div"); diff.className = "disc-diff"; const dr = d.asked_rate - st.rate, ct = Number(st.carat) || 0;
-      diff.textContent = "List " + (st.back != null ? "Back " + fmtNum(st.back, 2) + "% · " : "") + "$" + fmtNum(st.rate, 0) + "/ct → difference " + (dr >= 0 ? "+" : "−") + "$" + fmtNum(Math.abs(dr), 0) + "/ct" + (ct ? " (" + (dr >= 0 ? "+" : "−") + "$" + fmtNum(Math.abs(dr * ct), 0) + " total)" : "");
+      diff.textContent = "List " + (st.back != null ? "discount " + fmtNum(st.back, 2) + "% · " : "") + "$" + fmtNum(st.rate, 0) + "/ct → difference " + (dr >= 0 ? "+" : "−") + "$" + fmtNum(Math.abs(dr), 0) + "/ct" + (ct ? " (" + (dr >= 0 ? "+" : "−") + "$" + fmtNum(Math.abs(dr * ct), 0) + " total)" : "");
       c.appendChild(diff);
     }
     if (d.stone) c.appendChild(stoneCard(d.stone, { buttons: false }));
     const g = document.createElement("div"); g.className = "sc-grid";
     const add = (k, v) => { if (!v) return; const a = document.createElement("span"); a.className = "k"; a.textContent = k; const b = document.createElement("span"); b.textContent = v; g.appendChild(a); g.appendChild(b); };
-    add("Party", d.party); add("Note", d.note); add("Asked by", nameOf(d.requested_by));
+    add("Party", d.party); add("Note", d.note); add("Offered by", nameOf(d.requested_by));
     if (d.status !== "pending") add(d.status === "approved" ? "Approved by" : "Rejected by", nameOf(d.decided_by) + (d.decided_at ? " · " + new Date(d.decided_at).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : ""));
     add("Reason", d.decision_note);
     c.appendChild(g);
@@ -4581,7 +4630,7 @@ if ("serviceWorker" in navigator) {
     await ensureProfiles((data || []).flatMap(d => [d.requested_by, d.decided_by]).filter(Boolean));
     const list = (data || []).map(d => discounts[d.id]).sort((a, b) => (a.status === "pending" ? 0 : 1) - (b.status === "pending" ? 0 : 1));
     body.innerHTML = '<div class="sec-label"></div>'; body.firstChild.textContent = list.filter(d => d.status === "pending").length + " pending · " + list.length + " total (latest 200)";
-    if (!list.length) { body.insertAdjacentHTML("beforeend", '<div class="side-empty">No discount requests yet. On a stone card tap "💲 Ask discount".</div>'); return; }
+    if (!list.length) { body.insertAdjacentHTML("beforeend", '<div class="side-empty">No discount requests yet. On a stone card tap "💲 Offer discount".</div>'); return; }
     list.forEach(d => { const c = discountCard(d); c.style.marginBottom = "10px"; body.appendChild(c); });
   };
 
@@ -4760,7 +4809,7 @@ if ("serviceWorker" in navigator) {
     // chat area
     "Members": ["સભ્યો", "सदस्य"], "Today": ["આજે", "आज"], "Yesterday": ["ગઈકાલે", "कल"], "No messages yet": ["હજી કોઈ મેસેજ નથી", "अभी कोई मैसेज नहीं"],
     "Send the first message.": ["પહેલો મેસેજ મોકલો.", "पहला मैसेज भेजें."], "⬆ Load older messages": ["⬆ જૂના મેસેજ જુઓ", "⬆ पुराने मैसेज देखें"],
-    "⬇ Download": ["⬇ ડાઉનલોડ", "⬇ डाउनलोड"], "Delivered": ["પહોંચી ગયો", "पहुंच गया"], "Read": ["વાંચ્યો", "पढ़ लिया"], "Sending…": ["મોકલાય છે…", "भेजा जा रहा है…"], "⚠ Not sent · Tap to retry": ["⚠ ન ગયો · ફરી મોકલવા દબાવો", "⚠ नहीं गया · दोबारा भेजने के लिए दबाएं"],
+    "⬇ Download": ["⬇ ડાઉનલોડ", "⬇ डाउनलोड"], "📌 ON HOLD": ["📌 હોલ્ડ પર", "📌 होल्ड पर"], "⏳ HOLD REQUESTED": ["⏳ હોલ્ડ માંગ્યો", "⏳ होल्ड मांगा"], "Delivered": ["પહોંચી ગયો", "पहुंच गया"], "Read": ["વાંચ્યો", "पढ़ लिया"], "Sending…": ["મોકલાય છે…", "भेजा जा रहा है…"], "⚠ Not sent · Tap to retry": ["⚠ ન ગયો · ફરી મોકલવા દબાવો", "⚠ नहीं गया · दोबारा भेजने के लिए दबाएं"],
     "Edited": ["બદલેલો", "बदला गया"], "📌 Pinned": ["📌 પિન કરેલો", "📌 पिन किया"], "↪ Forwarded": ["↪ ફોરવર્ડ કરેલો", "↪ फॉरवर्ड किया"], "You": ["તમે", "आप"],
     "Message the team…": ["ટીમને મેસેજ લખો…", "टीम को मैसेज लिखें…"], "Post an announcement…": ["જાહેરાત લખો…", "घोषणा लिखें…"],
     "📢 Only admins can post announcements.": ["📢 ફક્ત એડમિન જાહેરાત કરી શકે.", "📢 केवल एडमिन घोषणा कर सकते हैं."],
@@ -4783,7 +4832,7 @@ if ("serviceWorker" in navigator) {
     "Message info": ["મેસેજ માહિતી", "मैसेज जानकारी"], "Create task": ["કામ બનાવો", "काम बनाएं"], "Post poll": ["મતદાન મૂકો", "पोल डालें"], "Schedule": ["સમય નક્કી કરો", "समय तय करें"],
     "Send request": ["વિનંતી મોકલો", "अनुरोध भेजें"], "Approve": ["મંજૂર", "मंज़ूर"], "Reject": ["નામંજૂર", "नामंज़ूर"], "Disable": ["બંધ કરો", "बंद करें"], "Enable": ["ચાલુ કરો", "चालू करें"],
     "Make admin": ["એડમિન બનાવો", "एडमिन बनाएं"], "Remove admin": ["એડમિન હટાવો", "एडमिन हटाएं"], "Admin panel": ["એડમિન પેનલ", "एडमिन पैनल"], "Users": ["યુઝર્સ", "यूज़र्स"],
-    "Share in chat": ["ચેટમાં શેર કરો", "चैट में शेयर करें"], "📌 Request hold": ["📌 હોલ્ડ માંગો", "📌 होल्ड मांगें"], "💲 Ask discount": ["💲 ડિસ્કાઉન્ટ માંગો", "💲 डिस्काउंट मांगें"],
+    "Share in chat": ["ચેટમાં શેર કરો", "चैट में शेयर करें"], "📌 Request hold": ["📌 હોલ્ડ માંગો", "📌 होल्ड मांगें"], "💲 Offer discount": ["💲 ઓફર ડિસ્કાઉન્ટ", "💲 ऑफर डिस्काउंट"], "Offer discount %": ["ઓફર ડિસ્કાઉન્ટ %", "ऑफर डिस्काउंट %"], "Offer price $/ct": ["ઓફર ભાવ $/ct", "ऑफर प्राइस $/ct"],
     "Clear filters": ["ફિલ્ટર કાઢો", "फ़िल्टर हटाएं"], "Shape": ["શેપ", "शेप"], "Carat": ["કેરેટ", "कैरेट"], "Color": ["કલર", "कलर"], "Clarity": ["ક્લેરિટી", "क्लैरिटी"], "Sort": ["ક્રમ", "क्रम"],
     "Any": ["કોઈપણ", "कोई भी"], "Party": ["પાર્ટી", "पार्टी"], "Note": ["નોંધ", "नोट"], "Hold until": ["હોલ્ડ ક્યાં સુધી", "होल्ड कब तक"], "Requested by": ["માંગનાર", "मांगने वाले"],
     "Assigned to": ["કોને સોંપ્યું", "किसे सौंपा"], "Due": ["છેલ્લી તારીખ", "आखिरी तारीख"], "✓ Mark done": ["✓ પૂરું થયું", "✓ पूरा हुआ"], "Reopen": ["ફરી ખોલો", "फिर खोलें"],
@@ -4801,7 +4850,7 @@ if ("serviceWorker" in navigator) {
     "No groups yet. Tap + NEW GROUP.": ["હજી કોઈ ગ્રુપ નથી.", "अभी कोई ग्रुप नहीं."], "Say hello": ["નમસ્તે કહો", "नमस्ते कहें"],
   };
   const LANG_IDX = { gu: 0, hi: 1 };
-  const MR = {"Email": "ईमेल", "Password": "पासवर्ड", "Sign In": "साइन इन", "Sign up": "साइन अप", "Forgot Password?": "पासवर्ड विसरलात?", "Employee name": "कर्मचाऱ्याचे नाव", "Mobile number": "मोबाइल नंबर", "Confirm password": "पासवर्ड पुन्हा लिहा", "Create account": "अकाउंट तयार करा", "Send reset link": "रीसेट लिंक पाठवा", "← Back to login": "← लॉगिनवर परत", "Choose photo": "फोटो निवडा", "Waiting for approval": "मंजुरीची वाट", "Check again": "पुन्हा तपासा", "Account disabled": "अकाउंट बंद आहे", "Save new password": "नवीन पासवर्ड सेव्ह करा", "New password": "नवीन पासवर्ड", "Confirm new password": "नवीन पासवर्ड पुन्हा लिहा", "Edit profile": "प्रोफाइल बदला", "🔔 Notifications": "🔔 सूचना", "🛡️ Admin panel": "🛡️ ॲडमिन पॅनल", "Log out": "लॉग आउट", "✅ My tasks & reminders": "✅ माझी कामे आणि रिमाइंडर", "🔗 Client links": "🔗 क्लायंट लिंक", "🎨 Theme": "🎨 थीम", "⭐ Saved messages": "⭐ सेव्ह केलेले मेसेज", "🌐 Language": "🌐 भाषा", "🕘 Attendance": "🕘 हजेरी", "📱 My devices": "📱 माझे डिव्हाइस", "Chat": "चॅट", "Unread": "न वाचलेले", "Meeting chats": "मीटिंग चॅट", "Unmuted": "म्यूट नाही", "Favorites": "आवडते", "Chats": "चॅट्स", "Contacts": "संपर्क", "Team Chat": "टीम चॅट", "Announcements": "घोषणा", "Everyone": "सर्वजण", "From admins": "ॲडमिनकडून", "You can post": "तुम्ही पोस्ट करू शकता", "Tap ⋯ on a chat → Add to favorites.": "चॅटवर ⋯ दाबा → आवडत्यांमध्ये जोडा.", "No chats yet. Tap ✏️ to start one.": "अजून चॅट नाही. ✏️ दाबून सुरू करा.", "Available": "उपलब्ध", "Busy": "व्यस्त", "Do not disturb": "त्रास देऊ नका", "Be right back": "लगेच येतो", "Away": "दूर", "Offline": "ऑफलाइन", "online": "ऑनलाइन", "⏰ My reminders": "⏰ माझे रिमाइंडर", "⭐ Add to favorites": "⭐ आवडत्यांमध्ये जोडा", "☆ Remove from favorites": "☆ आवडत्यांमधून काढा", "🔕 Mute": "🔕 म्यूट", "🔔 Unmute": "🔔 अनम्यूट", "✔️ Mark as read": "✔️ वाचले म्हणून नोंदवा", "Set your status": "तुमचा स्टेटस", "Available (automatic)": "उपलब्ध (आपोआप)", "Appear away": "दूर दिसा", "Appear offline": "ऑफलाइन दिसा", "Members": "सदस्य", "Today": "आज", "Yesterday": "काल", "No messages yet": "अजून मेसेज नाही", "Send the first message.": "पहिला मेसेज पाठवा.", "⬆ Load older messages": "⬆ जुने मेसेज पहा", "⬇ Download": "⬇ डाउनलोड", "Delivered": "पोहोचला", "Read": "वाचला", "Sending…": "पाठवत आहे…", "⚠ Not sent · Tap to retry": "⚠ गेला नाही · पुन्हा पाठवण्यासाठी दाबा", "Edited": "बदललेला", "📌 Pinned": "📌 पिन केलेला", "↪ Forwarded": "↪ फॉरवर्ड केलेला", "You": "तुम्ही", "Message the team…": "टीमला मेसेज लिहा…", "Post an announcement…": "घोषणा लिहा…", "📢 Only admins can post announcements.": "📢 फक्त ॲडमिन घोषणा करू शकतात.", "Get notified about new messages?": "नवीन मेसेजची सूचना हवी आहे?", "Turn on": "चालू करा", "Not now": "आत्ता नको", "Pinned message": "पिन केलेला मेसेज", "↩️ Reply": "↩️ उत्तर", "📌 Pin": "📌 पिन", "📌 Unpin": "📌 पिन काढा", "✅ Create task": "✅ काम तयार करा", "⏰ Remind me": "⏰ आठवण करून द्या", "✏️ Edit": "✏️ बदला", "↪️ Forward": "↪️ फॉरवर्ड", "📋 Copy text": "📋 मजकूर कॉपी करा", "🗑️ Delete for everyone": "🗑️ सर्वांसाठी हटवा", "🗑️ Discard": "🗑️ रद्द करा", "⭐ Save message": "⭐ मेसेज सेव्ह करा", "☆ Unsave": "☆ सेव्हमधून काढा", "📷 Camera": "📷 कॅमेरा", "💎 Share a stone": "💎 स्टोन शेअर करा", "🔍 Scan stock packet": "🔍 पॅकेट स्कॅन करा", "📊 Poll": "📊 मतदान", "✅ Task": "✅ काम", "⏰ Schedule / remind me": "⏰ वेळ ठरवा / आठवण करून द्या", "❗ Mark as important": "❗ महत्त्वाचे करा", "Cancel": "रद्द करा", "Close": "बंद करा", "Save": "सेव्ह करा", "Done": "झाले", "Copy": "कॉपी", "Create group": "ग्रुप तयार करा", "Start chat": "चॅट सुरू करा", "New chat": "नवीन चॅट", "Search messages": "मेसेज शोधा", "Forward to…": "फॉरवर्ड करा…", "Forward": "फॉरवर्ड", "Name": "नाव", "Mobile": "मोबाइल", "Change photo": "फोटो बदला", "Remove photo": "फोटो काढा", "Add people": "लोक जोडा", "Leave group": "ग्रुप सोडा", "Delete group": "ग्रुप हटवा", "Rename": "नाव बदला", "Remove": "काढा", "Add": "जोडा", "Message info": "मेसेज माहिती", "Create task": "काम तयार करा", "Post poll": "मतदान टाका", "Schedule": "वेळ ठरवा", "Send request": "विनंती पाठवा", "Approve": "मंजूर", "Reject": "नामंजूर", "Disable": "बंद करा", "Enable": "चालू करा", "Make admin": "ॲडमिन करा", "Remove admin": "ॲडमिन काढा", "Admin panel": "ॲडमिन पॅनल", "Users": "युजर्स", "Share in chat": "चॅटमध्ये शेअर करा", "📌 Request hold": "📌 होल्ड मागा", "💲 Ask discount": "💲 डिस्काउंट मागा", "Clear filters": "फिल्टर काढा", "Shape": "शेप", "Carat": "कॅरेट", "Color": "कलर", "Clarity": "क्लॅरिटी", "Sort": "क्रम", "Any": "कोणतेही", "Party": "पार्टी", "Note": "टीप", "Hold until": "होल्ड कधीपर्यंत", "Requested by": "मागणारे", "Assigned to": "कोणाला सोपवले", "Due": "शेवटची तारीख", "✓ Mark done": "✓ पूर्ण झाले", "Reopen": "पुन्हा उघडा", "Close poll": "मतदान बंद करा", "Join meeting": "मीटिंगमध्ये सामील व्हा", "👁 Preview": "👁 पहा", "🔍 Scan": "🔍 स्कॅन", "🔗 Client link": "🔗 क्लायंट लिंक", "Create link": "लिंक तयार करा", "Find": "शोधा", "Assigned to me": "मला सोपवलेली", "Created by me": "मी तयार केलेली", "⏰ Scheduled": "⏰ ठरवलेले", "Media": "फोटो", "Files": "फाइल्स", "Links": "लिंक", "Stones": "स्टोन", "Check in": "हजेरी लावा", "Check out": "चेक आउट", "Company announcements · only admins post": "कंपनीच्या घोषणा · फक्त ॲडमिन लिहू शकतात", "Announcements from admins will appear here.": "ॲडमिनच्या घोषणा इथे दिसतील.", "Only you can see this · your reminders and notes": "फक्त तुम्हाला दिसते · तुमचे रिमाइंडर आणि नोंदी", "Search name or mobile…": "नाव किंवा मोबाइल शोधा…", "Filter by name or mobile…": "नाव किंवा मोबाइलने शोधा…", "Photos, files and links in this chat": "या चॅटमधील फोटो, फाइल्स आणि लिंक", "Start a video meeting in this chat": "या चॅटमध्ये व्हिडिओ मीटिंग सुरू करा", "Record a voice note": "व्हॉइस नोट रेकॉर्ड करा", "Attach a file or photo": "फाइल किंवा फोटो जोडा", "No groups yet. Tap + NEW GROUP.": "अजून ग्रुप नाही.", "Say hello": "नमस्कार म्हणा"};   // मराठी
+  const MR = {"Email": "ईमेल", "Password": "पासवर्ड", "Sign In": "साइन इन", "Sign up": "साइन अप", "Forgot Password?": "पासवर्ड विसरलात?", "Employee name": "कर्मचाऱ्याचे नाव", "Mobile number": "मोबाइल नंबर", "Confirm password": "पासवर्ड पुन्हा लिहा", "Create account": "अकाउंट तयार करा", "Send reset link": "रीसेट लिंक पाठवा", "← Back to login": "← लॉगिनवर परत", "Choose photo": "फोटो निवडा", "Waiting for approval": "मंजुरीची वाट", "Check again": "पुन्हा तपासा", "Account disabled": "अकाउंट बंद आहे", "Save new password": "नवीन पासवर्ड सेव्ह करा", "New password": "नवीन पासवर्ड", "Confirm new password": "नवीन पासवर्ड पुन्हा लिहा", "Edit profile": "प्रोफाइल बदला", "🔔 Notifications": "🔔 सूचना", "🛡️ Admin panel": "🛡️ ॲडमिन पॅनल", "Log out": "लॉग आउट", "✅ My tasks & reminders": "✅ माझी कामे आणि रिमाइंडर", "🔗 Client links": "🔗 क्लायंट लिंक", "🎨 Theme": "🎨 थीम", "⭐ Saved messages": "⭐ सेव्ह केलेले मेसेज", "🌐 Language": "🌐 भाषा", "🕘 Attendance": "🕘 हजेरी", "📱 My devices": "📱 माझे डिव्हाइस", "Chat": "चॅट", "Unread": "न वाचलेले", "Meeting chats": "मीटिंग चॅट", "Unmuted": "म्यूट नाही", "Favorites": "आवडते", "Chats": "चॅट्स", "Contacts": "संपर्क", "Team Chat": "टीम चॅट", "Announcements": "घोषणा", "Everyone": "सर्वजण", "From admins": "ॲडमिनकडून", "You can post": "तुम्ही पोस्ट करू शकता", "Tap ⋯ on a chat → Add to favorites.": "चॅटवर ⋯ दाबा → आवडत्यांमध्ये जोडा.", "No chats yet. Tap ✏️ to start one.": "अजून चॅट नाही. ✏️ दाबून सुरू करा.", "Available": "उपलब्ध", "Busy": "व्यस्त", "Do not disturb": "त्रास देऊ नका", "Be right back": "लगेच येतो", "Away": "दूर", "Offline": "ऑफलाइन", "online": "ऑनलाइन", "⏰ My reminders": "⏰ माझे रिमाइंडर", "⭐ Add to favorites": "⭐ आवडत्यांमध्ये जोडा", "☆ Remove from favorites": "☆ आवडत्यांमधून काढा", "🔕 Mute": "🔕 म्यूट", "🔔 Unmute": "🔔 अनम्यूट", "✔️ Mark as read": "✔️ वाचले म्हणून नोंदवा", "Set your status": "तुमचा स्टेटस", "Available (automatic)": "उपलब्ध (आपोआप)", "Appear away": "दूर दिसा", "Appear offline": "ऑफलाइन दिसा", "Members": "सदस्य", "Today": "आज", "Yesterday": "काल", "No messages yet": "अजून मेसेज नाही", "Send the first message.": "पहिला मेसेज पाठवा.", "⬆ Load older messages": "⬆ जुने मेसेज पहा", "⬇ Download": "⬇ डाउनलोड", "📌 ON HOLD": "📌 होल्डवर", "⏳ HOLD REQUESTED": "⏳ होल्ड मागितला", "Delivered": "पोहोचला", "Read": "वाचला", "Sending…": "पाठवत आहे…", "⚠ Not sent · Tap to retry": "⚠ गेला नाही · पुन्हा पाठवण्यासाठी दाबा", "Edited": "बदललेला", "📌 Pinned": "📌 पिन केलेला", "↪ Forwarded": "↪ फॉरवर्ड केलेला", "You": "तुम्ही", "Message the team…": "टीमला मेसेज लिहा…", "Post an announcement…": "घोषणा लिहा…", "📢 Only admins can post announcements.": "📢 फक्त ॲडमिन घोषणा करू शकतात.", "Get notified about new messages?": "नवीन मेसेजची सूचना हवी आहे?", "Turn on": "चालू करा", "Not now": "आत्ता नको", "Pinned message": "पिन केलेला मेसेज", "↩️ Reply": "↩️ उत्तर", "📌 Pin": "📌 पिन", "📌 Unpin": "📌 पिन काढा", "✅ Create task": "✅ काम तयार करा", "⏰ Remind me": "⏰ आठवण करून द्या", "✏️ Edit": "✏️ बदला", "↪️ Forward": "↪️ फॉरवर्ड", "📋 Copy text": "📋 मजकूर कॉपी करा", "🗑️ Delete for everyone": "🗑️ सर्वांसाठी हटवा", "🗑️ Discard": "🗑️ रद्द करा", "⭐ Save message": "⭐ मेसेज सेव्ह करा", "☆ Unsave": "☆ सेव्हमधून काढा", "📷 Camera": "📷 कॅमेरा", "💎 Share a stone": "💎 स्टोन शेअर करा", "🔍 Scan stock packet": "🔍 पॅकेट स्कॅन करा", "📊 Poll": "📊 मतदान", "✅ Task": "✅ काम", "⏰ Schedule / remind me": "⏰ वेळ ठरवा / आठवण करून द्या", "❗ Mark as important": "❗ महत्त्वाचे करा", "Cancel": "रद्द करा", "Close": "बंद करा", "Save": "सेव्ह करा", "Done": "झाले", "Copy": "कॉपी", "Create group": "ग्रुप तयार करा", "Start chat": "चॅट सुरू करा", "New chat": "नवीन चॅट", "Search messages": "मेसेज शोधा", "Forward to…": "फॉरवर्ड करा…", "Forward": "फॉरवर्ड", "Name": "नाव", "Mobile": "मोबाइल", "Change photo": "फोटो बदला", "Remove photo": "फोटो काढा", "Add people": "लोक जोडा", "Leave group": "ग्रुप सोडा", "Delete group": "ग्रुप हटवा", "Rename": "नाव बदला", "Remove": "काढा", "Add": "जोडा", "Message info": "मेसेज माहिती", "Create task": "काम तयार करा", "Post poll": "मतदान टाका", "Schedule": "वेळ ठरवा", "Send request": "विनंती पाठवा", "Approve": "मंजूर", "Reject": "नामंजूर", "Disable": "बंद करा", "Enable": "चालू करा", "Make admin": "ॲडमिन करा", "Remove admin": "ॲडमिन काढा", "Admin panel": "ॲडमिन पॅनल", "Users": "युजर्स", "Share in chat": "चॅटमध्ये शेअर करा", "📌 Request hold": "📌 होल्ड मागा", "💲 Offer discount": "💲 ऑफर डिस्काउंट", "Offer discount %": "ऑफर डिस्काउंट %", "Offer price $/ct": "ऑफर प्राइस $/ct", "Clear filters": "फिल्टर काढा", "Shape": "शेप", "Carat": "कॅरेट", "Color": "कलर", "Clarity": "क्लॅरिटी", "Sort": "क्रम", "Any": "कोणतेही", "Party": "पार्टी", "Note": "टीप", "Hold until": "होल्ड कधीपर्यंत", "Requested by": "मागणारे", "Assigned to": "कोणाला सोपवले", "Due": "शेवटची तारीख", "✓ Mark done": "✓ पूर्ण झाले", "Reopen": "पुन्हा उघडा", "Close poll": "मतदान बंद करा", "Join meeting": "मीटिंगमध्ये सामील व्हा", "👁 Preview": "👁 पहा", "🔍 Scan": "🔍 स्कॅन", "🔗 Client link": "🔗 क्लायंट लिंक", "Create link": "लिंक तयार करा", "Find": "शोधा", "Assigned to me": "मला सोपवलेली", "Created by me": "मी तयार केलेली", "⏰ Scheduled": "⏰ ठरवलेले", "Media": "फोटो", "Files": "फाइल्स", "Links": "लिंक", "Stones": "स्टोन", "Check in": "हजेरी लावा", "Check out": "चेक आउट", "Company announcements · only admins post": "कंपनीच्या घोषणा · फक्त ॲडमिन लिहू शकतात", "Announcements from admins will appear here.": "ॲडमिनच्या घोषणा इथे दिसतील.", "Only you can see this · your reminders and notes": "फक्त तुम्हाला दिसते · तुमचे रिमाइंडर आणि नोंदी", "Search name or mobile…": "नाव किंवा मोबाइल शोधा…", "Filter by name or mobile…": "नाव किंवा मोबाइलने शोधा…", "Photos, files and links in this chat": "या चॅटमधील फोटो, फाइल्स आणि लिंक", "Start a video meeting in this chat": "या चॅटमध्ये व्हिडिओ मीटिंग सुरू करा", "Record a voice note": "व्हॉइस नोट रेकॉर्ड करा", "Attach a file or photo": "फाइल किंवा फोटो जोडा", "No groups yet. Tap + NEW GROUP.": "अजून ग्रुप नाही.", "Say hello": "नमस्कार म्हणा"};   // मराठी
   let lang = "en"; try { lang = localStorage.getItem("kg-lang") || "en"; } catch (e) {}
   const TR_SKIP = ".bubble, .stone-card, .slist, .task-card, .poll-card, .disc-card, .hold-card, .sheet-tbl, .search-hit, #client-view, .link-box, .cv-card, script, style";
   const tx = (key) => { if (lang === "en" || !TR[key]) return key; if (lang === "mr") return MR[key] || key; return TR[key][LANG_IDX[lang]] || key; };
