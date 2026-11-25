@@ -896,6 +896,7 @@
       <div class="panel-head">Forward to…</div>
       <div class="panel-body">
         <div id="fwd-preview" class="side-sub" style="margin-bottom:10px;"></div>
+        <input type="search" id="fwd-search" placeholder="Search chat or person…" autocomplete="off" style="margin-bottom:8px;">
         <div id="fwd-list"></div>
         <div class="panel-note" id="fwd-note"></div>
       </div>
@@ -1180,7 +1181,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v33 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v36 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -1599,7 +1600,9 @@ if ("serviceWorker" in navigator) {
 
   function renderContacts() {
     const q = sideSearch.value.trim().toLowerCase();
-    const list = contacts.filter(p => !q || (p.name||"").toLowerCase().includes(q) || (p.mobile||"").replace(/\s/g,"").includes(q.replace(/\s/g,"")) || (p.email||"").toLowerCase().includes(q));
+    // people you already have a private chat with are shown under Chats — don't list them twice (a search still finds everyone)
+    const inChats = new Set(groups.filter(g => g.kind === "direct").map(otherMember).filter(id => id && id !== myId));
+    const list = contacts.filter(p => q ? ((p.name||"").toLowerCase().includes(q) || (p.mobile||"").replace(/\s/g,"").includes(q.replace(/\s/g,"")) || (p.email||"").toLowerCase().includes(q)) : !inChats.has(p.id));
     // you first, then people who are online, then everyone else — alphabetically
     const rank = (p) => p.id === myId ? 0 : statusOf(p.id) === "offline" ? 2 : 1;
     list.sort((a,b) => (rank(a) - rank(b)) || (a.name||"").localeCompare(b.name||""));
@@ -1768,6 +1771,7 @@ if ("serviceWorker" in navigator) {
     return item;
   }
   function renderGroups() {
+    renderContacts();   // Contacts hides people who now have a chat in this list
     const q = ($("side-search").value || "").trim().toLowerCase();
     let list = chatEntries();
     if (q) list = list.filter(e => e.title.toLowerCase().includes(q));
@@ -2877,9 +2881,14 @@ if ("serviceWorker" in navigator) {
     const box = $("fwd-list"); box.innerHTML = "";
     const targets = [{ id: "team", name: "Team Chat", sub: "Everyone" }].concat(groups
       .filter(g => g.kind !== "announce" || amAppAdmin())
+      .filter(g => g.kind !== "self")
       .map(g => ({ id: g.id, name: chatTitleOf(g), sub: g.kind === "announce" ? "Announcement" : g.kind === "direct" ? "Private chat" : g.members.length + " members" })));
+    // people you have no chat with yet → a private chat is started when you forward
+    const inChats = new Set(groups.filter(g => g.kind === "direct").map(otherMember));
+    contacts.filter(c => c.id !== myId && !inChats.has(c.id)).forEach(c => targets.push({ id: "u:" + c.id, name: c.name || "Unnamed", sub: "New private chat", extra: (c.mobile || "") + " " + (c.email || "") }));
+    $("fwd-search").value = "";
     targets.forEach(t => {
-      const row = document.createElement("div"); row.className = "pick-row";
+      const row = document.createElement("div"); row.className = "pick-row"; row.dataset.find = (t.name + " " + t.sub + " " + (t.extra || "")).toLowerCase();
       const lab = document.createElement("label");
       const cb = document.createElement("input"); cb.type = "checkbox";
       cb.addEventListener("change", () => cb.checked ? fwdSelected.add(t.id) : fwdSelected.delete(t.id));
@@ -2890,7 +2899,14 @@ if ("serviceWorker" in navigator) {
       txt.firstChild.textContent = t.name; txt.lastChild.textContent = t.sub;
       lab.appendChild(cb); lab.appendChild(ic); lab.appendChild(txt); row.appendChild(lab); box.appendChild(row);
     });
-    $("fwd-modal").classList.add("open");
+    $("fwd-modal").classList.add("open"); setTimeout(() => $("fwd-search").focus(), 50);
+  });
+  $("fwd-search").addEventListener("input", () => {
+    const q = $("fwd-search").value.trim().toLowerCase(); let shown = 0;
+    $("fwd-list").querySelectorAll(".pick-row").forEach(r => { const ok = !q || r.dataset.find.includes(q) || r.dataset.find.replace(/\s/g, "").includes(q.replace(/\s/g, "")); r.style.display = ok ? "" : "none"; if (ok) shown++; });
+    let empty = $("fwd-list").querySelector(".fwd-empty");
+    if (!shown) { if (!empty) { empty = document.createElement("div"); empty.className = "side-empty fwd-empty"; empty.textContent = "No chat or person found."; $("fwd-list").appendChild(empty); } }
+    else if (empty) empty.remove();
   });
   $("fwd-cancel").addEventListener("click", () => $("fwd-modal").classList.remove("open"));
   $("fwd-modal").addEventListener("click", (e) => { if (e.target.id === "fwd-modal") $("fwd-modal").classList.remove("open"); });
@@ -2898,7 +2914,15 @@ if ("serviceWorker" in navigator) {
     const m = actMsg; if (!m) return;
     if (!fwdSelected.size) { $("fwd-note").textContent = "Pick at least one chat."; return; }
     const btn = $("fwd-send"); btn.disabled = true;
-    const rows = [...fwdSelected].map(k => ({
+    const keys = [];
+    for (const k of fwdSelected) {
+      if (!k.startsWith("u:")) { keys.push(k); continue; }
+      const { data: gid, error } = await sb.rpc("get_or_create_direct", { p_other: k.slice(2) });   // start the private chat first
+      if (error || !gid) { btn.disabled = false; $("fwd-note").textContent = "Couldn't start chat" + (error ? ": " + error.message : "."); return; }
+      keys.push(gid);
+    }
+    if (fwdSelected.size !== keys.length || [...fwdSelected].some(k => k.startsWith("u:"))) { await loadGroups(); loadSummaries(); }
+    const rows = keys.map(k => ({
       id: newId(), sender_id: myId, group_id: k === "team" ? null : k, text: m.text || "", forwarded: true,
       attachment_url: m.attachment_url || null, attachment_name: m.attachment_name || null, attachment_type: m.attachment_type || null, attachment_size: m.attachment_size || null
     }));
@@ -3483,7 +3507,7 @@ if ("serviceWorker" in navigator) {
     hdr.textContent = (count != null ? count.toLocaleString() : stoneResults.length) + " found" + ((count || 0) > 100 && stoneResults.length <= 100 ? " · showing first 100" : "");
     const all = document.createElement("button"); all.className = "small-btn"; all.style.marginLeft = "10px"; all.textContent = "Tick all shown";
     all.addEventListener("click", () => { const allOn = stoneResults.every(st => stoneSel.has(st.stock_id)); stoneResults.forEach(st => allOn ? stoneSel.delete(st.stock_id) : stoneSel.set(st.stock_id, st)); runStoneSearch(); });
-    hdr.appendChild(all);
+    // ("Tick all shown" button removed — use the tick box in the table header)
     // Table / Cards switch (remembered on this device)
     const vt = document.createElement("span"); vt.className = "view-toggle";
     [["table", "▦ Table"], ["cards", "▤ Cards"]].forEach(([v, label]) => {
