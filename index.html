@@ -944,7 +944,6 @@
           <label>Clarity<span class="rng"><select id="sf-cla1"></select><select id="sf-cla2"></select></span></label>
           <label>Rate $/ct<span class="rng"><input id="sf-r1" type="number" min="0" placeholder="min"><input id="sf-r2" type="number" min="0" placeholder="max"></span></label>
           <label>Sort<select id="sf-sort"><option value="stock_id">Stock ID</option><option value="carat:desc">Carat ↓</option><option value="carat">Carat ↑</option><option value="rate">Rate ↑</option><option value="rate:desc">Rate ↓</option><option value="back">Back % (best first)</option></select></label>
-          <label style="justify-content:flex-end;"><span style="display:flex; gap:6px; align-items:center; font-size:12.5px; color:var(--text);"><input type="checkbox" id="sf-avail" checked style="width:auto;"> Available only</span></label>
           <label style="justify-content:flex-end;"><span style="display:flex; flex-wrap:wrap; gap:6px;"><button class="small-btn" id="sf-clear" type="button">Clear filters</button><button class="small-btn" id="sf-scan" type="button">🔍 Scan</button></span></label>
         </div>
         <div id="stone-results"></div>
@@ -3238,7 +3237,12 @@ if ("serviceWorker" in navigator) {
 
   // picker: search stock and share a card into the chat
   let stoneTimer = null;
-  $("stone-btn").addEventListener("click", () => { $("stone-modal").classList.add("open"); $("stone-q").focus(); updateSelBar(); runStoneSearch(); });
+  $("stone-btn").addEventListener("click", () => {
+    // start clean every time: no old IDs, ticks or filters from last time
+    ["stone-q","sf-shape","sf-ct1","sf-ct2","sf-col1","sf-col2","sf-cla1","sf-cla2","sf-r1","sf-r2"].forEach(id => { const el = $(id); if (el) el.value = ""; });
+    $("sf-sort").value = "stock_id"; stoneSel.clear(); multiStoneSearch.lastQ = null; stoneResults = []; $("stone-results").innerHTML = "";
+    $("stone-modal").classList.add("open"); $("stone-q").focus(); updateSelBar(); runStoneSearch();
+  });
   $("stone-close").addEventListener("click", () => $("stone-modal").classList.remove("open"));
   $("stone-modal").addEventListener("click", (e) => { if (e.target.id === "stone-modal") $("stone-modal").classList.remove("open"); });
   $("stone-q").addEventListener("paste", (e) => {
@@ -3248,6 +3252,7 @@ if ("serviceWorker" in navigator) {
     el.value = el.value.trim() ? el.value.trim().replace(/,?$/, ", ") + add : add;
     clearTimeout(stoneTimer); runStoneSearch();
   });
+  $("stone-q").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); clearTimeout(stoneTimer); runStoneSearch(); } });
   $("stone-q").addEventListener("input", () => { clearTimeout(stoneTimer); stoneTimer = setTimeout(runStoneSearch, 250); });
   const COLORS = ["D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
   const CLARITIES = ["FL","IF","VVS1","VVS2","VS1","VS2","SI1","SI2","SI3","I1","I2","I3"];
@@ -3261,9 +3266,9 @@ if ("serviceWorker" in navigator) {
     const set = Array.from(new Set((data || []).map(r => r.shape).filter(Boolean))).sort();
     const el = $("sf-shape"); set.forEach(v => { const o = document.createElement("option"); o.value = v; o.textContent = v; el.appendChild(o); });
   }
-  ["sf-shape","sf-col1","sf-col2","sf-cla1","sf-cla2","sf-sort","sf-avail"].forEach(id => $(id).addEventListener("change", runStoneSearch));
+  ["sf-shape","sf-col1","sf-col2","sf-cla1","sf-cla2","sf-sort"].forEach(id => $(id).addEventListener("change", runStoneSearch));
   ["sf-ct1","sf-ct2","sf-r1","sf-r2"].forEach(id => $(id).addEventListener("input", () => { clearTimeout(stoneTimer); stoneTimer = setTimeout(runStoneSearch, 350); }));
-  $("sf-clear").addEventListener("click", () => { ["stone-q","sf-shape","sf-ct1","sf-ct2","sf-col1","sf-col2","sf-cla1","sf-cla2","sf-r1","sf-r2"].forEach(id => $(id).value = ""); $("sf-sort").value = "stock_id"; $("sf-avail").checked = true; runStoneSearch(); });
+  $("sf-clear").addEventListener("click", () => { ["stone-q","sf-shape","sf-ct1","sf-ct2","sf-col1","sf-col2","sf-cla1","sf-cla2","sf-r1","sf-r2"].forEach(id => $(id).value = ""); $("sf-sort").value = "stock_id"; runStoneSearch(); });
   const rangeOf = (list, a, b) => { if (!a && !b) return null; const i = a ? list.indexOf(a) : 0, j = b ? list.indexOf(b) : list.length - 1; return list.slice(Math.min(i, j), Math.max(i, j) + 1); };
   function filtersActive() { return ["sf-shape","sf-ct1","sf-ct2","sf-col1","sf-col2","sf-cla1","sf-cla2","sf-r1","sf-r2"].some(id => $(id).value); }
   async function multiStoneSearch(ids, box, stamp) {
@@ -3275,10 +3280,19 @@ if ("serviceWorker" in navigator) {
       if (a.error && b.error) { box.innerHTML = '<div class="side-empty"></div>'; box.firstChild.textContent = "Search failed: " + (a.error.message || a.error); return; }
       [].concat(a.data || [], b.data || []).forEach(st => found.set(st.stock_id, st));
     }
+    const keyOf = (v) => String(v || "").toUpperCase();
+    const exact = new Set(); found.forEach(st => { exact.add(keyOf(st.stock_id)); if (st.cert_no) exact.add(keyOf(st.cert_no)); });
+    const partial = new Map();   // typed id → stone, when it is part of a longer Stock ID / report no.
+    for (const id of ids.filter(x => !exact.has(keyOf(x)) && x.length >= 4).slice(0, 40)) {
+      const esc = id.replace(/[%_\\,()]/g, "");
+      const { data } = await sb.from("stones").select("*").or("stock_id.ilike.%" + esc + "%,cert_no.ilike.%" + esc + "%").limit(3);
+      if (data && data.length === 1) { found.set(data[0].stock_id, data[0]); partial.set(keyOf(id), data[0]); }
+    }
     if (runStoneSearch.last !== stamp) return;
     const key = (v) => String(v || "").toUpperCase();
     const byKey = new Map(); found.forEach(st => { byKey.set(key(st.stock_id), st); if (st.cert_no) byKey.set(key(st.cert_no), st); });
     const list = [], seen = new Set(), missing = [];
+    partial.forEach((st, k) => { if (!byKey.has(k)) byKey.set(k, st); });
     ids.forEach(id => { const st = byKey.get(key(id)); if (!st) missing.push(id); else if (!seen.has(st.stock_id)) { seen.add(st.stock_id); list.push(st); } });
     box.innerHTML = "";
     stoneResults = list;
@@ -3306,7 +3320,8 @@ if ("serviceWorker" in navigator) {
     const ids = Array.from(new Set(qv.split(/[\s,;|]+/).map(x => x.trim()).filter(Boolean)));
     if (ids.length > 1) return multiStoneSearch(ids.slice(0, 500), box, stamp);
     let q = sb.from("stones").select("*", { count: "exact" });
-    if (qv) { const esc = qv.replace(/[%_\\,()]/g, ""); q = q.or("stock_id.ilike.%" + esc + "%,cert_no.ilike.%" + esc + "%"); }
+    if (qv) { const esc = qv.replace(/[%_\\,()]/g, ""); q = q.or("stock_id.ilike.%" + esc + "%,cert_no.ilike.%" + esc + "%"); }   // a typed Stock ID / report no. ignores the filters below
+    else {
     if ($("sf-shape").value) q = q.eq("shape", $("sf-shape").value);
     if ($("sf-ct1").value) q = q.gte("carat", Number($("sf-ct1").value));
     if ($("sf-ct2").value) q = q.lte("carat", Number($("sf-ct2").value));
@@ -3314,23 +3329,20 @@ if ("serviceWorker" in navigator) {
     const lr = rangeOf(CLARITIES, $("sf-cla1").value, $("sf-cla2").value); if (lr) q = q.in("clarity", lr);
     if ($("sf-r1").value) q = q.gte("rate", Number($("sf-r1").value));
     if ($("sf-r2").value) q = q.lte("rate", Number($("sf-r2").value));
-    // "Available only" never hides a stone you searched for by ID / certificate number.
-    // A stone counts as available unless its status says memo / hold / sold / out / return (blank status = available).
-    const availOnly = $("sf-avail").checked && !qv;
+    }
     const [col, dir] = $("sf-sort").value.split(":");
-    let { data, error, count } = await q.order(col, { ascending: dir !== "desc", nullsFirst: false }).limit(availOnly ? 1000 : 100);
+    let { data, error, count } = await q.order(col, { ascending: dir !== "desc", nullsFirst: false }).limit(100);
     if (runStoneSearch.last !== stamp) return;
     box.innerHTML = "";
     if (error) { box.innerHTML = '<div class="side-empty"></div>'; box.firstChild.textContent = "Search failed: " + (error.message || error); return; }
     data = data || [];
-    if (availOnly) { const n0 = data.length; data = data.filter(isAvailableStone); count = n0 < 1000 ? data.length : null; data = data.slice(0, 100); }
     stoneResults = data;
     if (!stoneResults.length) {
       box.innerHTML = '<div class="side-empty"></div>';
       if (qv) {
         const { count: total } = await sb.from("stones").select("stock_id", { count: "exact", head: true });
-        box.firstChild.textContent = "No stone with “" + qv + "” in the uploaded stock (" + (total || 0).toLocaleString() + " stones)." + (filtersActive() ? " Try “Clear filters”." : " Check the file had this stock ID, and that the Stock ID column was matched in Admin panel → Stock.");
-      } else box.firstChild.textContent = "No stones match." + (availOnly ? " (Untick “Available only” to include stones on memo / hold.)" : "");
+        box.firstChild.textContent = "No stone with Stock ID / report no. “" + qv + "” in the uploaded stock (" + (total || 0).toLocaleString() + " stones). Check the file had this stone, and that the Stock ID and Cert/Report No columns were matched in Admin panel → Stock.";
+      } else box.firstChild.textContent = "No stones match these filters.";
       updateSelBar(); return;
     }
     renderStoneResults(box, count);
