@@ -1,4 +1,4 @@
-const CACHE = "kg-chatboat-v36";
+const CACHE = "kg-chatboat-v39";
 const SHELL = [
   "./index.html",
   "./manifest.json",

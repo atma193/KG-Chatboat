@@ -515,6 +515,13 @@
   .lang-opts button { font:inherit; font-size:16px; padding:12px 14px; border-radius:10px; border:2px solid var(--border); background:var(--bg-raised); color:var(--text); text-align:left; cursor:pointer; }
   .lang-opts button.cur { border-color:var(--accent); font-weight:700; }
   .hdr-right { display:flex; align-items:center; gap:10px; }
+  .stock-hdr-btn { background:rgba(255,255,255,.12); color:#fff; border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:6px 14px; font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+  #fwd-modal { z-index:1200; }
+  .pill.stock { background:color-mix(in srgb, var(--accent) 14%, transparent); color:var(--accent); }
+  .user-row .small-btn.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .stock-hdr-btn:hover { background:rgba(255,255,255,.22); }
+  /* inside a chat (＋ → Share a stone) the client tools are hidden — they live on the 💎 Stock page */
+  #stone-modal[data-mode="chat"] .client-only { display:none !important; }
   /* devices + activity */
   .dev-row { display:flex; gap:10px; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); }
   .dev-row .ic { font-size:22px; width:30px; text-align:center; }
@@ -730,6 +737,7 @@
         <div class="brand-name">KG Chatboat</div>
       </div>
       <div class="hdr-right">
+      <button class="stock-hdr-btn" id="stock-btn" type="button" title="Search stock · send to clients by WhatsApp, Excel or Client link">💎 Stock</button>
       <div class="me" id="me-box">
         <div class="me-menu" id="me-menu">
           <button id="menu-status"><span class="st-label st-available" id="menu-status-label"><i></i>Available</span></button>
@@ -960,7 +968,7 @@
   </div>
   <div class="modal-back" id="stone-modal">
     <div class="panel wide">
-      <div class="panel-head">💎 Share a stone</div>
+      <div class="panel-head" id="stone-title">💎 Share a stone</div>
       <div class="panel-body">
         <input type="search" id="stone-q" placeholder="Stock ID or certificate no. — paste many IDs to find them all at once">
         <div class="stone-filters" id="stone-filters">
@@ -976,9 +984,9 @@
       </div>
       <div class="panel-foot sel-bar">
         <span class="grow" id="sel-info">Tick stones to share several at once</span>
-        <button class="small-btn wa-btn ib" id="sel-wa" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2A9.8 9.8 0 0 0 3.6 17l-1.3 4.8 4.9-1.3A9.8 9.8 0 1 0 12 2.2Zm0 17.8a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 12 20Zm4.4-6c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8 1c-.1.2-.3.2-.5.1a6.6 6.6 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 5 5 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c1.6.7 2.2.7 3 .6a2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .2-1.2c-.1-.1-.3-.2-.5-.3Z"/></svg><span>WhatsApp</span></button>
-        <button class="small-btn ib" id="sel-xls" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span>Excel</span></button>
-        <button class="small-btn ib" id="sel-link" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span>Client link</span></button>
+        <button class="small-btn wa-btn ib client-only" id="sel-wa" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2A9.8 9.8 0 0 0 3.6 17l-1.3 4.8 4.9-1.3A9.8 9.8 0 1 0 12 2.2Zm0 17.8a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 12 20Zm4.4-6c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8 1c-.1.2-.3.2-.5.1a6.6 6.6 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 5 5 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c1.6.7 2.2.7 3 .6a2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .2-1.2c-.1-.1-.3-.2-.5-.3Z"/></svg><span>WhatsApp</span></button>
+        <button class="small-btn ib client-only" id="sel-xls" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span>Excel</span></button>
+        <button class="small-btn ib client-only" id="sel-link" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span>Client link</span></button>
         <button class="small-btn primary ib" id="sel-share" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M22 2 11 13"/></svg><span>Share in chat</span></button>
         <button class="small-btn" id="stone-close">Close</button>
       </div>
@@ -1181,7 +1189,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v36 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v39 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -1439,6 +1447,10 @@ if ("serviceWorker" in navigator) {
     meBox.innerHTML = ""; meBox.appendChild(av); meBox.appendChild(label); meBox.appendChild(meMenu);
     if (typeof paintMyStatus === "function") paintMyStatus();
     $("menu-admin").style.display = myProfile.role === "admin" ? "" : "none";
+    // 💎 Stock page (client WhatsApp / Excel / Client link): admins + people an admin switched on
+    const stockOk = myProfile.role === "admin" || !!myProfile.stock_access;
+    $("stock-btn").style.display = stockOk ? "" : "none";
+    if (!stockOk && typeof stoneMode !== "undefined" && stoneMode === "stock") $("stone-modal").classList.remove("open");
   }
 
   // ---------- admin panel: approve / disable / make admin ----------
@@ -1469,6 +1481,7 @@ if ("serviceWorker" in navigator) {
       const nm = document.createElement("div"); nm.className = "side-name"; nm.textContent = (u.name || "Unnamed") + (u.id === myId ? " (You)" : "");
       const st = document.createElement("span"); st.className = "pill " + u.status; st.textContent = u.status.toUpperCase(); nm.appendChild(st);
       if (u.role === "admin") { const a = document.createElement("span"); a.className = "pill admin"; a.textContent = "ADMIN"; nm.appendChild(a); }
+      if (u.status === "active" && (u.role === "admin" || u.stock_access)) { const a = document.createElement("span"); a.className = "pill stock"; a.textContent = "💎 STOCK"; a.title = "Can use the 💎 Stock page (WhatsApp / Excel / Client link to clients)"; nm.appendChild(a); }
       const sub = document.createElement("div"); sub.className = "side-sub"; sub.textContent = [u.mobile, u.email].filter(Boolean).join(" · ");
       txt.appendChild(nm); txt.appendChild(sub);
       const btns = document.createElement("div"); btns.className = "btns";
@@ -1486,6 +1499,8 @@ if ("serviceWorker" in navigator) {
         if (u.status === "pending") { mk("Approve", "primary", { status: "active" }); mk("Reject", "danger", { status: "disabled" }, "Reject " + (u.name||"this user") + "? They won't be able to use the app."); }
         else if (u.status === "active") {
           mk(u.role === "admin" ? "Remove admin" : "Make admin", "", { role: u.role === "admin" ? "member" : "admin" }, u.role === "admin" ? null : "Make " + (u.name||"this user") + " an admin? Admins can approve and disable users.");
+          if (u.role !== "admin") mk(u.stock_access ? "💎 Stock: On" : "💎 Stock: Off", u.stock_access ? "on" : "", { stock_access: !u.stock_access },
+            u.stock_access ? null : "Give " + (u.name||"this user") + " the 💎 Stock page? They can send stones to clients by WhatsApp, Excel and Client link.");
           mk("Disable", "danger", { status: "disabled" }, "Disable " + (u.name||"this user") + "? They lose access immediately.");
         } else mk("Enable", "primary", { status: "active" });
       }
@@ -2874,10 +2889,16 @@ if ("serviceWorker" in navigator) {
 
   // Forward
   const fwdSelected = new Set();
-  $("act-forward").addEventListener("click", () => {
-    closeActMenu(); if (!actMsg) return;
+  let fwdPayload = null;   // { msg } when forwarding a message, { stones } when sending from the 💎 Stock page
+  $("act-forward").addEventListener("click", () => { closeActMenu(); if (actMsg) openChatPicker({ msg: actMsg }); });
+  function openChatPicker(payload) {
+    fwdPayload = payload;
     fwdSelected.clear(); $("fwd-note").textContent = "";
-    $("fwd-preview").textContent = "“" + (actMsg.text || actMsg.attachment_name || "Attachment").slice(0, 120) + "”";
+    $("fwd-modal").querySelector(".panel-head").textContent = payload.stones ? "Send to…" : "Forward to…";
+    $("fwd-send").textContent = payload.stones ? "Send" : "Forward";
+    $("fwd-preview").textContent = payload.stones
+      ? "💎 " + payload.stones.length + " stone" + (payload.stones.length > 1 ? "s" : "") + ": " + payload.stones.map(st => st.stock_id).slice(0, 8).join(", ") + (payload.stones.length > 8 ? " …" : "")
+      : "“" + (payload.msg.text || payload.msg.attachment_name || "Attachment").slice(0, 120) + "”";
     const box = $("fwd-list"); box.innerHTML = "";
     const targets = [{ id: "team", name: "Team Chat", sub: "Everyone" }].concat(groups
       .filter(g => g.kind !== "announce" || amAppAdmin())
@@ -2900,7 +2921,7 @@ if ("serviceWorker" in navigator) {
       lab.appendChild(cb); lab.appendChild(ic); lab.appendChild(txt); row.appendChild(lab); box.appendChild(row);
     });
     $("fwd-modal").classList.add("open"); setTimeout(() => $("fwd-search").focus(), 50);
-  });
+  }
   $("fwd-search").addEventListener("input", () => {
     const q = $("fwd-search").value.trim().toLowerCase(); let shown = 0;
     $("fwd-list").querySelectorAll(".pick-row").forEach(r => { const ok = !q || r.dataset.find.includes(q) || r.dataset.find.replace(/\s/g, "").includes(q.replace(/\s/g, "")); r.style.display = ok ? "" : "none"; if (ok) shown++; });
@@ -2911,7 +2932,7 @@ if ("serviceWorker" in navigator) {
   $("fwd-cancel").addEventListener("click", () => $("fwd-modal").classList.remove("open"));
   $("fwd-modal").addEventListener("click", (e) => { if (e.target.id === "fwd-modal") $("fwd-modal").classList.remove("open"); });
   $("fwd-send").addEventListener("click", async () => {
-    const m = actMsg; if (!m) return;
+    const pl = fwdPayload || {}, m = pl.msg, stones = pl.stones; if (!m && !stones) return;
     if (!fwdSelected.size) { $("fwd-note").textContent = "Pick at least one chat."; return; }
     const btn = $("fwd-send"); btn.disabled = true;
     const keys = [];
@@ -2922,15 +2943,18 @@ if ("serviceWorker" in navigator) {
       keys.push(gid);
     }
     if (fwdSelected.size !== keys.length || [...fwdSelected].some(k => k.startsWith("u:"))) { await loadGroups(); loadSummaries(); }
-    const rows = keys.map(k => ({
+    const rows = keys.map(k => stones
+      ? Object.assign({ id: newId(), sender_id: myId, group_id: k === "team" ? null : k, text: "" }, stones.length === 1 ? { stone: stones[0] } : { stone_list: stones })
+      : {
       id: newId(), sender_id: myId, group_id: k === "team" ? null : k, text: m.text || "", forwarded: true,
       attachment_url: m.attachment_url || null, attachment_name: m.attachment_name || null, attachment_type: m.attachment_type || null, attachment_size: m.attachment_size || null
-    }));
+    });
     const { error } = await sb.from("messages").insert(rows);
     btn.disabled = false;
     if (error) { $("fwd-note").textContent = "Couldn't forward: " + error.message; return; }
     $("fwd-modal").classList.remove("open");
-    showBanner("Forwarded to " + rows.length + " chat" + (rows.length > 1 ? "s" : "") + "."); setTimeout(() => showBanner(""), 1500);
+    showBanner((stones ? "Sent to " : "Forwarded to ") + rows.length + " chat" + (rows.length > 1 ? "s" : "") + "."); setTimeout(() => showBanner(""), 1500);
+    if (stones) { stoneSel.clear(); updateSelBar(); runStoneSearch(); }
   });
 
   // ---------- @mentions ----------
@@ -3319,12 +3343,17 @@ if ("serviceWorker" in navigator) {
 
   // picker: search stock and share a card into the chat
   let stoneTimer = null;
-  $("stone-btn").addEventListener("click", () => {
+  let stoneMode = "chat";
+  $("stock-btn").addEventListener("click", () => openStonePicker("stock"));
+  $("stone-btn").addEventListener("click", () => openStonePicker("chat"));
+  function openStonePicker(mode) {
+    stoneMode = mode; $("stone-modal").dataset.mode = mode;
+    $("stone-title").textContent = mode === "stock" ? "💎 Stock — search & send to clients" : "💎 Share a stone";
     // start clean every time: no old IDs, ticks or filters from last time
     ["stone-q","sf-shape","sf-ct1","sf-ct2","sf-col1","sf-col2","sf-cla1","sf-cla2","sf-r1","sf-r2"].forEach(id => { const el = $(id); if (el) el.value = ""; });
     $("sf-sort").value = "stock_id"; stoneSel.clear(); multiStoneSearch.lastQ = null; stoneResults = []; $("stone-results").innerHTML = "";
     $("stone-modal").classList.add("open"); $("stone-q").focus(); updateSelBar(); runStoneSearch();
-  });
+  }
   $("stone-close").addEventListener("click", () => $("stone-modal").classList.remove("open"));
   $("stone-modal").addEventListener("click", (e) => { if (e.target.id === "stone-modal") $("stone-modal").classList.remove("open"); });
   $("stone-q").addEventListener("paste", (e) => {
@@ -3481,9 +3510,9 @@ if ("serviceWorker" in navigator) {
       });
       const ta = document.createElement("td"); ta.className = "acts";
       const mk = (icon, title, cls, fn) => ta.appendChild(iconBtn(icon, title, cls, fn, true));
-      mk("wa", "WhatsApp", "wa-btn", () => shareWhatsApp(stoneText(st)));
+      mk("wa", "WhatsApp", "wa-btn client-only", () => shareWhatsApp(stoneText(st)));
       mk("pin", "Request hold", "hold-btn", () => { $("stone-modal").classList.remove("open"); openHoldForm(st); });
-      mk("send", "Share in chat", "primary", () => { $("stone-modal").classList.remove("open"); shareStone(st); });
+      mk("send", "Share in chat", "primary", () => shareStonesFromPicker([st]));
       if (st.image_url) mk("photo", "Photo", "", () => window.open(st.image_url, "_blank", "noopener"));
       if (st.video_url) mk("video", "Video", "", () => window.open(st.video_url, "_blank", "noopener"));
       if (st.cert_url) mk("cert", "Certificate", "", () => window.open(st.cert_url, "_blank", "noopener"));
@@ -3523,9 +3552,9 @@ if ("serviceWorker" in navigator) {
       cb.addEventListener("change", () => { cb.checked ? stoneSel.set(st.stock_id, st) : stoneSel.delete(st.stock_id); updateSelBar(); });
       const bd = document.createElement("div"); bd.className = "sp-body";
       bd.appendChild(stoneCard(st, { buttons: false }));
-      const b = iconBtn("send", "Share in chat", "primary", () => { $("stone-modal").classList.remove("open"); shareStone(st); });
+      const b = iconBtn("send", "Share in chat", "primary", () => shareStonesFromPicker([st]));
       const h = iconBtn("pin", "Request hold", "hold-btn", () => { $("stone-modal").classList.remove("open"); openHoldForm(st); });
-      const w = iconBtn("wa", "WhatsApp", "wa-btn", () => shareWhatsApp(stoneText(st)));
+      const w = iconBtn("wa", "WhatsApp", "wa-btn client-only", () => shareWhatsApp(stoneText(st)));
       const bar = document.createElement("div"); bar.className = "sc-links"; bar.appendChild(w); bar.appendChild(h); bar.appendChild(b); bd.appendChild(bar);
       wrap.appendChild(cb); wrap.appendChild(bd); box.appendChild(wrap);
     });
@@ -3539,11 +3568,14 @@ if ("serviceWorker" in navigator) {
   const selList = () => Array.from(stoneSel.values()).map(stoneSnap);
   $("sel-wa").addEventListener("click", () => shareWhatsApp(stonesText(selList())));
   $("sel-xls").addEventListener("click", () => downloadStonesXlsx(selList()));
-  $("sel-share").addEventListener("click", () => {
-    const list = selList(); if (!list.length) return;
+  $("sel-share").addEventListener("click", () => { const list = selList(); if (list.length) shareStonesFromPicker(list); });
+  // chat mode → post into the open chat; Stock page → choose the chat / person first
+  function shareStonesFromPicker(list) {
+    list = list.map(stoneSnap);
+    if (stoneMode === "stock") { openChatPicker({ stones: list }); return; }
     $("stone-modal").classList.remove("open"); stoneSel.clear(); updateSelBar();
     if (list.length === 1) shareStone(list[0]); else sendSpecial({ stone_list: list });
-  });
+  }
 
   // ---------- WhatsApp + Excel for stones ----------
   function shareWhatsApp(text) {
@@ -4378,6 +4410,7 @@ if ("serviceWorker" in navigator) {
     const { data } = await sb.from("stones").select("stock_id").or("stock_id.eq." + code.replace(/[,()]/g, "") + ",cert_no.eq." + code.replace(/[,()]/g, "")).limit(1);
     stopScanner();
     $("plus-menu").classList.remove("open");
+    if (!$("stone-modal").classList.contains("open")) { stoneMode = "chat"; $("stone-modal").dataset.mode = "chat"; $("stone-title").textContent = "💎 Share a stone"; }   // scan from ＋ = chat mode; scan inside 💎 Stock keeps Stock mode
     $("stone-modal").classList.add("open"); $("sf-clear").click();
     $("stone-q").value = data && data[0] ? data[0].stock_id : code; updateSelBar(); runStoneSearch();
     if (!data || !data[0]) showBanner("No stone with exact code " + code + " — showing closest matches.", true);
@@ -4951,7 +4984,7 @@ if ("serviceWorker" in navigator) {
     user_pending: "⏳ User set to pending", role_changed: "🛡️ Role changed", hold_approved: "📌 Hold approved", hold_rejected: "📌 Hold rejected", hold_expired: "⌛ Hold expired",
     discount_approved: "💲 Discount approved", discount_rejected: "💲 Discount rejected", group_created: "👥 Group created", group_deleted: "👥 Group deleted",
     group_renamed: "👥 Group renamed", member_added: "➕ Added to group", member_removed: "➖ Removed from group", device_logged_out: "📱 Device logged out",
-    party_deleted: "🤝 Party deleted", stock_uploaded: "💎 Stock uploaded", backup_downloaded: "💾 Backup downloaded", client_link_created: "🔗 Client link created", settings_changed: "⚙️ Settings changed",
+    party_deleted: "🤝 Party deleted", stock_uploaded: "💎 Stock uploaded", stock_access_on: "💎 Stock access given", stock_access_off: "💎 Stock access removed", backup_downloaded: "💾 Backup downloaded", client_link_created: "🔗 Client link created", settings_changed: "⚙️ Settings changed",
   };
   const actDetail = (a) => {
     const d = a.details || {};
