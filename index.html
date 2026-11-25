@@ -1180,7 +1180,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v32 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v33 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -2387,9 +2387,7 @@ if ("serviceWorker" in navigator) {
           const img = document.createElement("img"); img.className="attach-img"; img.alt=m.attachment_name||"photo"; img.loading = "lazy"; img.decoding = "async";
           const iu = fileUrl(m.attachment_url); if (iu) img.src = iu; else { img.style.minWidth = "160px"; img.style.minHeight = "120px"; img.style.background = "rgba(127,127,127,.15)"; }
           img.addEventListener("click", async () => { try { openLightbox(await fileUrlNow(m.attachment_url), m.attachment_name || ""); } catch (e) { showBanner("Couldn't open photo: " + e.message, true); } });
-          const iw = document.createElement("div"); iw.className = "attach-wrap"; iw.appendChild(img);
-          if (!m._status) iw.appendChild(dlButton(m, "on-img"));
-          bubble.appendChild(iw);
+          bubble.appendChild(img);   // download: ⋮ menu → ⬇ Download
         } else if (type.startsWith("audio/") && !parts) {
           const au = document.createElement("audio"); au.controls = true; au.preload = "metadata"; const auu = fileUrl(m.attachment_url); if (auu) au.src = auu;
           bubble.appendChild(au);
