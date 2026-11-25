@@ -177,6 +177,7 @@
   .tabs button { border:none; background:none; color:var(--text-dim); font:inherit; font-size:13.5px; font-weight:600; padding:9px 10px; cursor:pointer; white-space:nowrap; flex-shrink:0; border-bottom:2px solid transparent; }
   .tabs { overflow-x:auto; scrollbar-width:thin; }
   #admin-modal .panel { max-width:940px; }
+  #stone-modal .panel { max-width:980px; }
   .tabs button.active { color:var(--text); border-bottom-color:var(--accent); }
   .user-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
   .user-row .avatar { width:36px; height:36px; }
@@ -358,13 +359,39 @@
   .seen-row .avatar { width:32px; height:32px; }
   .seen-row .t { margin-left:auto; font-size:12px; color:var(--text-dim); }
   /* stone search filters + multi-select */
-  .stone-filters { display:grid; grid-template-columns:repeat(4, 1fr); gap:6px 8px; margin-bottom:8px; }
+  .stone-filters { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:6px 8px; margin-bottom:8px; }
   .stone-filters label { font-size:11px; color:var(--text-dim); display:flex; flex-direction:column; gap:2px; }
   .stone-filters select, .stone-filters input { padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font:inherit; font-size:13px; margin:0 !important; min-width:0; }
   .stone-filters .rng { display:flex; gap:4px; }
-  .stone-filters .rng > * { flex:1; }
-  @media (max-width: 600px) { .stone-filters { grid-template-columns:repeat(2, 1fr); } }
+  .stone-filters .rng > * { flex:1; min-width:0; width:100%; }
+  .stone-filters select { width:100%; }
+  @media (max-width: 600px) { .stone-filters { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
   .stone-pick { display:flex; gap:10px; align-items:flex-start; }
+  .view-toggle { float:right; display:inline-flex; gap:0; }
+  .view-toggle .small-btn { border-radius:0; }
+  .view-toggle .small-btn:first-child { border-radius:8px 0 0 8px; } .view-toggle .small-btn:last-child { border-radius:0 8px 8px 0; margin-left:-1px; }
+  .view-toggle .small-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .stone-table-wrap { overflow:auto; max-height:52vh; border:1px solid var(--border); border-radius:10px; }
+  .stone-table { border-collapse:collapse; width:100%; font-size:12.5px; white-space:nowrap; }
+  .stone-table th { position:sticky; top:0; z-index:1; background:var(--bg-raised); color:var(--text-dim); font-weight:600; text-align:left; padding:7px 8px; border-bottom:1px solid var(--border); font-size:11.5px; }
+  .stone-table td { padding:6px 8px; border-bottom:1px solid var(--border); color:var(--text); }
+  .stone-table tbody tr { cursor:pointer; } .stone-table tbody tr:hover { background:color-mix(in srgb, var(--accent) 6%, transparent); }
+  .stone-table tr.sel { background:color-mix(in srgb, var(--accent) 12%, transparent); }
+  .stone-table .num { text-align:right; font-variant-numeric:tabular-nums; }
+  .stone-table .sid { font-weight:700; }
+  .stone-table .neg { color:var(--danger, #c0392b); }
+  .stone-table input[type=checkbox] { width:16px; height:16px; margin:0; accent-color:var(--accent); }
+  .stone-table td.acts > button { margin-right:4px; vertical-align:middle; }
+  .stone-table .acts .small-btn { padding:0; }
+  .small-btn.ib { display:inline-flex; align-items:center; gap:5px; }
+  .small-btn.ib .ic { width:15px; height:15px; flex-shrink:0; }
+  .small-btn.ib-only { width:30px; height:30px; justify-content:center; padding:0; border-radius:50%; }
+  .small-btn.ib-only .ic { width:16px; height:16px; }
+  .small-btn.wa-btn.ib-only { background:#25D366; color:#fff; border-color:#25D366; }
+  .small-btn.hold-btn .ic { color:#d35400; }
+  .stone-table tfoot td { position:sticky; bottom:0; background:var(--bg-raised); font-weight:700; border-top:1px solid var(--border); border-bottom:none; }
+  .st-badge { border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:10.5px; font-weight:600; color:var(--text-dim); }
+  .st-badge.ok { color:#1e8449; border-color:color-mix(in srgb, #1e8449 40%, transparent); }
   .stone-pick > input[type=checkbox] { width:18px; height:18px; margin-top:12px; accent-color:var(--accent); flex-shrink:0; }
   .stone-pick > .sp-body { flex:1; min-width:0; }
   .sel-bar { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
@@ -909,7 +936,7 @@
     <div class="panel wide">
       <div class="panel-head">💎 Share a stone</div>
       <div class="panel-body">
-        <input type="search" id="stone-q" placeholder="Stock ID or certificate number…">
+        <input type="search" id="stone-q" placeholder="Stock ID or certificate no. — paste many IDs to find them all at once">
         <div class="stone-filters" id="stone-filters">
           <label>Shape<select id="sf-shape"><option value="">Any</option></select></label>
           <label>Carat<span class="rng"><input id="sf-ct1" type="number" step="0.01" min="0" placeholder="from"><input id="sf-ct2" type="number" step="0.01" min="0" placeholder="to"></span></label>
@@ -918,16 +945,16 @@
           <label>Rate $/ct<span class="rng"><input id="sf-r1" type="number" min="0" placeholder="min"><input id="sf-r2" type="number" min="0" placeholder="max"></span></label>
           <label>Sort<select id="sf-sort"><option value="stock_id">Stock ID</option><option value="carat:desc">Carat ↓</option><option value="carat">Carat ↑</option><option value="rate">Rate ↑</option><option value="rate:desc">Rate ↓</option><option value="back">Back % (best first)</option></select></label>
           <label style="justify-content:flex-end;"><span style="display:flex; gap:6px; align-items:center; font-size:12.5px; color:var(--text);"><input type="checkbox" id="sf-avail" checked style="width:auto;"> Available only</span></label>
-          <label style="justify-content:flex-end;"><span style="display:flex; gap:6px;"><button class="small-btn" id="sf-clear" type="button">Clear filters</button><button class="small-btn" id="sf-scan" type="button">🔍 Scan</button></span></label>
+          <label style="justify-content:flex-end;"><span style="display:flex; flex-wrap:wrap; gap:6px;"><button class="small-btn" id="sf-clear" type="button">Clear filters</button><button class="small-btn" id="sf-scan" type="button">🔍 Scan</button></span></label>
         </div>
         <div id="stone-results"></div>
       </div>
       <div class="panel-foot sel-bar">
         <span class="grow" id="sel-info">Tick stones to share several at once</span>
-        <button class="small-btn wa-btn" id="sel-wa" disabled>WhatsApp</button>
-        <button class="small-btn" id="sel-xls" disabled>⬇ Excel</button>
-        <button class="small-btn" id="sel-link" disabled>🔗 Client link</button>
-        <button class="small-btn primary" id="sel-share" disabled>Share in chat</button>
+        <button class="small-btn wa-btn ib" id="sel-wa" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2A9.8 9.8 0 0 0 3.6 17l-1.3 4.8 4.9-1.3A9.8 9.8 0 1 0 12 2.2Zm0 17.8a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 12 20Zm4.4-6c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8 1c-.1.2-.3.2-.5.1a6.6 6.6 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 5 5 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c1.6.7 2.2.7 3 .6a2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .2-1.2c-.1-.1-.3-.2-.5-.3Z"/></svg><span>WhatsApp</span></button>
+        <button class="small-btn ib" id="sel-xls" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span>Excel</span></button>
+        <button class="small-btn ib" id="sel-link" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span>Client link</span></button>
+        <button class="small-btn primary ib" id="sel-share" disabled><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M22 2 11 13"/></svg><span>Share in chat</span></button>
         <button class="small-btn" id="stone-close">Close</button>
       </div>
     </div>
@@ -1134,7 +1161,8 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
 const VAPID_PUBLIC_KEY = "";      // for notifications when the app is closed — see SETUP.md "Push notifications". Leave "" to skip.
 const MEET_BASE_URL = "https://meet.jit.si/";   // video meetings (free). Any meeting service that accepts a room name in the URL works.
-const MAX_FILE_MB = 50;   // per-file limit. Supabase Free plan max = 50 MB; on Pro you can raise this (Storage → Settings)
+const MAX_FILE_MB = 500;  // biggest file a person can send. Bigger files are sent in pieces (see CHUNK_MB).
+const CHUNK_MB = 45;      // piece size. Must stay below Supabase's per-file limit (Free plan: 50 MB). On Pro you can raise both.
 // =================================================================================================
 
 if ("serviceWorker" in navigator) {
@@ -2328,13 +2356,14 @@ if ("serviceWorker" in navigator) {
       if (extra) { bubble.appendChild(extra); bubble.classList.add("has-card"); }
       if (m.attachment_url) {
         const type = m.attachment_type || "";
-        if (type.startsWith("image/")) {
+        const parts = isPartsRef(m.attachment_url);
+        if (type.startsWith("image/") && !parts) {
           bubble.style.padding = "4px";
           const img = document.createElement("img"); img.className="attach-img"; img.alt=m.attachment_name||"photo";
           const iu = fileUrl(m.attachment_url); if (iu) img.src = iu; else { img.style.minWidth = "160px"; img.style.minHeight = "120px"; img.style.background = "rgba(127,127,127,.15)"; }
           img.addEventListener("click", async () => { try { openLightbox(await fileUrlNow(m.attachment_url), m.attachment_name || ""); } catch (e) { showBanner("Couldn't open photo: " + e.message, true); } });
           bubble.appendChild(img);
-        } else if (type.startsWith("audio/")) {
+        } else if (type.startsWith("audio/") && !parts) {
           const au = document.createElement("audio"); au.controls = true; au.preload = "metadata"; const auu = fileUrl(m.attachment_url); if (auu) au.src = auu; bubble.appendChild(au);
         } else {
           const a = document.createElement("a"); a.className="attach-file"; a.href=m._status ? "javascript:void 0" : (fileUrl(m.attachment_url) || "javascript:void 0"); a.download=m.attachment_name||"file"; a.target="_blank"; a.rel="noopener";
@@ -2342,8 +2371,10 @@ if ("serviceWorker" in navigator) {
           icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>';
           const meta2 = document.createElement("div");
           const fn = document.createElement("div"); fn.className="file-name"; fn.textContent=m.attachment_name||"File";
-          const fs = document.createElement("div"); fs.className="file-size"; fs.textContent=fmtSize(m.attachment_size);
+          const fs = document.createElement("div"); fs.className="file-size";
+          fs.textContent = fmtSize(m.attachment_size) + (m._status === "sending" && m._progress != null ? " · uploading " + m._progress + "%" : parts && !m._status ? " · tap to download" : "");
           meta2.appendChild(fn); meta2.appendChild(fs); a.appendChild(icon); a.appendChild(meta2); bubble.appendChild(a);
+          if (parts && !m._status) { a.removeAttribute("target"); a.addEventListener("click", (e) => { e.preventDefault(); downloadAttachment(m); }); }
           const fx = fileExtra(m); if (fx) bubble.appendChild(fx);   // Excel preview
         }
       }
@@ -2408,15 +2439,40 @@ if ("serviceWorker" in navigator) {
   sendBtn.addEventListener("click", sendMessage);
   attachBtn.addEventListener("click", () => fileInput.click());
   fileInput.addEventListener("change", () => { Array.from(fileInput.files||[]).forEach(addPendingFile); fileInput.value=""; });
+  // paste a screenshot / copied photo or file straight into the message box (Ctrl+V)
+  function pastedFiles(dt) {
+    const out = [];
+    Array.from((dt && dt.items) || []).forEach(it => { if (it.kind === "file") { const f = it.getAsFile(); if (f) out.push(f); } });
+    if (!out.length) Array.from((dt && dt.files) || []).forEach(f => out.push(f));
+    return out.map((f, i) => {
+      if (f.name && f.name !== "image.png" && f.name !== "blob") return f;
+      const ext = ((f.type || "image/png").split("/")[1] || "png").replace("jpeg", "jpg").replace(/\W.*/, "");
+      const d = new Date(), pad = (n) => String(n).padStart(2, "0");
+      const nm = "Screenshot " + d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + "." + pad(d.getMinutes()) + "." + pad(d.getSeconds()) + (i ? "-" + (i + 1) : "") + "." + ext;
+      try { return new File([f], nm, { type: f.type || "image/png" }); } catch (e) { f.name2 = nm; return f; }
+    });
+  }
+  document.addEventListener("paste", (e) => {
+    const t = e.target, inComposer = t === composerInput || (t && t.closest && t.closest("#composer"));
+    const typingElsewhere = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable) && !inComposer;
+    if (typingElsewhere || document.querySelector(".modal-back.open")) return;
+    if (!composerInput.offsetParent) return;   // not logged in / no chat on screen
+    const files = pastedFiles(e.clipboardData); if (!files.length) return;   // plain text paste works as before
+    e.preventDefault(); files.forEach(addPendingFile); composerInput.focus();
+  });
 
   function addPendingFile(file) {
     if (file.size > MAX_FILE_MB * 1048576) {
-      showBanner("“" + file.name + "” is " + fmtSize(file.size) + " — files must be under " + MAX_FILE_MB + " MB.", true);
-      setTimeout(() => showBanner(""), 4000);
+      const msg = "⚠ File too big\n\n“" + file.name + "” is " + fmtSize(file.size) + ".\nThe size limit is " + MAX_FILE_MB + " MB per file.\n\nThis file was not attached.";
+      showBanner("“" + file.name + "” (" + fmtSize(file.size) + ") is over the " + MAX_FILE_MB + " MB size limit — not attached.", true);
+      setTimeout(() => showBanner(""), 8000);
+      alert(msg);
       return;
     }
-    const isImage = file.type && file.type.startsWith("image/");
-    const isAudio = file.type && file.type.startsWith("audio/");
+    if (file.size > 100 * 1048576 && !confirm("“" + file.name + "” is " + fmtSize(file.size) + ".\n\nBig files use a lot of the shared storage (Free plan: 1 GB for everyone). Send it?")) return;
+    const big = file.size > CHUNK_MB * 1048576;
+    const isImage = !big && file.type && file.type.startsWith("image/");
+    const isAudio = !big && file.type && file.type.startsWith("audio/");
     pendingAttachments.push({ blob:file, name:file.name, isImage, previewUrl: (isImage || isAudio) ? URL.createObjectURL(file) : null });
     renderPending();
   }
@@ -2447,6 +2503,7 @@ if ("serviceWorker" in navigator) {
     return null;
   }
   function fileUrl(ref) {   // usable link now, or "" while it's being signed (the chat redraws when ready)
+    if (isPartsRef(ref)) return "";
     const path = storagePath(ref); if (!path) return ref || "";
     const c = signCache[path];
     if (c && c.exp > Date.now() + 60000) return c.url;
@@ -2469,6 +2526,58 @@ if ("serviceWorker" in navigator) {
     if (error || !data) throw new Error("file link expired or not allowed");
     signCache[path] = { url: data.signedUrl, exp: Date.now() + 3600e3 };
     return data.signedUrl;
+  }
+
+  // ---------- big files: sent in pieces, joined back on download ----------
+  // stored as "sbparts://chat-uploads/<base>?n=<pieces>" — piece i is "<base>.part001" …
+  const CHUNK = CHUNK_MB * 1048576;
+  const isPartsRef = (ref) => typeof ref === "string" && ref.startsWith("sbparts://");
+  function partsOf(ref) {
+    const m = /^sbparts:\/\/chat-uploads\/(.+)\?n=(\d+)$/.exec(ref || ""); if (!m) return [];
+    return Array.from({ length: Number(m[2]) }, (_, i) => m[1] + ".part" + String(i + 1).padStart(3, "0"));
+  }
+  async function uploadAttachment(m) {
+    const blob = m._file.blob;
+    if (!m._base) m._base = myId + "/" + Date.now() + "-" + safeName(m._file.name);
+    if (blob.size <= CHUNK) {
+      const up = await sb.storage.from("chat-uploads").upload(m._base, blob);
+      if (up.error && !/exists|duplicate/i.test(up.error.message || "")) throw up.error;
+      return "sb://chat-uploads/" + m._base;   // private: opened via signed links
+    }
+    const n = Math.ceil(blob.size / CHUNK);
+    m._partsDone = m._partsDone || 0;           // a retry continues where it stopped
+    for (let i = m._partsDone; i < n; i++) {
+      m._progress = Math.round(i / n * 100); render(true);
+      const part = blob.slice(i * CHUNK, Math.min(blob.size, (i + 1) * CHUNK), "application/octet-stream");
+      const up = await sb.storage.from("chat-uploads").upload(m._base + ".part" + String(i + 1).padStart(3, "0"), part);
+      if (up.error && !/exists|duplicate/i.test(up.error.message || "")) throw up.error;
+      m._partsDone = i + 1;
+    }
+    m._progress = 100;
+    return "sbparts://chat-uploads/" + m._base + "?n=" + n;
+  }
+  // download any attachment (one piece or many) as a Blob, with progress
+  async function fetchAttachmentBlob(ref, type, label) {
+    if (!isPartsRef(ref)) { const r = await fetch(await fileUrlNow(ref)); if (!r.ok) throw new Error("download failed (" + r.status + ")"); return r.blob(); }
+    const parts = partsOf(ref);
+    const { data, error } = await sb.storage.from("chat-uploads").createSignedUrls(parts, 3600);
+    if (error || !data) throw new Error("file not available");
+    const chunks = [];
+    for (let i = 0; i < data.length; i++) {
+      showBanner("⬇ Downloading " + (label || "file") + "… " + Math.round(i / data.length * 100) + "%");
+      const r = await fetch(data[i].signedUrl); if (!r.ok) throw new Error("piece " + (i + 1) + " failed (" + r.status + ")");
+      chunks.push(await r.blob());
+    }
+    showBanner("");
+    return new Blob(chunks, { type: type || "application/octet-stream" });
+  }
+  async function downloadAttachment(m) {
+    try {
+      const blob = await fetchAttachmentBlob(m.attachment_url, m.attachment_type, m.attachment_name);
+      const url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = m.attachment_name || "file"; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (e) { showBanner("Couldn't download: " + e.message, true); }
   }
 
   // ---------- sending with status: sending → delivered → read, or failed (tap to retry) ----------
@@ -2515,12 +2624,7 @@ if ("serviceWorker" in navigator) {
       if (m.urgent) row.urgent = true;
       if (m.meeting) row.meeting = m.meeting;
       if (m._file) {
-        if (!m._uploadedUrl) {
-          const path = myId + "/" + Date.now() + "-" + safeName(m._file.name);
-          const up = await sb.storage.from("chat-uploads").upload(path, m._file.blob);
-          if (up.error) throw up.error;
-          m._uploadedUrl = "sb://chat-uploads/" + path;   // private: opened via signed links
-        }
+        if (!m._uploadedUrl) m._uploadedUrl = await uploadAttachment(m);
         Object.assign(row, { attachment_url: m._uploadedUrl, attachment_name: m._file.name, attachment_type: m._file.blob.type, attachment_size: m._file.blob.size });
       }
       const { data, error } = await sb.from("messages").insert(row).select().single();
@@ -2567,7 +2671,7 @@ if ("serviceWorker" in navigator) {
 
   function statusEl(m) {
     const el = document.createElement("div"); el.className = "msg-status";
-    if (m._status === "sending") { el.innerHTML = CLOCK + "<span>Sending…</span>"; el.title = "Sending"; return el; }
+    if (m._status === "sending") { el.innerHTML = CLOCK + "<span>Sending…" + (m._progress != null && m._progress < 100 ? " " + m._progress + "%" : "") + "</span>"; el.title = "Sending"; return el; }
     if (m._status === "failed") {
       el.className += " failed"; el.innerHTML = "<span>⚠ Not sent · Tap to retry</span>"; el.title = m._error || "Failed";
       el.addEventListener("click", () => deliver(m)); return el;
@@ -3033,6 +3137,7 @@ if ("serviceWorker" in navigator) {
   // =====================================================================
   // ---------- 💎 Stone cards ----------
   // =====================================================================
+  const ICONS = {"wa": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 2.2A9.8 9.8 0 0 0 3.6 17l-1.3 4.8 4.9-1.3A9.8 9.8 0 1 0 12 2.2Zm0 17.8a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 12 20Zm4.4-6c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8 1c-.1.2-.3.2-.5.1a6.6 6.6 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 5 5 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c1.6.7 2.2.7 3 .6a2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .2-1.2c-.1-.1-.3-.2-.5-.3Z\"/></svg>", "pin": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 17v5\"/><path d=\"M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z\"/></svg>", "send": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m22 2-7 20-4-9-9-4 20-7Z\"/><path d=\"M22 2 11 13\"/></svg>", "photo": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z\"/><circle cx=\"12\" cy=\"13\" r=\"3.5\"/></svg>", "video": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"2\" y=\"6\" width=\"14\" height=\"12\" rx=\"2\"/><path d=\"m16 10 6-3v10l-6-3\"/></svg>", "cert": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z\"/><path d=\"M14 2v6h6M8 13h8M8 17h5\"/></svg>", "xls": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3v12\"/><path d=\"m7 10 5 5 5-5\"/><path d=\"M5 21h14\"/></svg>", "link": "<svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7\"/><path d=\"M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7\"/></svg>"};
   const STONE_FIELDS = {
     stock_id: ["stock id","stockid","stock no","stock no.","stockno","stock","stock number","lot no","lot","lot id","packet no","packet","stone id","stone no","ref no","reference","sku","item no","item"],
     shape: ["shape","shp","standard shape"],
@@ -3115,14 +3220,14 @@ if ("serviceWorker" in navigator) {
       const cp = document.createElement("button"); cp.className = "small-btn"; cp.textContent = "Copy";
       cp.addEventListener("click", async (e) => { e.stopPropagation(); try { await navigator.clipboard.writeText(stoneText(st)); showBanner("Stone details copied."); setTimeout(() => showBanner(""), 1200); } catch (er) {} });
       links.appendChild(cp);
-      const wa = document.createElement("button"); wa.className = "small-btn wa-btn"; wa.textContent = "WhatsApp";
+      const wa = document.createElement("button"); wa.className = "small-btn wa-btn ib"; wa.innerHTML = ICONS.wa + "<span>WhatsApp</span>";
       wa.addEventListener("click", (e) => { e.stopPropagation(); shareWhatsApp(stoneText(st)); });
       links.appendChild(wa);
       if (opts.hold !== false) {
         const db2 = document.createElement("button"); db2.className = "small-btn"; db2.textContent = "💲 Ask discount";
         db2.addEventListener("click", (e) => { e.stopPropagation(); openDiscountForm(st); });
         links.appendChild(db2);
-        const hb = document.createElement("button"); hb.className = "small-btn primary"; hb.textContent = "📌 Request hold";
+        const hb = document.createElement("button"); hb.className = "small-btn primary ib"; hb.innerHTML = ICONS.pin + "<span>Request hold</span>";
         hb.addEventListener("click", (e) => { e.stopPropagation(); openHoldForm(st); });
         links.appendChild(hb);
       }
@@ -3136,6 +3241,13 @@ if ("serviceWorker" in navigator) {
   $("stone-btn").addEventListener("click", () => { $("stone-modal").classList.add("open"); $("stone-q").focus(); updateSelBar(); runStoneSearch(); });
   $("stone-close").addEventListener("click", () => $("stone-modal").classList.remove("open"));
   $("stone-modal").addEventListener("click", (e) => { if (e.target.id === "stone-modal") $("stone-modal").classList.remove("open"); });
+  $("stone-q").addEventListener("paste", (e) => {
+    const t = (e.clipboardData && e.clipboardData.getData("text")) || ""; if (!/[\r\n\t]/.test(t)) return;
+    e.preventDefault(); const el = $("stone-q");
+    const add = t.split(/[\r\n\t]+/).map(x => x.trim()).filter(Boolean).join(", ");
+    el.value = el.value.trim() ? el.value.trim().replace(/,?$/, ", ") + add : add;
+    clearTimeout(stoneTimer); runStoneSearch();
+  });
   $("stone-q").addEventListener("input", () => { clearTimeout(stoneTimer); stoneTimer = setTimeout(runStoneSearch, 250); });
   const COLORS = ["D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];
   const CLARITIES = ["FL","IF","VVS1","VVS2","VS1","VS2","SI1","SI2","SI3","I1","I2","I3"];
@@ -3154,6 +3266,31 @@ if ("serviceWorker" in navigator) {
   $("sf-clear").addEventListener("click", () => { ["stone-q","sf-shape","sf-ct1","sf-ct2","sf-col1","sf-col2","sf-cla1","sf-cla2","sf-r1","sf-r2"].forEach(id => $(id).value = ""); $("sf-sort").value = "stock_id"; $("sf-avail").checked = true; runStoneSearch(); });
   const rangeOf = (list, a, b) => { if (!a && !b) return null; const i = a ? list.indexOf(a) : 0, j = b ? list.indexOf(b) : list.length - 1; return list.slice(Math.min(i, j), Math.max(i, j) + 1); };
   function filtersActive() { return ["sf-shape","sf-ct1","sf-ct2","sf-col1","sf-col2","sf-cla1","sf-cla2","sf-r1","sf-r2"].some(id => $(id).value); }
+  async function multiStoneSearch(ids, box, stamp) {
+    const look = Array.from(new Set(ids.concat(ids.map(x => x.toUpperCase()))));
+    const found = new Map();
+    for (let i = 0; i < look.length; i += 150) {
+      const part = look.slice(i, i + 150);
+      const [a, b] = await Promise.all([sb.from("stones").select("*").in("stock_id", part).limit(1000), sb.from("stones").select("*").in("cert_no", part).limit(1000)]);
+      if (a.error && b.error) { box.innerHTML = '<div class="side-empty"></div>'; box.firstChild.textContent = "Search failed: " + (a.error.message || a.error); return; }
+      [].concat(a.data || [], b.data || []).forEach(st => found.set(st.stock_id, st));
+    }
+    if (runStoneSearch.last !== stamp) return;
+    const key = (v) => String(v || "").toUpperCase();
+    const byKey = new Map(); found.forEach(st => { byKey.set(key(st.stock_id), st); if (st.cert_no) byKey.set(key(st.cert_no), st); });
+    const list = [], seen = new Set(), missing = [];
+    ids.forEach(id => { const st = byKey.get(key(id)); if (!st) missing.push(id); else if (!seen.has(st.stock_id)) { seen.add(st.stock_id); list.push(st); } });
+    box.innerHTML = "";
+    stoneResults = list;
+    const info = document.createElement("div"); info.className = "side-sub"; info.style.margin = "0 0 6px";
+    info.textContent = list.length + " of " + ids.length + " found" + (missing.length ? " · not in stock: " + missing.slice(0, 30).join(", ") + (missing.length > 30 ? " … (+" + (missing.length - 30) + ")" : "") : " ✓");
+    if (missing.length) info.style.color = "var(--danger, #c0392b)";
+    box.appendChild(info);
+    if (!list.length) { updateSelBar(); return; }
+    const qkey = ids.join(","); if (multiStoneSearch.lastQ !== qkey) { multiStoneSearch.lastQ = qkey; list.forEach(st => stoneSel.set(st.stock_id, st)); }   // found stones are ticked → Share / WhatsApp / Excel / Client link at once
+    renderStoneResults(box, list.length);
+  }
+  const isAvailableStone = (st) => !/memo|hold|sold|out|return|reserved|issue/i.test(String(st.status || ""));
   async function runStoneSearch() {
     loadShapes();
     const qv = $("stone-q").value.trim(), box = $("stone-results");
@@ -3165,6 +3302,9 @@ if ("serviceWorker" in navigator) {
       box.firstChild.textContent = count ? count.toLocaleString() + " stones in stock. Type a Stock ID / certificate number, or use the filters." : "No stock uploaded yet." + (amAppAdmin() ? " Upload it in Admin panel → Stock." : " Ask an admin to upload it.");
       stoneResults = []; updateSelBar(); return;
     }
+    // several stock IDs / certificate numbers at once (separated by space, comma, new line…)
+    const ids = Array.from(new Set(qv.split(/[\s,;|]+/).map(x => x.trim()).filter(Boolean)));
+    if (ids.length > 1) return multiStoneSearch(ids.slice(0, 500), box, stamp);
     let q = sb.from("stones").select("*", { count: "exact" });
     if (qv) { const esc = qv.replace(/[%_\\,()]/g, ""); q = q.or("stock_id.ilike.%" + esc + "%,cert_no.ilike.%" + esc + "%"); }
     if ($("sf-shape").value) q = q.eq("shape", $("sf-shape").value);
@@ -3174,31 +3314,117 @@ if ("serviceWorker" in navigator) {
     const lr = rangeOf(CLARITIES, $("sf-cla1").value, $("sf-cla2").value); if (lr) q = q.in("clarity", lr);
     if ($("sf-r1").value) q = q.gte("rate", Number($("sf-r1").value));
     if ($("sf-r2").value) q = q.lte("rate", Number($("sf-r2").value));
-    if ($("sf-avail").checked) q = q.ilike("status", "avail%");
+    // "Available only" never hides a stone you searched for by ID / certificate number.
+    // A stone counts as available unless its status says memo / hold / sold / out / return (blank status = available).
+    const availOnly = $("sf-avail").checked && !qv;
     const [col, dir] = $("sf-sort").value.split(":");
-    const { data, error, count } = await q.order(col, { ascending: dir !== "desc", nullsFirst: false }).limit(100);
+    let { data, error, count } = await q.order(col, { ascending: dir !== "desc", nullsFirst: false }).limit(availOnly ? 1000 : 100);
     if (runStoneSearch.last !== stamp) return;
     box.innerHTML = "";
-    if (error) { box.innerHTML = '<div class="side-empty">Search failed.</div>'; return; }
-    stoneResults = data || [];
-    if (!stoneResults.length) { box.innerHTML = '<div class="side-empty">No stones match.' + ($("sf-avail").checked ? ' (Untick "Available only" to include stones on memo.)' : "") + '</div>'; updateSelBar(); return; }
+    if (error) { box.innerHTML = '<div class="side-empty"></div>'; box.firstChild.textContent = "Search failed: " + (error.message || error); return; }
+    data = data || [];
+    if (availOnly) { const n0 = data.length; data = data.filter(isAvailableStone); count = n0 < 1000 ? data.length : null; data = data.slice(0, 100); }
+    stoneResults = data;
+    if (!stoneResults.length) {
+      box.innerHTML = '<div class="side-empty"></div>';
+      if (qv) {
+        const { count: total } = await sb.from("stones").select("stock_id", { count: "exact", head: true });
+        box.firstChild.textContent = "No stone with “" + qv + "” in the uploaded stock (" + (total || 0).toLocaleString() + " stones)." + (filtersActive() ? " Try “Clear filters”." : " Check the file had this stock ID, and that the Stock ID column was matched in Admin panel → Stock.");
+      } else box.firstChild.textContent = "No stones match." + (availOnly ? " (Untick “Available only” to include stones on memo / hold.)" : "");
+      updateSelBar(); return;
+    }
+    renderStoneResults(box, count);
+  }
+  // button with a symbol (+ optional label). iconOnly → label becomes the tooltip
+  function iconBtn(icon, label, cls, fn, iconOnly) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "small-btn ib " + (cls || "") + (iconOnly ? " ib-only" : "");
+    b.innerHTML = ICONS[icon] || ""; b.title = label; b.setAttribute("aria-label", label);
+    if (!iconOnly) { const sp = document.createElement("span"); sp.textContent = label; b.appendChild(sp); }
+    if (fn) b.addEventListener("click", (e) => { e.stopPropagation(); fn(e); });
+    return b;
+  }
+  let stoneView = "table"; try { stoneView = localStorage.getItem("kg-stone-view") || "table"; } catch (e) {}
+  const PICK_COLS = [
+    ["stock_id", "Stock ID"], ["status", "Status"], ["shape", "Shape"], ["carat", "Carat", (v) => Number(v).toFixed(2)], ["color", "Color"], ["clarity", "Clarity"],
+    ["cut", "Cut"], ["polish", "Pol"], ["symmetry", "Sym"], ["fluorescence", "Fluor"], ["lab", "Lab"], ["cert_no", "Cert No"], ["measurements", "Meas."],
+    ["rap_rate", "Rap $", (v) => Number(v).toLocaleString()], ["back", "Back %", (v) => Number(v).toFixed(2)], ["rate", "Rate $/ct", (v) => Number(v).toLocaleString()],
+    ["amount", "Amount $", (v) => Number(v).toLocaleString(undefined, { maximumFractionDigits: 0 })], ["location", "Location"]
+  ];
+  const NUM_COLS = new Set(["carat", "rap_rate", "back", "rate", "amount"]);
+  function stoneTable(list) {
+    const has = (k) => list.some(st => st[k] != null && st[k] !== "");
+    const cols = PICK_COLS.filter(([k]) => k === "stock_id" || has(k));   // hide columns that are empty for every stone
+    const wrap = document.createElement("div"); wrap.className = "stone-table-wrap";
+    const t = document.createElement("table"); t.className = "stone-table";
+    const th = document.createElement("tr");
+    const allCb = document.createElement("input"); allCb.type = "checkbox"; allCb.title = "Tick all"; allCb.checked = list.length && list.every(st => stoneSel.has(st.stock_id));
+    const th0 = document.createElement("th"); th0.appendChild(allCb); th.appendChild(th0);
+    cols.forEach(([k, label]) => { const c = document.createElement("th"); c.textContent = label; if (NUM_COLS.has(k)) c.className = "num"; th.appendChild(c); });
+    const thA = document.createElement("th"); thA.textContent = "Action"; th.appendChild(thA);
+    const thead = document.createElement("thead"); thead.appendChild(th); t.appendChild(thead);
+    const tb = document.createElement("tbody"); const rowCbs = [];
+    let tot = { n: 0, ct: 0, amt: 0 };
+    list.forEach(st => {
+      const tr = document.createElement("tr"); if (stoneSel.has(st.stock_id)) tr.className = "sel";
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = stoneSel.has(st.stock_id); rowCbs.push([cb, st, tr]);
+      cb.addEventListener("change", () => { cb.checked ? stoneSel.set(st.stock_id, st) : stoneSel.delete(st.stock_id); tr.classList.toggle("sel", cb.checked); allCb.checked = list.every(x => stoneSel.has(x.stock_id)); updateSelBar(); });
+      const c0 = document.createElement("td"); c0.appendChild(cb); tr.appendChild(c0);
+      cols.forEach(([k, , f]) => {
+        const td = document.createElement("td"); const v = st[k];
+        td.textContent = v == null || v === "" ? "–" : (f && !isNaN(Number(v)) ? f(v) : String(v));
+        if (NUM_COLS.has(k)) td.className = "num";
+        if (k === "stock_id") td.className = "sid";
+        if (k === "status" && v) { td.textContent = ""; const b = document.createElement("span"); b.className = "st-badge" + (isAvailableStone(st) ? " ok" : ""); b.textContent = String(v).toUpperCase(); td.appendChild(b); }
+        if (k === "back" && Number(v) < 0) td.classList.add("neg");
+        tr.appendChild(td);
+      });
+      const ta = document.createElement("td"); ta.className = "acts";
+      const mk = (icon, title, cls, fn) => ta.appendChild(iconBtn(icon, title, cls, fn, true));
+      mk("wa", "WhatsApp", "wa-btn", () => shareWhatsApp(stoneText(st)));
+      mk("pin", "Request hold", "hold-btn", () => { $("stone-modal").classList.remove("open"); openHoldForm(st); });
+      mk("send", "Share in chat", "primary", () => { $("stone-modal").classList.remove("open"); shareStone(st); });
+      if (st.image_url) mk("photo", "Photo", "", () => window.open(st.image_url, "_blank", "noopener"));
+      if (st.video_url) mk("video", "Video", "", () => window.open(st.video_url, "_blank", "noopener"));
+      if (st.cert_url) mk("cert", "Certificate", "", () => window.open(st.cert_url, "_blank", "noopener"));
+      tr.appendChild(ta);
+      tr.addEventListener("click", (e) => { if (e.target.closest("button,input")) return; cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); });
+      tb.appendChild(tr);
+      tot.n++; tot.ct += Number(st.carat) || 0; tot.amt += Number(st.amount) || 0;
+    });
+    allCb.addEventListener("change", () => { rowCbs.forEach(([cb, st, tr]) => { cb.checked = allCb.checked; allCb.checked ? stoneSel.set(st.stock_id, st) : stoneSel.delete(st.stock_id); tr.classList.toggle("sel", allCb.checked); }); updateSelBar(); });
+    t.appendChild(tb);
+    // totals row
+    const tf = document.createElement("tr"); tf.className = "tot";
+    const f0 = document.createElement("td"); tf.appendChild(f0);
+    cols.forEach(([k]) => { const td = document.createElement("td"); if (k === "stock_id") td.textContent = tot.n + " stones"; if (k === "carat") { td.textContent = tot.ct.toFixed(2); td.className = "num"; } if (k === "amount") { td.textContent = tot.amt.toLocaleString(undefined, { maximumFractionDigits: 0 }); td.className = "num"; } if (k === "rate" && tot.ct) { td.textContent = "avg " + Math.round(tot.amt / tot.ct).toLocaleString(); td.className = "num"; } tf.appendChild(td); });
+    tf.appendChild(document.createElement("td"));
+    const tfoot = document.createElement("tfoot"); tfoot.appendChild(tf); t.appendChild(tfoot);
+    wrap.appendChild(t); return wrap;
+  }
+  function renderStoneResults(box, count) {
     const hdr = document.createElement("div"); hdr.className = "sec-label";
-    hdr.textContent = (count != null ? count.toLocaleString() : stoneResults.length) + " found" + ((count || 0) > 100 ? " · showing first 100" : "");
+    hdr.textContent = (count != null ? count.toLocaleString() : stoneResults.length) + " found" + ((count || 0) > 100 && stoneResults.length <= 100 ? " · showing first 100" : "");
     const all = document.createElement("button"); all.className = "small-btn"; all.style.marginLeft = "10px"; all.textContent = "Tick all shown";
     all.addEventListener("click", () => { const allOn = stoneResults.every(st => stoneSel.has(st.stock_id)); stoneResults.forEach(st => allOn ? stoneSel.delete(st.stock_id) : stoneSel.set(st.stock_id, st)); runStoneSearch(); });
-    hdr.appendChild(all); box.appendChild(hdr);
+    hdr.appendChild(all);
+    // Table / Cards switch (remembered on this device)
+    const vt = document.createElement("span"); vt.className = "view-toggle";
+    [["table", "▦ Table"], ["cards", "▤ Cards"]].forEach(([v, label]) => {
+      const t = document.createElement("button"); t.type = "button"; t.className = "small-btn" + (stoneView === v ? " active" : ""); t.textContent = label;
+      t.addEventListener("click", () => { stoneView = v; try { localStorage.setItem("kg-stone-view", v); } catch (e) {} box.innerHTML = ""; const info = null; renderStoneResults(box, count); });
+      vt.appendChild(t);
+    });
+    hdr.appendChild(vt); box.appendChild(hdr);
+    if (stoneView === "table") { box.appendChild(stoneTable(stoneResults)); updateSelBar(); return; }
     stoneResults.forEach(st => {
       const wrap = document.createElement("div"); wrap.className = "stone-pick";
       const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = stoneSel.has(st.stock_id);
       cb.addEventListener("change", () => { cb.checked ? stoneSel.set(st.stock_id, st) : stoneSel.delete(st.stock_id); updateSelBar(); });
       const bd = document.createElement("div"); bd.className = "sp-body";
       bd.appendChild(stoneCard(st, { buttons: false }));
-      const b = document.createElement("button"); b.className = "small-btn primary"; b.textContent = "Share in chat";
-      b.addEventListener("click", () => { $("stone-modal").classList.remove("open"); shareStone(st); });
-      const h = document.createElement("button"); h.className = "small-btn"; h.textContent = "📌 Request hold";
-      h.addEventListener("click", () => { $("stone-modal").classList.remove("open"); openHoldForm(st); });
-      const w = document.createElement("button"); w.className = "small-btn wa-btn"; w.textContent = "WhatsApp";
-      w.addEventListener("click", () => shareWhatsApp(stoneText(st)));
+      const b = iconBtn("send", "Share in chat", "primary", () => { $("stone-modal").classList.remove("open"); shareStone(st); });
+      const h = iconBtn("pin", "Request hold", "hold-btn", () => { $("stone-modal").classList.remove("open"); openHoldForm(st); });
+      const w = iconBtn("wa", "WhatsApp", "wa-btn", () => shareWhatsApp(stoneText(st)));
       const bar = document.createElement("div"); bar.className = "sc-links"; bar.appendChild(w); bar.appendChild(h); bar.appendChild(b); bd.appendChild(bar);
       wrap.appendChild(cb); wrap.appendChild(bd); box.appendChild(wrap);
     });
@@ -3647,8 +3873,10 @@ if ("serviceWorker" in navigator) {
     $("sheet-table").innerHTML = '<div class="side-empty">Opening…</div>'; $("sheet-modal").classList.add("open");
     $("sheet-download").href = url; $("sheet-download").setAttribute("download", name);
     try {
-      url = await fileUrlNow(url); $("sheet-download").href = url;
-      const [XLSX, buf] = await Promise.all([loadSheetJs(), fetch(url).then(r => { if (!r.ok) throw new Error("download failed (" + r.status + ")"); return r.arrayBuffer(); })]);
+      const ref = url;
+      if (!isPartsRef(ref)) { url = await fileUrlNow(ref); $("sheet-download").href = url; }
+      const [XLSX, buf] = await Promise.all([loadSheetJs(), fetchAttachmentBlob(ref, "", name).then(b => b.arrayBuffer())]);
+      if (isPartsRef(ref)) { $("sheet-download").href = URL.createObjectURL(new Blob([buf])); }
       const wb = XLSX.read(buf, { type: "array" });
       pvBook = { XLSX, wb, sheet: wb.SheetNames[0] };
       wb.SheetNames.forEach(n => { const t = document.createElement("button"); t.textContent = n; t.dataset.sheet = n; $("sheet-tabs").appendChild(t); });
@@ -4254,7 +4482,7 @@ if ("serviceWorker" in navigator) {
     if (tab === "media" || tab === "files") {
       const { data } = await inChat(sb.from("messages").select("id,sender_id,created_at,attachment_url,attachment_name,attachment_type,attachment_size").not("attachment_url", "is", null).eq("deleted", false)).order("created_at", { ascending: false }).limit(400);
       if (tab !== filesTab) return;
-      const all = data || [], isImg = (m) => (m.attachment_type || "").startsWith("image/");
+      const all = data || [], isImg = (m) => (m.attachment_type || "").startsWith("image/") && !isPartsRef(m.attachment_url);
       const list = all.filter(m => tab === "media" ? isImg(m) : !isImg(m));
       body.innerHTML = "";
       if (!list.length) { body.innerHTML = '<div class="side-empty">' + (tab === "media" ? "No photos shared in this chat yet." : "No files or voice notes in this chat yet.") + '</div>'; return; }
@@ -4276,6 +4504,7 @@ if ("serviceWorker" in navigator) {
           t.firstChild.textContent = m.attachment_name || "File"; t.lastChild.textContent = [fmtSize(m.attachment_size), nameOf(m.sender_id), fmtWhenShort(m.created_at)].filter(Boolean).join(" · ");
           t.addEventListener("click", () => go(m.id));
           const dl = document.createElement("a"); dl.className = "small-btn"; dl.textContent = "⬇"; dl.title = "Download"; dl.href = urlOf(m) || "#"; dl.target = "_blank"; dl.rel = "noopener"; dl.download = m.attachment_name || "file"; dl.style.textDecoration = "none";
+          if (isPartsRef(m.attachment_url)) { dl.removeAttribute("target"); dl.addEventListener("click", (e) => { e.preventDefault(); downloadAttachment(m); }); }
           r.appendChild(ic); r.appendChild(t); r.appendChild(dl);
           if (isSheetFile(m.attachment_name)) { const pv = document.createElement("button"); pv.className = "small-btn"; pv.textContent = "👁"; pv.title = "Preview"; pv.addEventListener("click", () => { $("files-modal").classList.remove("open"); openSheetPreview(m.attachment_url, m.attachment_name); }); r.appendChild(pv); }
           body.appendChild(r);
