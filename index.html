@@ -1180,7 +1180,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v31 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v32 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -2392,7 +2392,7 @@ if ("serviceWorker" in navigator) {
           bubble.appendChild(iw);
         } else if (type.startsWith("audio/") && !parts) {
           const au = document.createElement("audio"); au.controls = true; au.preload = "metadata"; const auu = fileUrl(m.attachment_url); if (auu) au.src = auu;
-          const aw = document.createElement("div"); aw.className = "audio-wrap"; aw.appendChild(au); if (!m._status) aw.appendChild(dlButton(m)); bubble.appendChild(aw);
+          bubble.appendChild(au);
         } else {
           const a = document.createElement("a"); a.className="attach-file"; a.href=m._status ? "javascript:void 0" : (fileUrl(m.attachment_url) || "javascript:void 0"); a.download=m.attachment_name||"file"; a.target="_blank"; a.rel="noopener";
           const icon = document.createElement("div"); icon.className="file-icon";
@@ -2401,7 +2401,7 @@ if ("serviceWorker" in navigator) {
           const fn = document.createElement("div"); fn.className="file-name"; fn.textContent=m.attachment_name||"File";
           const fs = document.createElement("div"); fs.className="file-size";
           fs.textContent = fmtSize(m.attachment_size) + (m._status === "sending" && m._progress != null ? " · uploading " + m._progress + "%" : parts && !m._status ? " · tap to download" : "");
-          meta2.appendChild(fn); meta2.appendChild(fs); a.appendChild(icon); a.appendChild(meta2); if (!m._status) a.appendChild(dlButton(m)); bubble.appendChild(a);
+          meta2.appendChild(fn); meta2.appendChild(fs); a.appendChild(icon); a.appendChild(meta2); bubble.appendChild(a);   // download: ⋮ menu → ⬇ Download
           if (parts && !m._status) { a.removeAttribute("target"); a.addEventListener("click", (e) => { e.preventDefault(); downloadAttachment(m); }); }
           const fx = fileExtra(m); if (fx) bubble.appendChild(fx);   // Excel preview
         }
