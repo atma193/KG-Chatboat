@@ -367,6 +367,11 @@
   .stone-filters select { width:100%; }
   @media (max-width: 600px) { .stone-filters { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
   .stone-pick { display:flex; gap:10px; align-items:flex-start; }
+  .stk-pick { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; margin:6px 0 10px; }
+  .stk-pick label { display:flex; flex-direction:column; gap:3px; }
+  .stk-pick select { padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font:inherit; font-size:13px; }
+  .stk-ex { font-size:11.5px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  @media (max-width: 600px) { .stk-pick { grid-template-columns:1fr; } }
   .view-toggle { float:right; display:inline-flex; gap:0; }
   .view-toggle .small-btn { border-radius:0; }
   .view-toggle .small-btn:first-child { border-radius:8px 0 0 8px; } .view-toggle .small-btn:last-child { border-radius:0 8px 8px 0; margin-left:-1px; }
@@ -3130,6 +3135,8 @@ if ("serviceWorker" in navigator) {
     for (let r = rg.s.r; r <= rg.e.r; r++) for (let c = rg.s.c; c <= rg.e.c; c++) {
       const cell = ws[XLSX.utils.encode_cell({ r, c })];
       if (cell && cell.l && cell.l.Target && rows[r - rg.s.r]) rows[r - rg.s.r][c - rg.s.c] = cell.l.Target;
+      // =HYPERLINK("https://…","Video") formulas (e.g. the AutoMail stock file) → keep the link itself
+      else if (cell && cell.f && rows[r - rg.s.r]) { const m = /HYPERLINK\(\s*"([^"]+)"/i.exec(cell.f); if (m) rows[r - rg.s.r][c - rg.s.c] = m[1]; }
     }
     return rows;
   }
@@ -3159,7 +3166,7 @@ if ("serviceWorker" in navigator) {
     location: ["location","loc","city","country","branch"],
     image_url: ["image","image link","image url","photo","photo link","img","image1"],
     video_url: ["video","video link","video url","v360","video1","360"],
-    cert_url: ["cert link","certificate link","cert url","report link","cert pdf","certificate url","cert file","certificate pdf"]
+    cert_url: ["cert link","certificate link","cert url","report link","cert pdf","certificate url","cert file","certificate pdf","certificate filename","cert filename"]
   };
   const NUM_FIELDS = ["carat","rate","amount","rap_rate","back"];
   const normH = (h) => String(h || "").toLowerCase().replace(/[^a-z0-9%$\/]/g, "");
@@ -3341,8 +3348,10 @@ if ("serviceWorker" in navigator) {
     if (!stoneResults.length) {
       box.innerHTML = '<div class="side-empty"></div>';
       if (qv) {
-        const { count: total } = await sb.from("stones").select("stock_id", { count: "exact", head: true });
-        box.firstChild.textContent = "No stone with Stock ID / report no. “" + qv + "” in the uploaded stock (" + (total || 0).toLocaleString() + " stones). Check the file had this stone, and that the Stock ID and Cert/Report No columns were matched in Admin panel → Stock.";
+        const [{ count: total, error: e2 }, { data: ex }] = await Promise.all([sb.from("stones").select("stock_id", { count: "exact", head: true }), sb.from("stones").select("stock_id,cert_no").order("updated_at", { ascending: false }).limit(4)]);
+        box.firstChild.textContent = "No stone with Stock ID / report no. “" + qv + "”. Uploaded stock has " + (total || 0).toLocaleString() + " stones" +
+          (ex && ex.length ? " — for example Stock ID " + ex.map(x => "“" + x.stock_id + "”").join(", ") + (ex.some(x => x.cert_no) ? " / report no. " + ex.filter(x => x.cert_no).map(x => "“" + x.cert_no + "”").join(", ") : "") : "") +
+          ". If these don't look like your Stock IDs, upload the file again in Admin panel → Stock and choose the right Stock ID column." + (e2 ? " (" + e2.message + ")" : "");
       } else box.firstChild.textContent = "No stones match these filters.";
       updateSelBar(); return;
     }
@@ -3820,7 +3829,7 @@ if ("serviceWorker" in navigator) {
     box.innerHTML = '<div class="side-empty">Reading file…</div>';
     try {
       const XLSX = await loadSheetJs();
-      const wb = XLSX.read(await f.arrayBuffer(), { type: "array", cellDates: false });
+      const wb = XLSX.read(await f.arrayBuffer(), { type: "array", cellDates: false, sheetStubs: true });   // stubs keep =HYPERLINK() cells that have no saved value
       // pick the sheet whose header row matches the most stone columns
       let best = null;
       wb.SheetNames.forEach(n => {
@@ -3831,22 +3840,57 @@ if ("serviceWorker" in navigator) {
         }
       });
       if (!best || best.map.stock_id == null) { box.innerHTML = '<div class="panel-note">Couldn\'t find a Stock ID column. Rename it to "Stock ID" (or Stock No / Lot No) and try again.</div>'; return; }
-      const { rows, h, map } = best, header = rows[h], seen = new Set(), out = [];
+      const { rows, h } = best, map = Object.assign({}, best.map), header = rows[h];
+      // several columns could be the Stock ID (e.g. "Stock" and "Stone No") → take the one with the most different values
+      { const al = new Set(STONE_FIELDS.stock_id.map(normH)), body = rows.slice(h + 1);
+        const cands = header.map((hd, i) => i).filter(i => al.has(normH(header[i])));
+        if (cands.length > 1) {
+          const uniq = (i) => new Set(body.map(r => String(r[i] ?? "").trim()).filter(Boolean)).size;
+          const bestCol = cands.reduce((x, y) => uniq(y) > uniq(x) ? y : x);
+          if (bestCol !== map.stock_id) { Object.keys(map).forEach(o => { if (map[o] === bestCol) delete map[o]; }); map.stock_id = bestCol; }
+        } }
+      const draw = () => {
+      const seen = new Set(), out = []; let dups = 0, blank = 0;
       for (let r = h + 1; r < rows.length; r++) {
-        const row = rows[r]; const id = String(row[map.stock_id] ?? "").trim(); if (!id || seen.has(id)) continue; seen.add(id);
+        const row = rows[r]; const id = String(row[map.stock_id] ?? "").replace(/\u00a0/g, " ").trim();
+        if (!id) { if (row.some(c => c !== "" && c != null)) blank++; continue; }
+        if (seen.has(id)) { dups++; continue; } seen.add(id);
         const st = { stock_id: id, updated_at: new Date().toISOString() };
-        Object.keys(map).forEach(k => { if (k === "stock_id") return; let v = row[map[k]]; if (NUM_FIELDS.includes(k)) v = toNum(v); else v = v === "" || v == null ? null : String(v).trim(); st[k] = v; });
+        Object.keys(map).forEach(k => { if (k === "stock_id" || map[k] == null) return; let v = row[map[k]]; if (NUM_FIELDS.includes(k)) v = toNum(v); else v = v === "" || v == null ? null : String(v).replace(/\u00a0/g, " ").trim(); st[k] = v; });
         out.push(st);
       }
       stockParsed = out;
-      const matched = Object.keys(map).map(k => k.replace(/_/g, " ") + " ← \"" + header[map[k]] + "\"");
+      const matched = Object.keys(map).filter(k => map[k] != null).map(k => k.replace(/_/g, " ") + " ← \"" + header[map[k]] + "\"");
       box.innerHTML = "";
+      // let the admin check / change the 3 important columns, with sample values from the file
+      const pick = document.createElement("div"); pick.className = "stk-pick";
+      [["stock_id", "Stock ID column"], ["cert_no", "Report / Cert No column"], ["status", "Status column"]].forEach(([k, label]) => {
+        const wrap = document.createElement("label"); wrap.className = "side-sub"; wrap.textContent = label;
+        const sel = document.createElement("select"); sel.dataset.k = k;
+        const none = document.createElement("option"); none.value = ""; none.textContent = k === "stock_id" ? "— choose —" : "— none —"; sel.appendChild(none);
+        header.forEach((hd, i) => { if (hd === "" || hd == null) return; const o = document.createElement("option"); o.value = i; o.textContent = String(hd); sel.appendChild(o); });
+        sel.value = map[k] != null ? String(map[k]) : "";
+        const ex = document.createElement("div"); ex.className = "stk-ex";
+        const samples = map[k] != null ? rows.slice(h + 1).map(r => r[map[k]]).filter(v => v !== "" && v != null).slice(0, 3) : [];
+        ex.textContent = samples.length ? "e.g. " + samples.join(" · ") : "";
+        sel.addEventListener("change", () => { if (sel.value === "") delete map[k]; else { Object.keys(map).forEach(o => { if (map[o] === Number(sel.value)) delete map[o]; }); map[k] = Number(sel.value); } draw(); });
+        wrap.appendChild(sel); wrap.appendChild(ex); pick.appendChild(wrap);
+      });
+      box.appendChild(pick);
+      if (map.stock_id == null) { const w = document.createElement("div"); w.className = "panel-note"; w.textContent = "Choose the Stock ID column."; box.appendChild(w); return; }
       const info = document.createElement("div"); info.className = "side-sub"; info.style.lineHeight = "1.6";
       info.textContent = "Sheet \"" + best.name + "\": " + out.length.toLocaleString() + " stones found. Columns matched: " + matched.join(", ") + ".";
       box.appendChild(info);
+      if (dups > out.length * 0.2 || blank) {
+        const w = document.createElement("div"); w.className = "panel-note stk-warn";
+        w.textContent = "⚠ " + (dups ? dups.toLocaleString() + " rows skipped because their Stock ID repeats" : "") + (dups && blank ? " · " : "") + (blank ? blank.toLocaleString() + " rows have an empty Stock ID" : "") + ". If this looks wrong, choose the correct Stock ID column above.";
+        box.appendChild(w);
+      }
       if (out[0]) { const s1 = document.createElement("div"); s1.style.margin = "10px 0"; s1.appendChild(stoneCard(out[0], { buttons: false })); box.appendChild(s1); }
       const go = document.createElement("button"); go.className = "small-btn primary"; go.textContent = "Upload " + out.length.toLocaleString() + " stones";
       go.addEventListener("click", () => uploadStock(go)); box.appendChild(go);
+      };
+      draw();
     } catch (e) { box.innerHTML = '<div class="panel-note"></div>'; box.firstChild.textContent = "Couldn't read file: " + e.message; }
   }
   async function uploadStock(btn) {
