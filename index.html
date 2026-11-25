@@ -177,7 +177,10 @@
   .tabs button { border:none; background:none; color:var(--text-dim); font:inherit; font-size:13.5px; font-weight:600; padding:9px 10px; cursor:pointer; white-space:nowrap; flex-shrink:0; border-bottom:2px solid transparent; }
   .tabs { overflow-x:auto; scrollbar-width:thin; }
   #admin-modal .panel { max-width:940px; }
-  #stone-modal .panel { max-width:980px; }
+  /* Share a stone: popup grows with the table (up to the screen), no inner scroll boxes */
+  #stone-modal .panel { width:max-content; min-width:min(680px, 96vw); max-width:98vw; max-height:96vh; }
+  #stone-modal .panel-body { overflow:auto; }
+  #stone-modal .stone-filters, #stone-modal #stone-q, #stone-results > .side-empty, #stone-results > .side-sub { width:0; min-width:100%; }   /* only the table decides how wide the popup gets */
   .tabs button.active { color:var(--text); border-bottom-color:var(--accent); }
   .user-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
   .user-row .avatar { width:36px; height:36px; }
@@ -376,17 +379,22 @@
   .view-toggle .small-btn { border-radius:0; }
   .view-toggle .small-btn:first-child { border-radius:8px 0 0 8px; } .view-toggle .small-btn:last-child { border-radius:0 8px 8px 0; margin-left:-1px; }
   .view-toggle .small-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-  .stone-table-wrap { overflow:auto; max-height:52vh; border:1px solid var(--border); border-radius:10px; }
-  .stone-table { border-collapse:collapse; width:100%; font-size:12.5px; white-space:nowrap; }
-  .stone-table th { position:sticky; top:0; z-index:1; background:var(--bg-raised); color:var(--text-dim); font-weight:600; text-align:left; padding:7px 8px; border-bottom:1px solid var(--border); font-size:11.5px; }
-  .stone-table td { padding:6px 8px; border-bottom:1px solid var(--border); color:var(--text); }
+  .stone-table-wrap { border:1px solid var(--border); border-radius:10px; }
+  .stone-table { border-collapse:collapse; width:auto; min-width:100%; font-size:12px; white-space:nowrap; }
+  .stone-table th { position:sticky; top:-1px; z-index:1; background:var(--bg-raised); color:var(--text-dim); font-weight:600; text-align:left; padding:6px 6px; border-bottom:1px solid var(--border); font-size:11px; }
+  .stone-table td { padding:5px 6px; border-bottom:1px solid var(--border); color:var(--text); }
   .stone-table tbody tr { cursor:pointer; } .stone-table tbody tr:hover { background:color-mix(in srgb, var(--accent) 6%, transparent); }
   .stone-table tr.sel { background:color-mix(in srgb, var(--accent) 12%, transparent); }
   .stone-table .num { text-align:right; font-variant-numeric:tabular-nums; }
   .stone-table .sid { font-weight:700; }
   .stone-table .neg { color:var(--danger, #c0392b); }
   .stone-table input[type=checkbox] { width:16px; height:16px; margin:0; accent-color:var(--accent); }
-  .stone-table td.acts > button { margin-right:4px; vertical-align:middle; }
+  .stone-table td.acts > button { margin-right:3px; vertical-align:middle; }
+  .stone-table .small-btn.ib-only { width:26px; height:26px; }
+  .stone-table .small-btn.ib-only .ic { width:14px; height:14px; }
+  /* smaller screens: drop the least-used columns so the table fits without a scroll bar */
+  @media (max-width: 1250px) { .stone-table .k-location, .stone-table .k-rap_rate, .stone-table .k-measurements { display:none; } }
+  @media (max-width: 1100px) { .stone-table .k-lab, .stone-table .k-amount { display:none; } .stone-table td, .stone-table th { padding-left:4px; padding-right:4px; } }
   .stone-table .acts .small-btn { padding:0; }
   .small-btn.ib { display:inline-flex; align-items:center; gap:5px; }
   .small-btn.ib .ic { width:15px; height:15px; flex-shrink:0; }
@@ -394,7 +402,7 @@
   .small-btn.ib-only .ic { width:16px; height:16px; }
   .small-btn.wa-btn.ib-only { background:#25D366; color:#fff; border-color:#25D366; }
   .small-btn.hold-btn .ic { color:#d35400; }
-  .stone-table tfoot td { position:sticky; bottom:0; background:var(--bg-raised); font-weight:700; border-top:1px solid var(--border); border-bottom:none; }
+  .stone-table tfoot td { position:sticky; bottom:-1px; background:var(--bg-raised); font-weight:700; border-top:1px solid var(--border); border-bottom:none; }
   .st-badge { border:1px solid var(--border); border-radius:6px; padding:1px 6px; font-size:10.5px; font-weight:600; color:var(--text-dim); }
   .st-badge.sold { color:#c0392b; border-color:color-mix(in srgb, #c0392b 45%, transparent); background:color-mix(in srgb, #c0392b 8%, transparent); }
   .st-badge.ok { color:#1e8449; border-color:color-mix(in srgb, #1e8449 40%, transparent); }
@@ -3365,6 +3373,7 @@ if ("serviceWorker" in navigator) {
     if (fn) b.addEventListener("click", (e) => { e.stopPropagation(); fn(e); });
     return b;
   }
+  let stoneViewChosen = false;   // on phones the cards view is used unless someone taps "Table"
   let stoneView = "table"; try { stoneView = localStorage.getItem("kg-stone-view") || "table"; } catch (e) {}
   const PICK_COLS = [
     ["stock_id", "Stock ID"], ["status", "Status"], ["shape", "Shape"], ["carat", "Carat", (v) => Number(v).toFixed(2)], ["color", "Color"], ["clarity", "Clarity"],
@@ -3381,7 +3390,7 @@ if ("serviceWorker" in navigator) {
     const th = document.createElement("tr");
     const allCb = document.createElement("input"); allCb.type = "checkbox"; allCb.title = "Tick all"; allCb.checked = list.length && list.every(st => stoneSel.has(st.stock_id));
     const th0 = document.createElement("th"); th0.appendChild(allCb); th.appendChild(th0);
-    cols.forEach(([k, label]) => { const c = document.createElement("th"); c.textContent = label; if (NUM_COLS.has(k)) c.className = "num"; th.appendChild(c); });
+    cols.forEach(([k, label]) => { const c = document.createElement("th"); c.textContent = label; c.className = "k-" + k + (NUM_COLS.has(k) ? " num" : ""); th.appendChild(c); });
     const thA = document.createElement("th"); thA.textContent = "Action"; th.appendChild(thA);
     const thead = document.createElement("thead"); thead.appendChild(th); t.appendChild(thead);
     const tb = document.createElement("tbody"); const rowCbs = [];
@@ -3394,8 +3403,7 @@ if ("serviceWorker" in navigator) {
       cols.forEach(([k, , f]) => {
         const td = document.createElement("td"); const v = st[k];
         td.textContent = v == null || v === "" ? "–" : (f && !isNaN(Number(v)) ? f(v) : String(v));
-        if (NUM_COLS.has(k)) td.className = "num";
-        if (k === "stock_id") td.className = "sid";
+        td.className = "k-" + k + (NUM_COLS.has(k) ? " num" : "") + (k === "stock_id" ? " sid" : "");
         if (k === "status" && v) { td.textContent = ""; const b = document.createElement("span"); b.className = "st-badge" + (/sold/i.test(String(v)) ? " sold" : isAvailableStone(st) ? " ok" : ""); b.textContent = String(v).toUpperCase(); td.appendChild(b); }
         if (k === "back" && Number(v) < 0) td.classList.add("neg");
         tr.appendChild(td);
@@ -3418,7 +3426,7 @@ if ("serviceWorker" in navigator) {
     // totals row
     const tf = document.createElement("tr"); tf.className = "tot";
     const f0 = document.createElement("td"); tf.appendChild(f0);
-    cols.forEach(([k]) => { const td = document.createElement("td"); if (k === "stock_id") td.textContent = tot.n + " stones"; if (k === "carat") { td.textContent = tot.ct.toFixed(2); td.className = "num"; } if (k === "amount") { td.textContent = tot.amt.toLocaleString(undefined, { maximumFractionDigits: 0 }); td.className = "num"; } if (k === "rate" && tot.ct) { td.textContent = "avg " + Math.round(tot.amt / tot.ct).toLocaleString(); td.className = "num"; } tf.appendChild(td); });
+    cols.forEach(([k]) => { const td = document.createElement("td"); td.className = "k-" + k; if (k === "stock_id") td.textContent = tot.n + " stones"; if (k === "carat") { td.textContent = tot.ct.toFixed(2); td.className = "num"; } if (k === "amount") { td.textContent = tot.amt.toLocaleString(undefined, { maximumFractionDigits: 0 }); td.className = "num"; } if (k === "rate" && tot.ct) { td.textContent = "avg " + Math.round(tot.amt / tot.ct).toLocaleString(); td.className = "num"; } tf.appendChild(td); });
     tf.appendChild(document.createElement("td"));
     const tfoot = document.createElement("tfoot"); tfoot.appendChild(tf); t.appendChild(tfoot);
     wrap.appendChild(t); return wrap;
@@ -3432,12 +3440,12 @@ if ("serviceWorker" in navigator) {
     // Table / Cards switch (remembered on this device)
     const vt = document.createElement("span"); vt.className = "view-toggle";
     [["table", "▦ Table"], ["cards", "▤ Cards"]].forEach(([v, label]) => {
-      const t = document.createElement("button"); t.type = "button"; t.className = "small-btn" + (stoneView === v ? " active" : ""); t.textContent = label;
-      t.addEventListener("click", () => { stoneView = v; try { localStorage.setItem("kg-stone-view", v); } catch (e) {} box.innerHTML = ""; const info = null; renderStoneResults(box, count); });
+      const t = document.createElement("button"); t.type = "button"; const shown = (stoneView === "table" && !(window.innerWidth < 760 && !stoneViewChosen)) ? "table" : "cards"; t.className = "small-btn" + (shown === v ? " active" : ""); t.textContent = label;
+      t.addEventListener("click", () => { stoneView = v; stoneViewChosen = true; try { localStorage.setItem("kg-stone-view", v); } catch (e) {} box.innerHTML = ""; const info = null; renderStoneResults(box, count); });
       vt.appendChild(t);
     });
     hdr.appendChild(vt); box.appendChild(hdr);
-    if (stoneView === "table") { box.appendChild(stoneTable(stoneResults)); updateSelBar(); return; }
+    if (stoneView === "table" && !(window.innerWidth < 760 && !stoneViewChosen)) { box.appendChild(stoneTable(stoneResults)); updateSelBar(); return; }
     stoneResults.forEach(st => {
       const wrap = document.createElement("div"); wrap.className = "stone-pick";
       const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = stoneSel.has(st.stock_id);
