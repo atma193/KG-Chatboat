@@ -370,6 +370,15 @@
   .stone-filters select { width:100%; }
   @media (max-width: 600px) { .stone-filters { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
   .stone-pick { display:flex; gap:10px; align-items:flex-start; }
+  .dl-btn { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; flex-shrink:0; border-radius:50%; border:1px solid var(--border); background:var(--bg-raised); color:var(--accent); cursor:pointer; padding:0; margin-left:auto; }
+  .dl-btn:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .dl-btn .ic { width:16px; height:16px; }
+  .attach-file .dl-btn { margin-left:10px; }
+  .attach-wrap { position:relative; display:inline-block; max-width:100%; }
+  .attach-wrap .attach-img { display:block; }
+  .dl-btn.on-img { position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.55); color:#fff; border-color:transparent; backdrop-filter:blur(2px); }
+  .dl-btn.on-img:hover { background:var(--accent); }
+  .audio-wrap { display:flex; align-items:center; gap:6px; }
   .stk-pick { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; margin:6px 0 10px; }
   .stk-pick label { display:flex; flex-direction:column; gap:3px; }
   .stk-pick select { padding:6px 8px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font:inherit; font-size:13px; }
@@ -734,6 +743,7 @@
           <button id="menu-notif">🔔 Notifications</button>
           <button id="menu-admin" style="display:none;">🛡️ Admin panel</button>
           <button id="menu-logout">Log out</button>
+          <div id="app-version" style="padding:6px 14px 8px; font-size:11px; color:var(--text-dim); border-top:1px solid var(--border); margin-top:4px;"></div>
         </div>
       </div>
       </div>
@@ -871,6 +881,7 @@
   <div class="act-menu" id="act-menu">
     <div class="react-row" id="react-row"></div>
     <button id="act-reply">↩️ Reply</button>
+    <button id="act-download">⬇ Download</button>
     <button id="act-pin">📌 Pin</button>
     <button id="act-save">⭐ Save message</button>
     <button id="act-task">✅ Create task</button>
@@ -1169,6 +1180,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
+const APP_VERSION = "v31 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -2066,7 +2078,7 @@ if ("serviceWorker" in navigator) {
     (data||[]).forEach(p => profileCache[p.id] = p);
   }
 
-  const PAGE = 300;
+  const PAGE = 100;   // messages loaded per page (older ones: "Load older messages")
   let hasOlder = false;
   let reactions = {};       // message id → [{user_id, emoji}]
   let pins = [], pinIdx = 0;
@@ -2372,12 +2384,15 @@ if ("serviceWorker" in navigator) {
         const parts = isPartsRef(m.attachment_url);
         if (type.startsWith("image/") && !parts) {
           bubble.style.padding = "4px";
-          const img = document.createElement("img"); img.className="attach-img"; img.alt=m.attachment_name||"photo";
+          const img = document.createElement("img"); img.className="attach-img"; img.alt=m.attachment_name||"photo"; img.loading = "lazy"; img.decoding = "async";
           const iu = fileUrl(m.attachment_url); if (iu) img.src = iu; else { img.style.minWidth = "160px"; img.style.minHeight = "120px"; img.style.background = "rgba(127,127,127,.15)"; }
           img.addEventListener("click", async () => { try { openLightbox(await fileUrlNow(m.attachment_url), m.attachment_name || ""); } catch (e) { showBanner("Couldn't open photo: " + e.message, true); } });
-          bubble.appendChild(img);
+          const iw = document.createElement("div"); iw.className = "attach-wrap"; iw.appendChild(img);
+          if (!m._status) iw.appendChild(dlButton(m, "on-img"));
+          bubble.appendChild(iw);
         } else if (type.startsWith("audio/") && !parts) {
-          const au = document.createElement("audio"); au.controls = true; au.preload = "metadata"; const auu = fileUrl(m.attachment_url); if (auu) au.src = auu; bubble.appendChild(au);
+          const au = document.createElement("audio"); au.controls = true; au.preload = "metadata"; const auu = fileUrl(m.attachment_url); if (auu) au.src = auu;
+          const aw = document.createElement("div"); aw.className = "audio-wrap"; aw.appendChild(au); if (!m._status) aw.appendChild(dlButton(m)); bubble.appendChild(aw);
         } else {
           const a = document.createElement("a"); a.className="attach-file"; a.href=m._status ? "javascript:void 0" : (fileUrl(m.attachment_url) || "javascript:void 0"); a.download=m.attachment_name||"file"; a.target="_blank"; a.rel="noopener";
           const icon = document.createElement("div"); icon.className="file-icon";
@@ -2386,7 +2401,7 @@ if ("serviceWorker" in navigator) {
           const fn = document.createElement("div"); fn.className="file-name"; fn.textContent=m.attachment_name||"File";
           const fs = document.createElement("div"); fs.className="file-size";
           fs.textContent = fmtSize(m.attachment_size) + (m._status === "sending" && m._progress != null ? " · uploading " + m._progress + "%" : parts && !m._status ? " · tap to download" : "");
-          meta2.appendChild(fn); meta2.appendChild(fs); a.appendChild(icon); a.appendChild(meta2); bubble.appendChild(a);
+          meta2.appendChild(fn); meta2.appendChild(fs); a.appendChild(icon); a.appendChild(meta2); if (!m._status) a.appendChild(dlButton(m)); bubble.appendChild(a);
           if (parts && !m._status) { a.removeAttribute("target"); a.addEventListener("click", (e) => { e.preventDefault(); downloadAttachment(m); }); }
           const fx = fileExtra(m); if (fx) bubble.appendChild(fx);   // Excel preview
         }
@@ -2486,8 +2501,24 @@ if ("serviceWorker" in navigator) {
     const big = file.size > CHUNK_MB * 1048576;
     const isImage = !big && file.type && file.type.startsWith("image/");
     const isAudio = !big && file.type && file.type.startsWith("audio/");
-    pendingAttachments.push({ blob:file, name:file.name, isImage, previewUrl: (isImage || isAudio) ? URL.createObjectURL(file) : null });
+    const item = { blob:file, name:file.name, isImage, previewUrl: (isImage || isAudio) ? URL.createObjectURL(file) : null };
+    pendingAttachments.push(item);
     renderPending();
+    // big photos / screenshots are made smaller before sending → much faster to send and to open for everyone
+    if (isImage && /^image\/(jpeg|png|webp|bmp)$/i.test(file.type) && file.size > 400 * 1024) {
+      item.shrinking = shrinkImage(file).then(small => { if (small) { item.blob = small; item.name = small.name; } }).catch(() => {}).finally(() => { item.shrinking = null; });
+    }
+  }
+  async function shrinkImage(file, maxSide = 2000, quality = 0.85) {
+    const bmp = await createImageBitmap(file);
+    const k = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
+    const w = Math.round(bmp.width * k), h = Math.round(bmp.height * k);
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, w, h); ctx.drawImage(bmp, 0, 0, w, h); bmp.close && bmp.close();
+    const blob = await new Promise(r => c.toBlob(r, "image/jpeg", quality));
+    if (!blob || blob.size >= file.size * 0.9) return null;   // not worth it → keep the original
+    const name = file.name.replace(/\.(png|jpe?g|webp|bmp)$/i, "") + ".jpg";
+    return new File([blob], name, { type: "image/jpeg" });
   }
   function renderPending() {
     pendingWrap.innerHTML = "";
@@ -2584,12 +2615,21 @@ if ("serviceWorker" in navigator) {
     showBanner("");
     return new Blob(chunks, { type: type || "application/octet-stream" });
   }
+  // ⬇ button shown on every sent / received attachment
+  function dlButton(m, cls) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "dl-btn " + (cls || ""); b.title = "Download"; b.setAttribute("aria-label", "Download " + (m.attachment_name || "file"));
+    b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>';
+    b.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); downloadAttachment(m); });
+    return b;
+  }
   async function downloadAttachment(m) {
+    if (!m || !m.attachment_url || m._status) return;
+    showBanner("⬇ Downloading " + (m.attachment_name || "file") + "…");
     try {
       const blob = await fetchAttachmentBlob(m.attachment_url, m.attachment_type, m.attachment_name);
       const url = URL.createObjectURL(blob), a = document.createElement("a");
       a.href = url; a.download = m.attachment_name || "file"; document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      setTimeout(() => URL.revokeObjectURL(url), 60000); showBanner("");
     } catch (e) { showBanner("Couldn't download: " + e.message, true); }
   }
 
@@ -2637,6 +2677,7 @@ if ("serviceWorker" in navigator) {
       if (m.urgent) row.urgent = true;
       if (m.meeting) row.meeting = m.meeting;
       if (m._file) {
+        if (m._file.shrinking) await m._file.shrinking;   // wait for the smaller copy of a big photo
         if (!m._uploadedUrl) m._uploadedUrl = await uploadAttachment(m);
         Object.assign(row, { attachment_url: m._uploadedUrl, attachment_name: m._file.name, attachment_type: m._file.blob.type, attachment_size: m._file.blob.size });
       }
@@ -2747,6 +2788,7 @@ if ("serviceWorker" in navigator) {
     $("act-edit").style.display = mine && !local ? "" : "none";
     $("act-forward").style.display = local ? "none" : "";
     $("act-copy").style.display = m.text ? "" : "none";
+    $("act-download").style.display = m.attachment_url && !local && !m.deleted ? "" : "none";
     $("act-delete").style.display = mine ? "" : "none";
     $("act-delete").textContent = local ? "🗑️ Discard" : "🗑️ Delete for everyone";
     actMenu.classList.add("open");
@@ -2777,6 +2819,8 @@ if ("serviceWorker" in navigator) {
   $("act-pin").addEventListener("click", () => { closeActMenu(); togglePin(actMsg); });
 
   // Copy
+  { const v = document.getElementById("app-version"); if (v) v.textContent = "App version " + APP_VERSION; }
+  $("act-download").addEventListener("click", () => { const m = actMsg; closeActMenu(); downloadAttachment(m); });
   $("act-copy").addEventListener("click", async () => {
     closeActMenu(); const t = actMsg && actMsg.text; if (!t) return;
     try { await navigator.clipboard.writeText(t); showBanner("Copied."); setTimeout(() => showBanner(""), 1200); }
@@ -3276,9 +3320,14 @@ if ("serviceWorker" in navigator) {
   fillSel("sf-col1", COLORS, "from"); fillSel("sf-col2", COLORS, "to"); fillSel("sf-cla1", CLARITIES, "from"); fillSel("sf-cla2", CLARITIES, "to");
   let shapesLoaded = false, stoneResults = [];
   const stoneSel = new Map();   // stock_id → stone (ticked)
+  async function selectAllPagesStones() {   // shape of every stone (19,000+), 1,000 per request
+    const { count } = await sb.from("stones").select("stock_id", { count: "exact", head: true });
+    const reqs = []; for (let i = 0; i < Math.min(count || 0, 100000); i += 1000) reqs.push(sb.from("stones").select("shape").order("stock_id").range(i, i + 999));
+    return [].concat(...(await Promise.all(reqs)).map(r => r.data || []));
+  }
   async function loadShapes() {
     if (shapesLoaded) return; shapesLoaded = true;
-    const { data } = await sb.from("stones").select("shape").limit(50000);
+    const data = await selectAllPagesStones();
     const set = Array.from(new Set((data || []).map(r => r.shape).filter(Boolean))).sort();
     const el = $("sf-shape"); set.forEach(v => { const o = document.createElement("option"); o.value = v; o.textContent = v; el.appendChild(o); });
   }
@@ -3719,7 +3768,9 @@ if ("serviceWorker" in navigator) {
     const cnt = (q) => q.then(r => r.count || 0);
     const [users, msgs, holds, stock, tasks] = await Promise.all([
       sb.from("profiles").select("id,status,role"),
-      sb.from("messages").select("created_at,sender_id").gte("created_at", day14.toISOString()).limit(50000),
+      (async () => { const reqs = [], { count } = await sb.from("messages").select("id", { count: "exact", head: true }).gte("created_at", day14.toISOString());
+        for (let i = 0; i < Math.min(count || 0, 50000); i += 1000) reqs.push(sb.from("messages").select("created_at,sender_id").gte("created_at", day14.toISOString()).order("created_at").range(i, i + 999));
+        return { data: [].concat(...(await Promise.all(reqs)).map(r => r.data || [])) }; })(),
       sb.from("hold_requests").select("*").order("created_at", { ascending: false }).limit(1000),
       cnt(sb.from("stones").select("stock_id", { count: "exact", head: true })),
       sb.from("tasks").select("id,done,due_date"),
@@ -4400,8 +4451,13 @@ if ("serviceWorker" in navigator) {
     $("disc-back").value = discStone.back != null ? discStone.back : ""; $("disc-rate").value = discStone.rate != null ? Math.round(discStone.rate) : "";
     discDiff(); $("disc-modal").classList.add("open"); $("disc-party").focus();
   }
-  $("disc-back").addEventListener("input", () => { const rap = Number(discStone && discStone.rap_rate); const b = Number($("disc-back").value); if (rap && $("disc-back").value !== "") $("disc-rate").value = Math.round(rap * (1 + b / 100)); discDiff(); });
-  $("disc-rate").addEventListener("input", () => { const rap = Number(discStone && discStone.rap_rate); const r = Number($("disc-rate").value); if (rap && r) $("disc-back").value = ((r / rap - 1) * 100).toFixed(2); discDiff(); });
+  // Back % sign: some stock files write a discount as −31.5, others (AutoMail) as +31.5.
+  // Work out which one this stone uses from its own list rate, so Back % ↔ Rate always match.
+  const backSign = (st) => { const rap = Number(st && st.rap_rate), rate = Number(st && st.rate), b = Number(st && st.back);
+    if (rap && rate && b) return Math.abs(rap * (1 - b / 100) - rate) < Math.abs(rap * (1 + b / 100) - rate) ? -1 : 1;   // -1 → positive number = discount
+    return b > 0 && rate && rap && rate < rap ? -1 : 1; };
+  $("disc-back").addEventListener("input", () => { const rap = Number(discStone && discStone.rap_rate); const b = Number($("disc-back").value); if (rap && $("disc-back").value !== "") $("disc-rate").value = Math.round(rap * (1 + backSign(discStone) * b / 100)); discDiff(); });
+  $("disc-rate").addEventListener("input", () => { const rap = Number(discStone && discStone.rap_rate); const r = Number($("disc-rate").value); if (rap && r) $("disc-back").value = (backSign(discStone) * (r / rap - 1) * 100).toFixed(2); discDiff(); });
   $("disc-cancel").addEventListener("click", () => $("disc-modal").classList.remove("open"));
   $("disc-send").addEventListener("click", async () => {
     const party = $("disc-party").value.trim(); if (!party) { $("disc-msg").textContent = "Enter the party name."; return; }
@@ -4649,7 +4705,7 @@ if ("serviceWorker" in navigator) {
     // chat area
     "Members": ["સભ્યો", "सदस्य"], "Today": ["આજે", "आज"], "Yesterday": ["ગઈકાલે", "कल"], "No messages yet": ["હજી કોઈ મેસેજ નથી", "अभी कोई मैसेज नहीं"],
     "Send the first message.": ["પહેલો મેસેજ મોકલો.", "पहला मैसेज भेजें."], "⬆ Load older messages": ["⬆ જૂના મેસેજ જુઓ", "⬆ पुराने मैसेज देखें"],
-    "Delivered": ["પહોંચી ગયો", "पहुंच गया"], "Read": ["વાંચ્યો", "पढ़ लिया"], "Sending…": ["મોકલાય છે…", "भेजा जा रहा है…"], "⚠ Not sent · Tap to retry": ["⚠ ન ગયો · ફરી મોકલવા દબાવો", "⚠ नहीं गया · दोबारा भेजने के लिए दबाएं"],
+    "⬇ Download": ["⬇ ડાઉનલોડ", "⬇ डाउनलोड"], "Delivered": ["પહોંચી ગયો", "पहुंच गया"], "Read": ["વાંચ્યો", "पढ़ लिया"], "Sending…": ["મોકલાય છે…", "भेजा जा रहा है…"], "⚠ Not sent · Tap to retry": ["⚠ ન ગયો · ફરી મોકલવા દબાવો", "⚠ नहीं गया · दोबारा भेजने के लिए दबाएं"],
     "Edited": ["બદલેલો", "बदला गया"], "📌 Pinned": ["📌 પિન કરેલો", "📌 पिन किया"], "↪ Forwarded": ["↪ ફોરવર્ડ કરેલો", "↪ फॉरवर्ड किया"], "You": ["તમે", "आप"],
     "Message the team…": ["ટીમને મેસેજ લખો…", "टीम को मैसेज लिखें…"], "Post an announcement…": ["જાહેરાત લખો…", "घोषणा लिखें…"],
     "📢 Only admins can post announcements.": ["📢 ફક્ત એડમિન જાહેરાત કરી શકે.", "📢 केवल एडमिन घोषणा कर सकते हैं."],
@@ -4690,7 +4746,7 @@ if ("serviceWorker" in navigator) {
     "No groups yet. Tap + NEW GROUP.": ["હજી કોઈ ગ્રુપ નથી.", "अभी कोई ग्रुप नहीं."], "Say hello": ["નમસ્તે કહો", "नमस्ते कहें"],
   };
   const LANG_IDX = { gu: 0, hi: 1 };
-  const MR = {"Email": "ईमेल", "Password": "पासवर्ड", "Sign In": "साइन इन", "Sign up": "साइन अप", "Forgot Password?": "पासवर्ड विसरलात?", "Employee name": "कर्मचाऱ्याचे नाव", "Mobile number": "मोबाइल नंबर", "Confirm password": "पासवर्ड पुन्हा लिहा", "Create account": "अकाउंट तयार करा", "Send reset link": "रीसेट लिंक पाठवा", "← Back to login": "← लॉगिनवर परत", "Choose photo": "फोटो निवडा", "Waiting for approval": "मंजुरीची वाट", "Check again": "पुन्हा तपासा", "Account disabled": "अकाउंट बंद आहे", "Save new password": "नवीन पासवर्ड सेव्ह करा", "New password": "नवीन पासवर्ड", "Confirm new password": "नवीन पासवर्ड पुन्हा लिहा", "Edit profile": "प्रोफाइल बदला", "🔔 Notifications": "🔔 सूचना", "🛡️ Admin panel": "🛡️ ॲडमिन पॅनल", "Log out": "लॉग आउट", "✅ My tasks & reminders": "✅ माझी कामे आणि रिमाइंडर", "🔗 Client links": "🔗 क्लायंट लिंक", "🎨 Theme": "🎨 थीम", "⭐ Saved messages": "⭐ सेव्ह केलेले मेसेज", "🌐 Language": "🌐 भाषा", "🕘 Attendance": "🕘 हजेरी", "📱 My devices": "📱 माझे डिव्हाइस", "Chat": "चॅट", "Unread": "न वाचलेले", "Meeting chats": "मीटिंग चॅट", "Unmuted": "म्यूट नाही", "Favorites": "आवडते", "Chats": "चॅट्स", "Contacts": "संपर्क", "Team Chat": "टीम चॅट", "Announcements": "घोषणा", "Everyone": "सर्वजण", "From admins": "ॲडमिनकडून", "You can post": "तुम्ही पोस्ट करू शकता", "Tap ⋯ on a chat → Add to favorites.": "चॅटवर ⋯ दाबा → आवडत्यांमध्ये जोडा.", "No chats yet. Tap ✏️ to start one.": "अजून चॅट नाही. ✏️ दाबून सुरू करा.", "Available": "उपलब्ध", "Busy": "व्यस्त", "Do not disturb": "त्रास देऊ नका", "Be right back": "लगेच येतो", "Away": "दूर", "Offline": "ऑफलाइन", "online": "ऑनलाइन", "⏰ My reminders": "⏰ माझे रिमाइंडर", "⭐ Add to favorites": "⭐ आवडत्यांमध्ये जोडा", "☆ Remove from favorites": "☆ आवडत्यांमधून काढा", "🔕 Mute": "🔕 म्यूट", "🔔 Unmute": "🔔 अनम्यूट", "✔️ Mark as read": "✔️ वाचले म्हणून नोंदवा", "Set your status": "तुमचा स्टेटस", "Available (automatic)": "उपलब्ध (आपोआप)", "Appear away": "दूर दिसा", "Appear offline": "ऑफलाइन दिसा", "Members": "सदस्य", "Today": "आज", "Yesterday": "काल", "No messages yet": "अजून मेसेज नाही", "Send the first message.": "पहिला मेसेज पाठवा.", "⬆ Load older messages": "⬆ जुने मेसेज पहा", "Delivered": "पोहोचला", "Read": "वाचला", "Sending…": "पाठवत आहे…", "⚠ Not sent · Tap to retry": "⚠ गेला नाही · पुन्हा पाठवण्यासाठी दाबा", "Edited": "बदललेला", "📌 Pinned": "📌 पिन केलेला", "↪ Forwarded": "↪ फॉरवर्ड केलेला", "You": "तुम्ही", "Message the team…": "टीमला मेसेज लिहा…", "Post an announcement…": "घोषणा लिहा…", "📢 Only admins can post announcements.": "📢 फक्त ॲडमिन घोषणा करू शकतात.", "Get notified about new messages?": "नवीन मेसेजची सूचना हवी आहे?", "Turn on": "चालू करा", "Not now": "आत्ता नको", "Pinned message": "पिन केलेला मेसेज", "↩️ Reply": "↩️ उत्तर", "📌 Pin": "📌 पिन", "📌 Unpin": "📌 पिन काढा", "✅ Create task": "✅ काम तयार करा", "⏰ Remind me": "⏰ आठवण करून द्या", "✏️ Edit": "✏️ बदला", "↪️ Forward": "↪️ फॉरवर्ड", "📋 Copy text": "📋 मजकूर कॉपी करा", "🗑️ Delete for everyone": "🗑️ सर्वांसाठी हटवा", "🗑️ Discard": "🗑️ रद्द करा", "⭐ Save message": "⭐ मेसेज सेव्ह करा", "☆ Unsave": "☆ सेव्हमधून काढा", "📷 Camera": "📷 कॅमेरा", "💎 Share a stone": "💎 स्टोन शेअर करा", "🔍 Scan stock packet": "🔍 पॅकेट स्कॅन करा", "📊 Poll": "📊 मतदान", "✅ Task": "✅ काम", "⏰ Schedule / remind me": "⏰ वेळ ठरवा / आठवण करून द्या", "❗ Mark as important": "❗ महत्त्वाचे करा", "Cancel": "रद्द करा", "Close": "बंद करा", "Save": "सेव्ह करा", "Done": "झाले", "Copy": "कॉपी", "Create group": "ग्रुप तयार करा", "Start chat": "चॅट सुरू करा", "New chat": "नवीन चॅट", "Search messages": "मेसेज शोधा", "Forward to…": "फॉरवर्ड करा…", "Forward": "फॉरवर्ड", "Name": "नाव", "Mobile": "मोबाइल", "Change photo": "फोटो बदला", "Remove photo": "फोटो काढा", "Add people": "लोक जोडा", "Leave group": "ग्रुप सोडा", "Delete group": "ग्रुप हटवा", "Rename": "नाव बदला", "Remove": "काढा", "Add": "जोडा", "Message info": "मेसेज माहिती", "Create task": "काम तयार करा", "Post poll": "मतदान टाका", "Schedule": "वेळ ठरवा", "Send request": "विनंती पाठवा", "Approve": "मंजूर", "Reject": "नामंजूर", "Disable": "बंद करा", "Enable": "चालू करा", "Make admin": "ॲडमिन करा", "Remove admin": "ॲडमिन काढा", "Admin panel": "ॲडमिन पॅनल", "Users": "युजर्स", "Share in chat": "चॅटमध्ये शेअर करा", "📌 Request hold": "📌 होल्ड मागा", "💲 Ask discount": "💲 डिस्काउंट मागा", "Clear filters": "फिल्टर काढा", "Shape": "शेप", "Carat": "कॅरेट", "Color": "कलर", "Clarity": "क्लॅरिटी", "Sort": "क्रम", "Any": "कोणतेही", "Party": "पार्टी", "Note": "टीप", "Hold until": "होल्ड कधीपर्यंत", "Requested by": "मागणारे", "Assigned to": "कोणाला सोपवले", "Due": "शेवटची तारीख", "✓ Mark done": "✓ पूर्ण झाले", "Reopen": "पुन्हा उघडा", "Close poll": "मतदान बंद करा", "Join meeting": "मीटिंगमध्ये सामील व्हा", "👁 Preview": "👁 पहा", "🔍 Scan": "🔍 स्कॅन", "🔗 Client link": "🔗 क्लायंट लिंक", "Create link": "लिंक तयार करा", "Find": "शोधा", "Assigned to me": "मला सोपवलेली", "Created by me": "मी तयार केलेली", "⏰ Scheduled": "⏰ ठरवलेले", "Media": "फोटो", "Files": "फाइल्स", "Links": "लिंक", "Stones": "स्टोन", "Check in": "हजेरी लावा", "Check out": "चेक आउट", "Company announcements · only admins post": "कंपनीच्या घोषणा · फक्त ॲडमिन लिहू शकतात", "Announcements from admins will appear here.": "ॲडमिनच्या घोषणा इथे दिसतील.", "Only you can see this · your reminders and notes": "फक्त तुम्हाला दिसते · तुमचे रिमाइंडर आणि नोंदी", "Search name or mobile…": "नाव किंवा मोबाइल शोधा…", "Filter by name or mobile…": "नाव किंवा मोबाइलने शोधा…", "Photos, files and links in this chat": "या चॅटमधील फोटो, फाइल्स आणि लिंक", "Start a video meeting in this chat": "या चॅटमध्ये व्हिडिओ मीटिंग सुरू करा", "Record a voice note": "व्हॉइस नोट रेकॉर्ड करा", "Attach a file or photo": "फाइल किंवा फोटो जोडा", "No groups yet. Tap + NEW GROUP.": "अजून ग्रुप नाही.", "Say hello": "नमस्कार म्हणा"};   // मराठी
+  const MR = {"Email": "ईमेल", "Password": "पासवर्ड", "Sign In": "साइन इन", "Sign up": "साइन अप", "Forgot Password?": "पासवर्ड विसरलात?", "Employee name": "कर्मचाऱ्याचे नाव", "Mobile number": "मोबाइल नंबर", "Confirm password": "पासवर्ड पुन्हा लिहा", "Create account": "अकाउंट तयार करा", "Send reset link": "रीसेट लिंक पाठवा", "← Back to login": "← लॉगिनवर परत", "Choose photo": "फोटो निवडा", "Waiting for approval": "मंजुरीची वाट", "Check again": "पुन्हा तपासा", "Account disabled": "अकाउंट बंद आहे", "Save new password": "नवीन पासवर्ड सेव्ह करा", "New password": "नवीन पासवर्ड", "Confirm new password": "नवीन पासवर्ड पुन्हा लिहा", "Edit profile": "प्रोफाइल बदला", "🔔 Notifications": "🔔 सूचना", "🛡️ Admin panel": "🛡️ ॲडमिन पॅनल", "Log out": "लॉग आउट", "✅ My tasks & reminders": "✅ माझी कामे आणि रिमाइंडर", "🔗 Client links": "🔗 क्लायंट लिंक", "🎨 Theme": "🎨 थीम", "⭐ Saved messages": "⭐ सेव्ह केलेले मेसेज", "🌐 Language": "🌐 भाषा", "🕘 Attendance": "🕘 हजेरी", "📱 My devices": "📱 माझे डिव्हाइस", "Chat": "चॅट", "Unread": "न वाचलेले", "Meeting chats": "मीटिंग चॅट", "Unmuted": "म्यूट नाही", "Favorites": "आवडते", "Chats": "चॅट्स", "Contacts": "संपर्क", "Team Chat": "टीम चॅट", "Announcements": "घोषणा", "Everyone": "सर्वजण", "From admins": "ॲडमिनकडून", "You can post": "तुम्ही पोस्ट करू शकता", "Tap ⋯ on a chat → Add to favorites.": "चॅटवर ⋯ दाबा → आवडत्यांमध्ये जोडा.", "No chats yet. Tap ✏️ to start one.": "अजून चॅट नाही. ✏️ दाबून सुरू करा.", "Available": "उपलब्ध", "Busy": "व्यस्त", "Do not disturb": "त्रास देऊ नका", "Be right back": "लगेच येतो", "Away": "दूर", "Offline": "ऑफलाइन", "online": "ऑनलाइन", "⏰ My reminders": "⏰ माझे रिमाइंडर", "⭐ Add to favorites": "⭐ आवडत्यांमध्ये जोडा", "☆ Remove from favorites": "☆ आवडत्यांमधून काढा", "🔕 Mute": "🔕 म्यूट", "🔔 Unmute": "🔔 अनम्यूट", "✔️ Mark as read": "✔️ वाचले म्हणून नोंदवा", "Set your status": "तुमचा स्टेटस", "Available (automatic)": "उपलब्ध (आपोआप)", "Appear away": "दूर दिसा", "Appear offline": "ऑफलाइन दिसा", "Members": "सदस्य", "Today": "आज", "Yesterday": "काल", "No messages yet": "अजून मेसेज नाही", "Send the first message.": "पहिला मेसेज पाठवा.", "⬆ Load older messages": "⬆ जुने मेसेज पहा", "⬇ Download": "⬇ डाउनलोड", "Delivered": "पोहोचला", "Read": "वाचला", "Sending…": "पाठवत आहे…", "⚠ Not sent · Tap to retry": "⚠ गेला नाही · पुन्हा पाठवण्यासाठी दाबा", "Edited": "बदललेला", "📌 Pinned": "📌 पिन केलेला", "↪ Forwarded": "↪ फॉरवर्ड केलेला", "You": "तुम्ही", "Message the team…": "टीमला मेसेज लिहा…", "Post an announcement…": "घोषणा लिहा…", "📢 Only admins can post announcements.": "📢 फक्त ॲडमिन घोषणा करू शकतात.", "Get notified about new messages?": "नवीन मेसेजची सूचना हवी आहे?", "Turn on": "चालू करा", "Not now": "आत्ता नको", "Pinned message": "पिन केलेला मेसेज", "↩️ Reply": "↩️ उत्तर", "📌 Pin": "📌 पिन", "📌 Unpin": "📌 पिन काढा", "✅ Create task": "✅ काम तयार करा", "⏰ Remind me": "⏰ आठवण करून द्या", "✏️ Edit": "✏️ बदला", "↪️ Forward": "↪️ फॉरवर्ड", "📋 Copy text": "📋 मजकूर कॉपी करा", "🗑️ Delete for everyone": "🗑️ सर्वांसाठी हटवा", "🗑️ Discard": "🗑️ रद्द करा", "⭐ Save message": "⭐ मेसेज सेव्ह करा", "☆ Unsave": "☆ सेव्हमधून काढा", "📷 Camera": "📷 कॅमेरा", "💎 Share a stone": "💎 स्टोन शेअर करा", "🔍 Scan stock packet": "🔍 पॅकेट स्कॅन करा", "📊 Poll": "📊 मतदान", "✅ Task": "✅ काम", "⏰ Schedule / remind me": "⏰ वेळ ठरवा / आठवण करून द्या", "❗ Mark as important": "❗ महत्त्वाचे करा", "Cancel": "रद्द करा", "Close": "बंद करा", "Save": "सेव्ह करा", "Done": "झाले", "Copy": "कॉपी", "Create group": "ग्रुप तयार करा", "Start chat": "चॅट सुरू करा", "New chat": "नवीन चॅट", "Search messages": "मेसेज शोधा", "Forward to…": "फॉरवर्ड करा…", "Forward": "फॉरवर्ड", "Name": "नाव", "Mobile": "मोबाइल", "Change photo": "फोटो बदला", "Remove photo": "फोटो काढा", "Add people": "लोक जोडा", "Leave group": "ग्रुप सोडा", "Delete group": "ग्रुप हटवा", "Rename": "नाव बदला", "Remove": "काढा", "Add": "जोडा", "Message info": "मेसेज माहिती", "Create task": "काम तयार करा", "Post poll": "मतदान टाका", "Schedule": "वेळ ठरवा", "Send request": "विनंती पाठवा", "Approve": "मंजूर", "Reject": "नामंजूर", "Disable": "बंद करा", "Enable": "चालू करा", "Make admin": "ॲडमिन करा", "Remove admin": "ॲडमिन काढा", "Admin panel": "ॲडमिन पॅनल", "Users": "युजर्स", "Share in chat": "चॅटमध्ये शेअर करा", "📌 Request hold": "📌 होल्ड मागा", "💲 Ask discount": "💲 डिस्काउंट मागा", "Clear filters": "फिल्टर काढा", "Shape": "शेप", "Carat": "कॅरेट", "Color": "कलर", "Clarity": "क्लॅरिटी", "Sort": "क्रम", "Any": "कोणतेही", "Party": "पार्टी", "Note": "टीप", "Hold until": "होल्ड कधीपर्यंत", "Requested by": "मागणारे", "Assigned to": "कोणाला सोपवले", "Due": "शेवटची तारीख", "✓ Mark done": "✓ पूर्ण झाले", "Reopen": "पुन्हा उघडा", "Close poll": "मतदान बंद करा", "Join meeting": "मीटिंगमध्ये सामील व्हा", "👁 Preview": "👁 पहा", "🔍 Scan": "🔍 स्कॅन", "🔗 Client link": "🔗 क्लायंट लिंक", "Create link": "लिंक तयार करा", "Find": "शोधा", "Assigned to me": "मला सोपवलेली", "Created by me": "मी तयार केलेली", "⏰ Scheduled": "⏰ ठरवलेले", "Media": "फोटो", "Files": "फाइल्स", "Links": "लिंक", "Stones": "स्टोन", "Check in": "हजेरी लावा", "Check out": "चेक आउट", "Company announcements · only admins post": "कंपनीच्या घोषणा · फक्त ॲडमिन लिहू शकतात", "Announcements from admins will appear here.": "ॲडमिनच्या घोषणा इथे दिसतील.", "Only you can see this · your reminders and notes": "फक्त तुम्हाला दिसते · तुमचे रिमाइंडर आणि नोंदी", "Search name or mobile…": "नाव किंवा मोबाइल शोधा…", "Filter by name or mobile…": "नाव किंवा मोबाइलने शोधा…", "Photos, files and links in this chat": "या चॅटमधील फोटो, फाइल्स आणि लिंक", "Start a video meeting in this chat": "या चॅटमध्ये व्हिडिओ मीटिंग सुरू करा", "Record a voice note": "व्हॉइस नोट रेकॉर्ड करा", "Attach a file or photo": "फाइल किंवा फोटो जोडा", "No groups yet. Tap + NEW GROUP.": "अजून ग्रुप नाही.", "Say hello": "नमस्कार म्हणा"};   // मराठी
   let lang = "en"; try { lang = localStorage.getItem("kg-lang") || "en"; } catch (e) {}
   const TR_SKIP = ".bubble, .stone-card, .slist, .task-card, .poll-card, .disc-card, .hold-card, .sheet-tbl, .search-hit, #client-view, .link-box, .cv-card, script, style";
   const tx = (key) => { if (lang === "en" || !TR[key]) return key; if (lang === "mr") return MR[key] || key; return TR[key][LANG_IDX[lang]] || key; };
