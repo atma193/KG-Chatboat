@@ -1343,7 +1343,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v45 · 26 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v46 · 26 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -1776,14 +1776,15 @@ if ("serviceWorker" in navigator) {
     const q = sideSearch.value.trim().toLowerCase();
     // people you already have a private chat with are shown under Chats — don't list them twice (a search still finds everyone)
     const inChats = new Set(groups.filter(g => g.kind === "direct").map(otherMember).filter(id => id && id !== myId));
-    const list = contacts.filter(p => q ? ((p.name||"").toLowerCase().includes(q) || (p.mobile||"").replace(/\s/g,"").includes(q.replace(/\s/g,"")) || (p.email||"").toLowerCase().includes(q)) : !inChats.has(p.id));
+    const others = contacts.filter(p => p.id !== myId);   // you are not listed — 📝 My notes is in the name menu / Chats
+    const list = others.filter(p => q ? ((p.name||"").toLowerCase().includes(q) || (p.mobile||"").replace(/\s/g,"").includes(q.replace(/\s/g,"")) || (p.email||"").toLowerCase().includes(q)) : !inChats.has(p.id));
     // you first, then people who are online, then everyone else — alphabetically
     const rank = (p) => p.id === myId ? 0 : statusOf(p.id) === "offline" ? 2 : 1;
     list.sort((a,b) => (rank(a) - rank(b)) || (a.name||"").localeCompare(b.name||""));
-    const nOn = contacts.filter(p => statusOf(p.id) !== "offline").length;
-    $("side-count").textContent = contacts.length ? nOn + " online · " + contacts.length : "";
+    const nOn = others.filter(p => statusOf(p.id) !== "offline").length;
+    $("side-count").textContent = others.length ? nOn + " online · " + others.length : "";
     contactListEl.innerHTML = "";
-    if (!list.length) { contactListEl.innerHTML = '<div class="side-empty">' + (q ? "No match." : "No contacts yet.") + '</div>'; return; }
+    if (!list.length) { contactListEl.innerHTML = '<div class="side-empty">' + (q ? "No match." : others.length ? "Everyone you chat with is under Chats." : "No contacts yet.") + '</div>'; return; }
     list.forEach(p => {
       const item = document.createElement("div"); item.className = "side-item";
       const av = document.createElement("div"); av.className = "avatar"; paintAvatar(av, p, p.id);
