@@ -557,6 +557,22 @@
   .chg-ids { margin-top:10px; font-size:12.5px; line-height:1.7; word-break:break-word; color:var(--text); }
   .upload-card { margin-top:6px; }
   .link-row .interest { color:#C27C0E; font-weight:600; }
+  .qr-pop .qr-item { display:flex; gap:8px; align-items:flex-start; padding:8px 10px; cursor:pointer; border-bottom:1px solid var(--border); }
+  .qr-pop .qr-item:hover, .qr-pop .qr-item.sel { background:color-mix(in srgb, var(--accent) 14%, transparent); }
+  .qr-pop .qr-item .t { flex:1; white-space:pre-wrap; font-size:13.5px; color:var(--text); }
+  .qr-pop .qr-item .x { color:var(--text-dim); padding:0 4px; } .qr-pop .qr-item .x:hover { color:var(--danger, #c0392b); }
+  .qr-pop .qr-foot { display:flex; gap:6px; padding:8px 10px; flex-wrap:wrap; }
+  .qr-pop .qr-empty { padding:10px; font-size:13px; color:var(--text-dim); }
+  .search-filters { display:flex; flex-wrap:wrap; gap:6px; margin:-2px 0 8px; align-items:center; font-size:12px; color:var(--text-dim); }
+  .search-filters select, .search-filters input { padding:5px 8px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font:inherit; font-size:13px; width:auto; margin:0; }
+  .search-filters label { display:flex; gap:4px; align-items:center; }
+  .bc-list { max-height:42vh; overflow:auto; margin-top:8px; border:1px solid var(--border); border-radius:10px; }
+  .bc-list .pick-row { padding:6px 10px; border-bottom:1px solid var(--border); }
+  .bc-list .pick-row label { display:flex; gap:10px; align-items:center; cursor:pointer; }
+  .bc-list input[type=checkbox] { width:16px; height:16px; accent-color:var(--accent); }
+  .drop-overlay { position:fixed; inset:0; z-index:2000; display:none; align-items:center; justify-content:center; background:color-mix(in srgb, var(--accent) 18%, rgba(0,0,0,.35)); pointer-events:none; }
+  .drop-overlay.open { display:flex; }
+  .drop-overlay div { background:var(--bg-raised); color:var(--text); border:3px dashed var(--accent); border-radius:18px; padding:28px 40px; font-size:20px; font-weight:700; }
   .stock-hdr-btn:hover { background:rgba(255,255,255,.22); }
   /* inside a chat (＋ → Share a stone) the client tools are hidden — they live on the 💎 Stock page */
   #stone-modal[data-mode="chat"] .client-only, #stone-modal[data-mode="chat"] .stock-only { display:none !important; }
@@ -781,6 +797,7 @@
           <button id="menu-status"><span class="st-label st-available" id="menu-status-label"><i></i>Available</span></button>
           <button id="menu-mytasks">✅ My tasks &amp; reminders</button>
           <button id="menu-links">🔗 Client links</button>
+          <button id="menu-broadcast">📣 Broadcast message</button>
           <button id="menu-saved">⭐ Saved messages</button>
           <button id="menu-lang">🌐 Language</button>
           <button id="menu-devices">📱 My devices</button>
@@ -841,6 +858,7 @@
       <div class="urgent-bar" id="urgent-bar"><span>❗</span><span class="grow"><b>Important</b> — everyone in this chat is alerted, even if they muted it</span><span class="x" id="urgent-x" title="Not important">&times;</span></div>
       <div class="edit-bar" id="reply-bar"><div class="grow"><b id="reply-bar-name">Replying</b> · <span id="reply-bar-text"></span></div><span class="x" id="reply-cancel" title="Cancel reply">&times;</span></div>
       <div class="mention-pop" id="mention-pop"></div>
+      <div class="mention-pop qr-pop" id="qr-pop"></div>
       <div class="pending-wrap" id="pending-wrap"></div>
       <div class="composer-locked" id="composer-locked">📢 Only admins can post announcements.</div>
       <div class="rec-bar" id="rec-bar"><span class="rec-dot"></span><span class="grow" id="rec-time">0:00</span><button class="small-btn" id="rec-cancel">Cancel</button><button class="small-btn primary" id="rec-send">Send ➤</button></div>
@@ -851,6 +869,7 @@
         <input type="file" id="file-input" multiple style="display:none;">
         <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none;">
         <button class="icon-btn" id="plus-btn" title="More: camera, stone, poll, task, schedule" style="font-size:20px; font-weight:300;">＋</button>
+        <button class="icon-btn" id="qr-btn" title="Quick replies (or type / in the message box)" style="font-size:18px;">⚡</button>
         <textarea id="composer-input" placeholder="Message the team…" rows="1"></textarea>
         <button class="icon-btn" id="mic-btn" title="Record a voice note">🎤</button>
         <button class="send-btn" id="send-btn" disabled>
@@ -998,10 +1017,15 @@
       <div class="panel-head">Search messages</div>
       <div class="panel-body">
         <input type="search" id="search-input" placeholder="Type a word, stock ID, party name…">
+        <div class="search-filters">
+          <select id="search-from" title="From"><option value="">From: anyone</option></select>
+          <select id="search-type" title="Type"><option value="">All messages</option><option value="photo">📷 Photos</option><option value="file">📎 Files</option><option value="link">🔗 Links</option><option value="stone">💎 Stones</option><option value="voice">🎤 Voice notes</option></select>
+          <label>From <input type="date" id="search-d1"></label><label>to <input type="date" id="search-d2"></label>
+        </div>
         <label class="side-sub" style="display:flex; gap:6px; align-items:center; margin:-4px 0 8px;"><input type="checkbox" id="search-here"> Only in this chat</label>
         <div id="search-results"></div>
       </div>
-      <div class="panel-foot"><button class="small-btn" id="search-close">Close</button></div>
+      <div class="panel-foot"><button class="small-btn" id="chat-export" title="Download every message of the open chat as an Excel file">⬇ Export this chat</button><span class="grow"></span><button class="small-btn" id="search-close">Close</button></div>
     </div>
   </div>
   <div class="modal-back" id="stone-modal">
@@ -1252,6 +1276,21 @@
       <div class="panel-foot"><button class="small-btn" id="chg-close">Close</button></div>
     </div>
   </div>
+  <!-- 📣 broadcast -->
+  <div class="modal-back" id="bc-modal">
+    <div class="panel wide">
+      <div class="panel-head">📣 Broadcast message</div>
+      <div class="panel-body">
+        <div class="side-sub" style="margin-bottom:8px;">The message goes to each person's own private chat (and to the groups you tick) — nobody sees who else got it.</div>
+        <textarea class="field" id="bc-text" rows="3" placeholder="Type the message…" style="width:100%; resize:vertical;"></textarea>
+        <div style="display:flex; gap:8px; align-items:center; margin:6px 0 10px;"><button class="small-btn" id="bc-attach" type="button">📎 Add a file / photo</button><span class="side-sub" id="bc-file"></span><input type="file" id="bc-file-input" style="display:none;"></div>
+        <div style="display:flex; gap:8px; align-items:center;"><input type="search" id="bc-search" placeholder="Search people or groups…" style="flex:1; margin:0;"><button class="small-btn" id="bc-all" type="button">Tick all people</button></div>
+        <div id="bc-list" class="bc-list"></div>
+        <div class="panel-note" id="bc-msg"></div>
+      </div>
+      <div class="panel-foot"><span class="grow side-sub" id="bc-count">Nobody ticked</span><button class="small-btn" id="bc-cancel">Cancel</button><button class="small-btn primary" id="bc-send">📣 Send</button></div>
+    </div>
+  </div>
   <div id="client-view"></div>
   <div class="modal-back" id="saved-modal">
     <div class="panel wide">
@@ -1303,13 +1342,17 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v42 · 26 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v44 · 26 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
 const VAPID_PUBLIC_KEY = "";      // for notifications when the app is closed — see SETUP.md "Push notifications". Leave "" to skip.
 const MEET_BASE_URL = "https://meet.jit.si/";   // video meetings (free). Any meeting service that accepts a room name in the URL works.
-const MAX_FILE_MB = 500;  // biggest file a person can send. Bigger files are sent in pieces (see CHUNK_MB).
+// 🗄 Own file server (MinIO on the office PC + the "file-url" Supabase function — see SETUP.md "Own file server").
+// false = files go to Supabase Storage (Free plan: 1 GB in total). true = new files go to your server.
+const FILE_SERVER = false;
+const FILE_SERVER_MAX_MB = 2048;   // biggest file when FILE_SERVER is on (keep the same as the function's FILE_MAX_MB secret)
+const MAX_FILE_MB = FILE_SERVER ? FILE_SERVER_MAX_MB : 500;  // biggest file a person can send. Bigger files are sent in pieces.
 const CHUNK_MB = 45;      // piece size. Must stay below Supabase's per-file limit (Free plan: 50 MB). On Pro you can raise both.
 // =================================================================================================
 
@@ -2632,8 +2675,8 @@ if ("serviceWorker" in navigator) {
       alert(msg);
       return;
     }
-    if (file.size > 100 * 1048576 && !confirm("“" + file.name + "” is " + fmtSize(file.size) + ".\n\nBig files use a lot of the shared storage (Free plan: 1 GB for everyone). Send it?")) return;
-    const big = file.size > CHUNK_MB * 1048576;
+    if (!FILE_SERVER && file.size > 100 * 1048576 && !confirm("“" + file.name + "” is " + fmtSize(file.size) + ".\n\nBig files use a lot of the shared storage (Free plan: 1 GB for everyone). Send it?")) return;
+    const big = file.size > (FILE_SERVER ? 90 : CHUNK_MB) * 1048576;
     const isImage = !big && file.type && file.type.startsWith("image/");
     const isAudio = !big && file.type && file.type.startsWith("audio/");
     const item = { blob:file, name:file.name, isImage, previewUrl: (isImage || isAudio) ? URL.createObjectURL(file) : null };
@@ -2681,8 +2724,19 @@ if ("serviceWorker" in navigator) {
     const i = ref.indexOf(PUB_MARK); if (i >= 0) return decodeURIComponent(ref.slice(i + PUB_MARK.length).split("?")[0]);
     return null;
   }
+  const s3Queue = new Set(); let s3Timer = null;
+  async function flushS3() {
+    const keys = [...s3Queue]; s3Queue.clear(); if (!keys.length) return;
+    try { const { urls } = await fileServer({ action: "get", keys }); keys.forEach((k, i) => signCache["s3:" + k] = { url: urls[i], exp: Date.now() + 3600e3 }); }
+    catch (e) { keys.forEach(k => signCache["s3:" + k] = { url: "", exp: Date.now() + 120000 }); }
+    render(true);
+  }
   function fileUrl(ref) {   // usable link now, or "" while it's being signed (the chat redraws when ready)
     if (isPartsRef(ref)) return "";
+    if (isS3Ref(ref)) { const k = ref.slice(5), c = signCache["s3:" + k];
+      if (c && c.exp > Date.now() + 60000) return c.url;
+      if (!s3Queue.has(k)) { s3Queue.add(k); clearTimeout(s3Timer); s3Timer = setTimeout(flushS3, 20); }
+      return ""; }
     const path = storagePath(ref); if (!path) return ref || "";
     const c = signCache[path];
     if (c && c.exp > Date.now() + 60000) return c.url;
@@ -2699,6 +2753,8 @@ if ("serviceWorker" in navigator) {
     render(true);
   }
   async function fileUrlNow(ref) {
+    if (isS3Ref(ref)) { const k = ref.slice(5), c = signCache["s3:" + k]; if (c && c.url && c.exp > Date.now() + 60000) return c.url;
+      const { urls } = await fileServer({ action: "get", keys: [k] }); signCache["s3:" + k] = { url: urls[0], exp: Date.now() + 3600e3 }; return urls[0]; }
     const path = storagePath(ref); if (!path) return ref;
     const c = signCache[path]; if (c && c.url && c.exp > Date.now() + 60000) return c.url;
     const { data, error } = await sb.storage.from("chat-uploads").createSignedUrl(path, 3600);
@@ -2710,12 +2766,36 @@ if ("serviceWorker" in navigator) {
   // ---------- big files: sent in pieces, joined back on download ----------
   // stored as "sbparts://chat-uploads/<base>?n=<pieces>" — piece i is "<base>.part001" …
   const CHUNK = CHUNK_MB * 1048576;
-  const isPartsRef = (ref) => typeof ref === "string" && ref.startsWith("sbparts://");
+  const isPartsRef = (ref) => typeof ref === "string" && (ref.startsWith("sbparts://") || ref.startsWith("s3parts://"));
+  const isS3Ref = (ref) => typeof ref === "string" && ref.startsWith("s3://");
+  // ---- own file server: signed links come from the "file-url" function ----
+  async function fileServer(body) {
+    const { data, error } = await sb.functions.invoke("file-url", { body });
+    if (error || !data || data.error) throw new Error((data && data.error) || (error && error.message) || "file server not reachable");
+    return data;
+  }
+  const FS_PIECE = 90 * 1048576;   // < 100 MB per request (Cloudflare Tunnel limit)
+  async function uploadToFileServer(m) {
+    const blob = m._file.blob, n = Math.max(1, Math.ceil(blob.size / FS_PIECE));
+    if (!m._s3) { m._s3 = await fileServer({ action: "put", name: m._file.name, size: blob.size, parts: n }); m._partsDone = 0; }
+    for (let i = m._partsDone || 0; i < n; i++) {
+      m._progress = Math.round(i / n * 100); render(true);
+      const part = n === 1 ? blob : blob.slice(i * FS_PIECE, Math.min(blob.size, (i + 1) * FS_PIECE));
+      const r = await fetch(m._s3.urls[i], { method: "PUT", body: part });
+      if (!r.ok) { if (r.status === 403) { m._s3 = null; m._partsDone = 0; } throw new Error("upload to file server failed (" + r.status + ")"); }
+      m._partsDone = i + 1;
+    }
+    m._progress = 100;
+    return n === 1 ? "s3://" + m._s3.key : "s3parts://" + m._s3.key + "?n=" + n;
+  }
   function partsOf(ref) {
+    const s3 = /^s3parts:\/\/(.+)\?n=(\d+)$/.exec(ref || "");
+    if (s3) return Array.from({ length: Number(s3[2]) }, (_, i) => s3[1] + ".part" + String(i + 1).padStart(3, "0"));
     const m = /^sbparts:\/\/chat-uploads\/(.+)\?n=(\d+)$/.exec(ref || ""); if (!m) return [];
     return Array.from({ length: Number(m[2]) }, (_, i) => m[1] + ".part" + String(i + 1).padStart(3, "0"));
   }
   async function uploadAttachment(m) {
+    if (FILE_SERVER) return uploadToFileServer(m);
     const blob = m._file.blob;
     if (!m._base) m._base = myId + "/" + Date.now() + "-" + safeName(m._file.name);
     if (blob.size <= CHUNK) {
@@ -2739,8 +2819,10 @@ if ("serviceWorker" in navigator) {
   async function fetchAttachmentBlob(ref, type, label) {
     if (!isPartsRef(ref)) { const r = await fetch(await fileUrlNow(ref)); if (!r.ok) throw new Error("download failed (" + r.status + ")"); return r.blob(); }
     const parts = partsOf(ref);
-    const { data, error } = await sb.storage.from("chat-uploads").createSignedUrls(parts, 3600);
-    if (error || !data) throw new Error("file not available");
+    let data, error;
+    if (ref.startsWith("s3parts://")) { try { data = (await fileServer({ action: "get", keys: parts })).urls.map(u => ({ signedUrl: u })); } catch (e) { error = e; } }
+    else ({ data, error } = await sb.storage.from("chat-uploads").createSignedUrls(parts, 3600));
+    if (error || !data) throw new Error("file not available" + (error && error.message ? " (" + error.message + ")" : ""));
     const chunks = [];
     for (let i = 0; i < data.length; i++) {
       showBanner("⬇ Downloading " + (label || "file") + "… " + Math.round(i / data.length * 100) + "%");
@@ -3135,36 +3217,6 @@ if ("serviceWorker" in navigator) {
   $("search-modal").addEventListener("click", (e) => { if (e.target.id === "search-modal") $("search-modal").classList.remove("open"); });
   $("search-input").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(runSearch, 300); });
   $("search-here").addEventListener("change", runSearch);
-  async function runSearch() {
-    const qtext = $("search-input").value.trim(), box = $("search-results");
-    if (qtext.length < 2) { box.innerHTML = '<div class="side-empty">Type at least 2 letters.</div>'; return; }
-    box.innerHTML = '<div class="side-empty">Searching…</div>';
-    let q = sb.from("messages").select("*").ilike("text", "%" + qtext.replace(/[%_\\]/g, "\\$&") + "%").eq("deleted", false);
-    if ($("search-here").checked) q = currentGroupId ? q.eq("group_id", currentGroupId) : q.is("group_id", null);
-    const { data, error } = await q.order("created_at", { ascending: false }).limit(50);
-    if (qtext !== $("search-input").value.trim()) return;
-    if (error) { box.innerHTML = '<div class="side-empty">Search failed.</div>'; return; }
-    await ensureProfiles(Array.from(new Set((data || []).map(m => m.sender_id).filter(Boolean))));
-    box.innerHTML = "";
-    if (!data || !data.length) { box.innerHTML = '<div class="side-empty">No messages found.</div>'; return; }
-    const hdr = document.createElement("div"); hdr.className = "sec-label"; hdr.textContent = data.length + (data.length === 50 ? "+" : "") + " result" + (data.length === 1 ? "" : "s"); box.appendChild(hdr);
-    data.forEach(m => {
-      const hit = document.createElement("div"); hit.className = "search-hit";
-      const h1 = document.createElement("div"); h1.className = "h1";
-      const a = document.createElement("span"); a.textContent = (m.sender_id === myId ? "You" : nameOf(m.sender_id)) + " · " + chatTitleOf(groupById(m.group_id || null));
-      const b = document.createElement("span"); b.textContent = new Date(m.created_at).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
-      h1.appendChild(a); h1.appendChild(b);
-      const h2 = document.createElement("div"); h2.className = "h2";
-      const t = m.text || "", i = Math.max(0, t.toLowerCase().indexOf(qtext.toLowerCase())), from = Math.max(0, i - 40);
-      h2.appendChild(document.createTextNode((from > 0 ? "…" : "") + t.slice(from, i)));
-      const mk = document.createElement("mark"); mk.textContent = t.slice(i, i + qtext.length); h2.appendChild(mk);
-      h2.appendChild(document.createTextNode(t.slice(i + qtext.length, i + qtext.length + 80) + (t.length > i + qtext.length + 80 ? "…" : "")));
-      hit.appendChild(h1); hit.appendChild(h2);
-      hit.addEventListener("click", () => { $("search-modal").classList.remove("open"); closeSidebar(); jumpTo(m.id); });
-      box.appendChild(hit);
-    });
-  }
-
   // ---------- online / last seen / typing ----------
   let onlineSet = new Set(), presenceCh = null, lastTypingSent = 0, lastSeenTimer = null;
   // ---------- online / offline status (Teams-style) ----------
@@ -5008,6 +5060,237 @@ if ("serviceWorker" in navigator) {
     if (data && data.length) toast("📒 " + data.length + " stone" + (data.length > 1 ? "s" : "") + " on memo should be back by now — 💎 Stock → 📒 Sold / Memo");
   }
 
+
+  // =====================================================================
+  // ---------- v44: ⚡ quick replies · 📣 broadcast · 🔍 search filters + ⬇ export · drag & drop files ----------
+  // =====================================================================
+  // ---------------- drag & drop files onto the chat ----------------
+  {
+    const drop = document.createElement("div"); drop.className = "drop-overlay"; drop.innerHTML = '<div>📎 Drop files here to attach</div>';
+    document.body.appendChild(drop);
+    let depth = 0;
+    const hasFiles = (e) => e.dataTransfer && [...(e.dataTransfer.types || [])].includes("Files");
+    const chatVisible = () => !!composerInput.offsetParent && !document.querySelector(".modal-back.open");
+    window.addEventListener("dragenter", (e) => { if (!hasFiles(e) || !chatVisible()) return; e.preventDefault(); depth++; drop.classList.add("open"); });
+    window.addEventListener("dragover", (e) => { if (!hasFiles(e)) return; e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect = chatVisible() ? "copy" : "none"; });
+    window.addEventListener("dragleave", (e) => { if (!hasFiles(e)) return; depth = Math.max(0, depth - 1); if (!depth) drop.classList.remove("open"); });
+    window.addEventListener("drop", (e) => {
+      if (!hasFiles(e)) return; e.preventDefault(); depth = 0; drop.classList.remove("open");
+      if (!chatVisible()) return;
+      if (!canPost()) { showBanner("Only admins can post here.", true); return; }
+      Array.from(e.dataTransfer.files || []).forEach(addPendingFile); composerInput.focus(); updateSendEnabled();
+    });
+  }
+
+  // ---------------- ⚡ quick replies ----------------
+  let quickReplies = null, qrSel = 0, qrSlash = false;
+  const qrPop = $("qr-pop");
+  async function loadQuickReplies(force) {
+    if (quickReplies && !force) return quickReplies;
+    const { data } = await sb.from("quick_replies").select("*").eq("user_id", myId).order("created_at", { ascending: true });
+    quickReplies = data || []; return quickReplies;
+  }
+  function useQuickReply(r) {
+    const cur = composerInput.value;
+    composerInput.value = qrSlash || !cur.trim() ? r.text : (cur.replace(/\s+$/, "") + " " + r.text);
+    closeQr(); composerInput.focus(); composerInput.dispatchEvent(new Event("input", { bubbles: true })); updateSendEnabled();
+    composerInput.style.height = "auto"; composerInput.style.height = Math.min(composerInput.scrollHeight, 160) + "px";
+  }
+  function closeQr() { qrPop.classList.remove("open"); qrSlash = false; }
+  async function openQr(filter) {
+    await loadQuickReplies();
+    const f = (filter || "").toLowerCase(), list = quickReplies.filter(r => !f || r.text.toLowerCase().includes(f));
+    qrPop.innerHTML = ""; qrSel = Math.min(qrSel, Math.max(0, list.length - 1));
+    if (!quickReplies.length) qrPop.appendChild(Object.assign(document.createElement("div"), { className: "qr-empty", textContent: "No quick replies yet. Type a message and tap “＋ Save current message”, or add one below." }));
+    else if (!list.length) qrPop.appendChild(Object.assign(document.createElement("div"), { className: "qr-empty", textContent: "No quick reply matches “" + filter + "”." }));
+    list.forEach((r, i) => {
+      const it = document.createElement("div"); it.className = "qr-item" + (i === qrSel ? " sel" : "");
+      const t = document.createElement("div"); t.className = "t"; t.textContent = r.text;
+      const x = document.createElement("span"); x.className = "x"; x.textContent = "×"; x.title = "Delete this quick reply";
+      x.addEventListener("click", async (e) => { e.stopPropagation(); if (!confirm("Delete this quick reply?")) return; await sb.from("quick_replies").delete().eq("id", r.id); await loadQuickReplies(true); openQr(filter); });
+      it.addEventListener("mousedown", (e) => { e.preventDefault(); useQuickReply(r); });
+      it.appendChild(t); it.appendChild(x); qrPop.appendChild(it);
+    });
+    if (!qrSlash) {
+      const foot = document.createElement("div"); foot.className = "qr-foot";
+      const cur = composerInput.value.trim();
+      if (cur) { const sv = document.createElement("button"); sv.className = "small-btn primary"; sv.textContent = "＋ Save current message"; sv.addEventListener("mousedown", (e) => { e.preventDefault(); addQuickReply(cur); }); foot.appendChild(sv); }
+      const nw = document.createElement("button"); nw.className = "small-btn"; nw.textContent = "＋ New quick reply";
+      nw.addEventListener("mousedown", (e) => { e.preventDefault(); const t = prompt("New quick reply:"); if (t && t.trim()) addQuickReply(t.trim()); });
+      foot.appendChild(nw); qrPop.appendChild(foot);
+    }
+    qrPop._list = list; qrPop.classList.add("open");
+  }
+  async function addQuickReply(text) {
+    const { error } = await sb.from("quick_replies").insert({ text: text.slice(0, 1000), user_id: myId });
+    if (error) { showBanner("Couldn't save quick reply: " + error.message, true); return; }
+    await loadQuickReplies(true); showBanner("⚡ Quick reply saved."); setTimeout(() => showBanner(""), 1500); openQr();
+  }
+  $("qr-btn").addEventListener("click", (e) => { e.stopPropagation(); if (qrPop.classList.contains("open")) closeQr(); else { qrSlash = false; qrSel = 0; openQr(); } });
+  document.addEventListener("click", (e) => { if (!e.target.closest("#qr-pop, #qr-btn")) closeQr(); });
+  // type "/" at the start of the message box → pick a quick reply
+  composerInput.addEventListener("input", () => {
+    const v = composerInput.value;
+    if (/^\/[^\s]*$/.test(v) && !editingMsg) { qrSlash = true; openQr(v.slice(1)); }
+    else if (qrSlash) closeQr();
+  });
+  composerInput.addEventListener("keydown", (e) => {
+    if (!qrPop.classList.contains("open") || !qrSlash) return;
+    const list = qrPop._list || [];
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); e.stopImmediatePropagation(); qrSel = (qrSel + (e.key === "ArrowDown" ? 1 : -1) + list.length) % Math.max(1, list.length); openQr(composerInput.value.slice(1)); }
+    else if ((e.key === "Enter" || e.key === "Tab") && list.length) { e.preventDefault(); e.stopImmediatePropagation(); useQuickReply(list[qrSel] || list[0]); }
+    else if (e.key === "Escape") { e.preventDefault(); closeQr(); }
+  }, true);
+
+  // ---------------- 📣 broadcast ----------------
+  const bcSel = new Set(); let bcFile = null;
+  $("menu-broadcast").addEventListener("click", () => { meMenu.classList.remove("open"); openBroadcast(); });
+  $("bc-cancel").addEventListener("click", () => $("bc-modal").classList.remove("open"));
+  $("bc-attach").addEventListener("click", () => $("bc-file-input").click());
+  $("bc-file-input").addEventListener("change", () => {
+    const f = $("bc-file-input").files[0]; $("bc-file-input").value = ""; if (!f) return;
+    if (f.size > MAX_FILE_MB * 1048576) { alert("⚠ File too big\n\n“" + f.name + "” is " + fmtSize(f.size) + ".\nThe size limit is " + MAX_FILE_MB + " MB per file."); return; }
+    bcFile = f; $("bc-file").textContent = "📎 " + f.name + " · " + fmtSize(f.size) + "  ";
+    const x = document.createElement("a"); x.href = "#"; x.textContent = "remove"; x.addEventListener("click", (e) => { e.preventDefault(); bcFile = null; $("bc-file").textContent = ""; }); $("bc-file").appendChild(x);
+  });
+  function bcTargets() {
+    const people = contacts.filter(c => c.id !== myId).map(c => ({ id: "u:" + c.id, name: c.name || "Unnamed", sub: [c.mobile, "Private chat"].filter(Boolean).join(" · "), person: c }));
+    const grps = groups.filter(g => g.kind === "group" || (g.kind !== "direct" && g.kind !== "self" && g.kind !== "announce"))
+      .map(g => ({ id: g.id, name: chatTitleOf(g), sub: "Group · " + (g.members || []).length + " members" }));
+    return people.sort((a, b) => a.name.localeCompare(b.name)).concat(grps);
+  }
+  function drawBcList() {
+    const q = $("bc-search").value.trim().toLowerCase(), box = $("bc-list"); box.innerHTML = "";
+    bcTargets().filter(t => !q || (t.name + " " + t.sub).toLowerCase().includes(q)).forEach(t => {
+      const row = document.createElement("div"); row.className = "pick-row"; const lab = document.createElement("label");
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = bcSel.has(t.id);
+      cb.addEventListener("change", () => { cb.checked ? bcSel.add(t.id) : bcSel.delete(t.id); bcCount(); });
+      const av = document.createElement("div"); av.className = "avatar"; av.style.width = av.style.height = "30px";
+      if (t.person) paintAvatar(av, t.person, t.person.id); else { av.className = "group-icon"; av.style.background = colorFor(t.id); av.textContent = initials(t.name); }
+      const tx = document.createElement("div"); tx.className = "side-text"; tx.innerHTML = '<div class="side-name"></div><div class="side-sub"></div>';
+      tx.firstChild.textContent = t.name; tx.lastChild.textContent = t.sub;
+      lab.appendChild(cb); lab.appendChild(av); lab.appendChild(tx); row.appendChild(lab); box.appendChild(row);
+    });
+    if (!box.children.length) box.innerHTML = '<div class="side-empty">Nobody found.</div>';
+  }
+  function bcCount() { const n = bcSel.size; $("bc-count").textContent = n ? n + " chat" + (n === 1 ? "" : "s") + " ticked" : "Nobody ticked"; }
+  $("bc-search").addEventListener("input", drawBcList);
+  $("bc-all").addEventListener("click", () => { const ppl = bcTargets().filter(t => t.person).map(t => t.id); const all = ppl.every(id => bcSel.has(id)); ppl.forEach(id => all ? bcSel.delete(id) : bcSel.add(id)); drawBcList(); bcCount(); });
+  function openBroadcast() {
+    bcSel.clear(); bcFile = null; $("bc-text").value = composerInput.value.trim() && !editingMsg ? composerInput.value.trim() : ""; $("bc-file").textContent = ""; $("bc-search").value = ""; $("bc-msg").textContent = "";
+    drawBcList(); bcCount(); $("bc-modal").classList.add("open"); $("bc-text").focus();
+  }
+  $("bc-send").addEventListener("click", async () => {
+    const text = $("bc-text").value.trim();
+    if (!text && !bcFile) { $("bc-msg").textContent = "Type a message or add a file."; return; }
+    if (!bcSel.size) { $("bc-msg").textContent = "Tick at least one person or group."; return; }
+    if (!confirm("Send this to " + bcSel.size + " chat" + (bcSel.size === 1 ? "" : "s") + "?")) return;
+    const btn = $("bc-send"); btn.disabled = true;
+    try {
+      let att = null;
+      if (bcFile) {
+        $("bc-msg").textContent = "Uploading " + bcFile.name + "…";
+        const m = { _file: { blob: bcFile, name: bcFile.name } };
+        const url = await uploadAttachment(m);
+        att = { attachment_url: url, attachment_name: bcFile.name, attachment_type: bcFile.type || null, attachment_size: bcFile.size };
+      }
+      const keys = [];
+      for (const k of bcSel) {
+        if (!k.startsWith("u:")) { keys.push(k); continue; }
+        $("bc-msg").textContent = "Opening chats… " + keys.length + " / " + bcSel.size;
+        const { data: gid, error } = await sb.rpc("get_or_create_direct", { p_other: k.slice(2) });
+        if (error || !gid) throw new Error("couldn't open a chat" + (error ? ": " + error.message : ""));
+        keys.push(gid);
+      }
+      const rows = keys.map(gid => Object.assign({ id: newId(), sender_id: myId, group_id: gid, text }, att || {}));
+      for (let i = 0; i < rows.length; i += 100) { const { error } = await sb.from("messages").insert(rows.slice(i, i + 100)); if (error) throw error; }
+      $("bc-modal").classList.remove("open");
+      if (composerInput.value.trim() === text) { composerInput.value = ""; updateSendEnabled(); }
+      await loadGroups(); loadSummaries();
+      showBanner("📣 Sent to " + rows.length + " chat" + (rows.length === 1 ? "" : "s") + "."); setTimeout(() => showBanner(""), 2500);
+    } catch (e) { $("bc-msg").textContent = "Couldn't send: " + (e.message || e); }
+    finally { btn.disabled = false; }
+  });
+
+  // ---------------- 🔍 search filters + ⬇ export ----------------
+  function fillSearchFrom() {
+    const sel = $("search-from"), cur = sel.value; sel.innerHTML = '<option value="">From: anyone</option><option value="' + myId + '">From: me</option>';
+    contacts.filter(c => c.id !== myId).sort((a, b) => (a.name || "").localeCompare(b.name || "")).forEach(c => { const o = document.createElement("option"); o.value = c.id; o.textContent = "From: " + (c.name || "Unnamed"); sel.appendChild(o); });
+    sel.value = cur;
+  }
+  $("search-btn").addEventListener("click", fillSearchFrom);
+  ["search-from", "search-type", "search-d1", "search-d2"].forEach(id => $(id).addEventListener("change", runSearch));
+  const typeOk = (m, t) => !t ? true : t === "photo" ? /^image\//.test(m.attachment_type || "") : t === "voice" ? /^audio\//.test(m.attachment_type || "")
+    : t === "file" ? !!m.attachment_url && !/^(image|audio)\//.test(m.attachment_type || "") : t === "link" ? /https?:\/\//i.test(m.text || "")
+    : t === "stone" ? !!(m.stone || (m.stone_list && m.stone_list.length)) : true;
+  // replaces the old text-only search: text and/or person, type, dates, this chat
+  async function runSearch() {
+    const qtext = $("search-input").value.trim(), box = $("search-results");
+    const from = $("search-from").value, type = $("search-type").value, d1 = $("search-d1").value, d2 = $("search-d2").value;
+    const any = qtext.length >= 2 || from || type || d1 || d2;
+    if (!any) { box.innerHTML = '<div class="side-empty">Type at least 2 letters, or choose a person, type or date.</div>'; return; }
+    box.innerHTML = '<div class="side-empty">Searching…</div>';
+    const stamp = Symbol(); runSearch.last = stamp;
+    let q = sb.from("messages").select("*").eq("deleted", false);
+    if (qtext.length >= 2) q = q.ilike("text", "%" + qtext.replace(/[%_\\]/g, "\\$&") + "%");
+    if (from) q = q.eq("sender_id", from);
+    if (d1) q = q.gte("created_at", new Date(d1 + "T00:00:00").toISOString());
+    if (d2) q = q.lte("created_at", new Date(d2 + "T23:59:59").toISOString());
+    if ($("search-here").checked) q = currentGroupId ? q.eq("group_id", currentGroupId) : q.is("group_id", null);
+    const { data, error } = await q.order("created_at", { ascending: false }).limit(type ? 1000 : 100);
+    if (runSearch.last !== stamp) return;
+    if (error) { box.innerHTML = '<div class="side-empty">Search failed.</div>'; return; }
+    const list = (data || []).filter(m => typeOk(m, type)).slice(0, 100);
+    await ensureProfiles(Array.from(new Set(list.map(m => m.sender_id).filter(Boolean))));
+    box.innerHTML = "";
+    if (!list.length) { box.innerHTML = '<div class="side-empty">No messages found.</div>'; return; }
+    const hdr = document.createElement("div"); hdr.className = "sec-label"; hdr.textContent = list.length + (list.length === 100 ? "+" : "") + " result" + (list.length === 1 ? "" : "s"); box.appendChild(hdr);
+    list.forEach(m => {
+      const hit = document.createElement("div"); hit.className = "search-hit";
+      const h1 = document.createElement("div"); h1.className = "h1";
+      const a = document.createElement("span"); a.textContent = (m.sender_id === myId ? "You" : nameOf(m.sender_id)) + " · " + chatTitleOf(groupById(m.group_id || null));
+      const b = document.createElement("span"); b.textContent = new Date(m.created_at).toLocaleString(undefined, { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" });
+      h1.appendChild(a); h1.appendChild(b);
+      const h2 = document.createElement("div"); h2.className = "h2";
+      const extra = m.attachment_name ? (/^image\//.test(m.attachment_type || "") ? "📷 " : /^audio\//.test(m.attachment_type || "") ? "🎤 " : "📎 ") + m.attachment_name
+        : m.stone ? "💎 " + (m.stone.stock_id || "Stone") : m.stone_list ? "💎 " + m.stone_list.length + " stones" : "";
+      const t = m.text || "";
+      if (qtext.length >= 2 && t) {
+        const i = Math.max(0, t.toLowerCase().indexOf(qtext.toLowerCase())), st = Math.max(0, i - 40);
+        h2.appendChild(document.createTextNode((st > 0 ? "…" : "") + t.slice(st, i)));
+        const mk = document.createElement("mark"); mk.textContent = t.slice(i, i + qtext.length); h2.appendChild(mk);
+        h2.appendChild(document.createTextNode(t.slice(i + qtext.length, i + qtext.length + 80) + (t.length > i + qtext.length + 80 ? "…" : "")));
+      } else h2.textContent = (t.slice(0, 120) + (t.length > 120 ? "…" : "")) || extra;
+      if (t && extra) { const e2 = document.createElement("div"); e2.className = "side-sub"; e2.textContent = extra; h2.appendChild(e2); }
+      hit.appendChild(h1); hit.appendChild(h2);
+      hit.addEventListener("click", () => { $("search-modal").classList.remove("open"); closeSidebar(); jumpTo(m.id); });
+      box.appendChild(hit);
+    });
+  }
+  $("chat-export").addEventListener("click", async () => {
+    const btn = $("chat-export"); btn.disabled = true; const gid = currentGroupId, title = chatTitleOf(groupById(gid));
+    try {
+      showBanner("⬇ Reading all messages of " + title + "…");
+      const base = () => { let q = sb.from("messages").select("*"); return gid ? q.eq("group_id", gid) : q.is("group_id", null); };
+      const { count } = await base().select("id", { count: "exact", head: true });
+      const reqs = []; for (let i = 0; i < Math.min(count || 0, 100000); i += 1000) reqs.push(base().order("created_at", { ascending: true }).range(i, i + 999));
+      const all = [].concat(...(await Promise.all(reqs)).map(r => r.data || []));
+      await ensureProfiles(Array.from(new Set(all.map(m => m.sender_id).filter(Boolean))));
+      const XLSX = await loadSheetJs(), wb = XLSX.utils.book_new();
+      const rows = [["Date", "Time", "From", "Message", "Attachment", "Stone(s)", "Forwarded", "Edited", "Deleted"]].concat(all.map(m => {
+        const d = new Date(m.created_at);
+        return [isoDay(d), d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }), m.sender_id ? nameOf(m.sender_id) : "KG Bot", m.deleted ? "" : (m.text || ""),
+          m.deleted ? "" : (m.attachment_name || ""), m.stone ? m.stone.stock_id || "" : m.stone_list ? m.stone_list.map(x => x.stock_id).join(", ") : "", m.forwarded ? "yes" : "", m.edited_at ? "yes" : "", m.deleted ? "yes" : ""];
+      }));
+      const ws = XLSX.utils.aoa_to_sheet(rows); ws["!cols"] = [{ wch: 11 }, { wch: 8 }, { wch: 18 }, { wch: 70 }, { wch: 28 }, { wch: 20 }, { wch: 9 }, { wch: 7 }, { wch: 8 }];
+      XLSX.utils.book_append_sheet(wb, ws, "Chat");
+      XLSX.writeFile(wb, "KG_chat_" + title.replace(/[^\w]+/g, "_").slice(0, 40) + "_" + isoDay(Date.now()) + ".xlsx");
+      sb.rpc("log_event", { p_action: "chat_exported", p_target: title, p_details: { messages: all.length } }).then(() => {}, () => {});
+      showBanner("⬇ " + all.length.toLocaleString() + " messages exported."); setTimeout(() => showBanner(""), 2000);
+    } catch (e) { showBanner("Couldn't export: " + e.message, true); }
+    finally { btn.disabled = false; }
+  });
+
   // =====================================================================
   // ---------- 💲 Discount approval ----------
   // =====================================================================
@@ -5512,7 +5795,7 @@ if ("serviceWorker" in navigator) {
     user_pending: "⏳ User set to pending", role_changed: "🛡️ Role changed", hold_approved: "📌 Hold approved", hold_rejected: "📌 Hold rejected", hold_expired: "⌛ Hold expired",
     discount_approved: "💲 Discount approved", discount_rejected: "💲 Discount rejected", group_created: "👥 Group created", group_deleted: "👥 Group deleted",
     group_renamed: "👥 Group renamed", member_added: "➕ Added to group", member_removed: "➖ Removed from group", device_logged_out: "📱 Device logged out",
-    party_deleted: "🤝 Party deleted", stock_uploaded: "💎 Stock uploaded", stock_access_on: "💎 Stock access given", stock_access_off: "💎 Stock access removed", backup_downloaded: "💾 Backup downloaded", client_link_created: "🔗 Client link created", settings_changed: "⚙️ Settings changed",
+    party_deleted: "🤝 Party deleted", stock_uploaded: "💎 Stock uploaded", stock_access_on: "💎 Stock access given", chat_exported: "⬇ Chat exported", stock_access_off: "💎 Stock access removed", backup_downloaded: "💾 Backup downloaded", client_link_created: "🔗 Client link created", settings_changed: "⚙️ Settings changed",
   };
   const actDetail = (a) => {
     const d = a.details || {};
