@@ -573,6 +573,7 @@
   .drop-overlay { position:fixed; inset:0; z-index:2000; display:none; align-items:center; justify-content:center; background:color-mix(in srgb, var(--accent) 18%, rgba(0,0,0,.35)); pointer-events:none; }
   .drop-overlay.open { display:flex; }
   .drop-overlay div { background:var(--bg-raised); color:var(--text); border:3px dashed var(--accent); border-radius:18px; padding:28px 40px; font-size:20px; font-weight:700; }
+  .list-sep { margin:10px 12px 2px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-dim); }
   .stock-hdr-btn:hover { background:rgba(255,255,255,.22); }
   /* inside a chat (＋ → Share a stone) the client tools are hidden — they live on the 💎 Stock page */
   #stone-modal[data-mode="chat"] .client-only, #stone-modal[data-mode="chat"] .stock-only { display:none !important; }
@@ -832,8 +833,8 @@
         <div class="sec-body" id="sec-fav"><div id="fav-list"></div></div>
         <div class="sec-toggle" data-sec="chats"><span class="car">›</span>Chats<span class="cnt" id="chats-count"></span></div>
         <div class="sec-body" id="sec-chats"><div id="chat-list"></div></div>
-        <div class="sec-toggle" data-sec="contacts"><span class="car">›</span>Contacts<span class="cnt" id="side-count"></span></div>
-        <div class="sec-body" id="sec-contacts"><div id="contact-list"></div></div>
+        <div class="sec-toggle" data-sec="contacts" style="display:none;"><span class="car">›</span>Contacts<span class="cnt" id="side-count"></span></div>
+        <div class="sec-body" id="sec-contacts" style="display:none;"><div id="contact-list"></div></div>
         <!-- older layout pieces, kept hidden so older code paths keep working -->
         <div style="display:none;">
           <div id="side-team"></div><span id="team-badge"></span><div id="announce-item"></div>
@@ -1343,7 +1344,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v46 · 26 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v48 · 26 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -1769,22 +1770,23 @@ if ("serviceWorker" in navigator) {
     if (error) { contactListEl.innerHTML = '<div class="side-empty">Couldn\'t load contacts.</div>'; return; }
     contacts = (data || []).filter(p => !p.status || p.status === "active");
     contacts.forEach(p => profileCache[p.id] = p);
-    renderContacts();
+    renderContacts(); renderGroups();
   }
 
   function renderContacts() {
     const q = sideSearch.value.trim().toLowerCase();
-    // people you already have a private chat with are shown under Chats — don't list them twice (a search still finds everyone)
-    const inChats = new Set(groups.filter(g => g.kind === "direct").map(otherMember).filter(id => id && id !== myId));
-    const others = contacts.filter(p => p.id !== myId);   // you are not listed — 📝 My notes is in the name menu / Chats
-    const list = others.filter(p => q ? ((p.name||"").toLowerCase().includes(q) || (p.mobile||"").replace(/\s/g,"").includes(q.replace(/\s/g,"")) || (p.email||"").toLowerCase().includes(q)) : !inChats.has(p.id));
+    // everyone except you (📝 My notes is in the name menu / Chats); the Contacts section starts closed
+    const others = contacts.filter(p => p.id !== myId);
+    const list = others.filter(p => !q || (p.name||"").toLowerCase().includes(q) || (p.mobile||"").replace(/\s/g,"").includes(q.replace(/\s/g,"")) || (p.email||"").toLowerCase().includes(q));
+    // while searching the sidebar, show matching contacts even if the section is closed
+    $("sec-contacts").classList.toggle("closed", !q && !$("sec-contacts").previousElementSibling.classList.contains("open"));
     // you first, then people who are online, then everyone else — alphabetically
     const rank = (p) => p.id === myId ? 0 : statusOf(p.id) === "offline" ? 2 : 1;
     list.sort((a,b) => (rank(a) - rank(b)) || (a.name||"").localeCompare(b.name||""));
     const nOn = others.filter(p => statusOf(p.id) !== "offline").length;
     $("side-count").textContent = others.length ? nOn + " online · " + others.length : "";
     contactListEl.innerHTML = "";
-    if (!list.length) { contactListEl.innerHTML = '<div class="side-empty">' + (q ? "No match." : others.length ? "Everyone you chat with is under Chats." : "No contacts yet.") + '</div>'; return; }
+    if (!list.length) { contactListEl.innerHTML = '<div class="side-empty">' + (q ? "No match." : "No contacts yet.") + '</div>'; return; }
     list.forEach(p => {
       const item = document.createElement("div"); item.className = "side-item";
       const av = document.createElement("div"); av.className = "avatar"; paintAvatar(av, p, p.id);
@@ -1947,7 +1949,6 @@ if ("serviceWorker" in navigator) {
     return item;
   }
   function renderGroups() {
-    renderContacts();   // Contacts hides people who now have a chat in this list
     const q = ($("side-search").value || "").trim().toLowerCase();
     let list = chatEntries();
     if (q) list = list.filter(e => e.title.toLowerCase().includes(q));
@@ -1955,19 +1956,43 @@ if ("serviceWorker" in navigator) {
     if (chipFilters.has("meeting")) list = list.filter(e => e.s.has_meeting);
     if (chipFilters.has("unmuted")) list = list.filter(e => !e.p.muted);
     const t = (e) => e.s.last_at ? new Date(e.s.last_at).getTime() : (e.g && e.g.created_at ? new Date(e.g.created_at).getTime() : 0);
-    list.sort((a, b) => t(b) - t(a));
+    // order (user's wish): 1 open chat · 2 online · 3 away · 4 offline — newest message first inside each
+    const tier = (e) => { if (e.key === (currentGroupId || "team")) return 0;
+      if (!e.g || e.g.kind !== "direct") return 1;
+      const st = statusOf(otherMember(e.g)); return st === "offline" ? 3 : st === "away" ? 2 : 1; };
+    list.sort((a, b) => (tier(a) - tier(b)) || (t(b) - t(a)));
     const favs = list.filter(e => e.p.favorite), rest = list.filter(e => !e.p.favorite);
     const filtering = !!(q || chipFilters.size);
     const fill = (box, items, empty) => { box.innerHTML = ""; if (!items.length) { const d = document.createElement("div"); d.className = "side-empty"; d.textContent = empty; box.appendChild(d); } items.forEach(e => box.appendChild(chatItem(e))); };
     fill($("fav-list"), favs, filtering ? "No favorites match." : "Tap ⋯ on a chat → Add to favorites.");
     fill($("chat-list"), rest, filtering ? "No chats match." : "No chats yet. Tap ✏️ to start one.");
+    // 5 · everyone you have no private chat with yet (online → away → offline), at the bottom
+    if (!chipFilters.size) {
+      const inChats = new Set(groups.filter(g => g.kind === "direct").map(otherMember));
+      const rk = (id) => { const st = statusOf(id); return st === "offline" ? 2 : st === "away" ? 1 : 0; };
+      const people = contacts.filter(p => p.id !== myId && !inChats.has(p.id) && (!q || (p.name || "").toLowerCase().includes(q) || (p.mobile || "").replace(/\s/g, "").includes(q.replace(/\s/g, ""))))
+        .sort((a, b) => (rk(a.id) - rk(b.id)) || (a.name || "").localeCompare(b.name || ""));
+      if (people.length) {
+        const box = $("chat-list"); if (box.firstChild && box.firstChild.classList && box.firstChild.classList.contains("side-empty")) box.innerHTML = "";
+        const lab = document.createElement("div"); lab.className = "list-sep"; lab.textContent = "Start a chat"; box.appendChild(lab);
+        people.forEach(p => {
+          const item = document.createElement("div"); item.className = "side-item chat-item no-chat"; item.title = "Start a private chat with " + (p.name || "this person");
+          const txt = document.createElement("div"); txt.className = "side-text";
+          const nm = document.createElement("div"); nm.className = "side-name"; nm.textContent = p.name || "Unnamed";
+          const sub = document.createElement("div"); sub.className = "side-sub"; sub.appendChild(statusLabel(p.id, true));
+          txt.appendChild(nm); txt.appendChild(sub); item.appendChild(personIcon(p.id)); item.appendChild(txt);
+          item.addEventListener("click", () => { closeSidebar(); openDirect(p.id); });
+          box.appendChild(item);
+        });
+      }
+    }
     $("fav-count").textContent = favs.length || ""; $("chats-count").textContent = rest.length || "";
     $("side-team").classList.toggle("active", !currentGroupId);
   }
   // collapsible sections (remembered on this device)
   function applySections() {
     document.querySelectorAll(".sec-toggle").forEach(t => {
-      const k = t.dataset.sec, open = secState[k] !== undefined ? secState[k] : true;
+      const k = t.dataset.sec, open = secState[k] !== undefined ? secState[k] : k !== "contacts";   // Contacts closed by default
       t.classList.toggle("open", open); $("sec-" + k).classList.toggle("closed", !open);
     });
   }
@@ -1976,6 +2001,7 @@ if ("serviceWorker" in navigator) {
     try { localStorage.setItem("kg-sections", JSON.stringify(secState)); } catch (e) {}
     applySections();
   }));
+  if (!secState._contactsClosedV47) { delete secState.contacts; secState._contactsClosedV47 = 1; try { localStorage.setItem("kg-sections", JSON.stringify(secState)); } catch (e) {} }   // user asked: Contacts list hidden (closed) by default
   applySections();
   // filter chips
   $("chips").addEventListener("click", (ev) => {
@@ -3280,7 +3306,7 @@ if ("serviceWorker" in navigator) {
     if (!force && st === myLive) return;
     myLive = st;
     if (presenceCh) { try { await presenceCh.track({ user_id: myId, s: st, at: Date.now() }); } catch (e) {} }
-    paintMyStatus(); renderContacts();
+    paintMyStatus(); renderContacts(); renderGroups();
   }
   ["mousemove", "keydown", "touchstart", "scroll", "click"].forEach(ev => window.addEventListener(ev, () => {
     const wasIdle = Date.now() - lastActive > IDLE_MS; lastActive = Date.now(); if (wasIdle) publishStatus();
