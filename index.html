@@ -798,6 +798,7 @@
           <button id="menu-mytasks">✅ My tasks &amp; reminders</button>
           <button id="menu-links">🔗 Client links</button>
           <button id="menu-broadcast">📣 Broadcast message</button>
+          <button id="menu-self">📝 My notes (message yourself)</button>
           <button id="menu-saved">⭐ Saved messages</button>
           <button id="menu-lang">🌐 Language</button>
           <button id="menu-devices">📱 My devices</button>
@@ -1342,7 +1343,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v44 · 26 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v45 · 26 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -1792,7 +1793,8 @@ if ("serviceWorker" in navigator) {
       txt.appendChild(nm); txt.appendChild(sub);
       const w = document.createElement("div"); w.className = "av-wrap"; const dot = document.createElement("span"); dot.className = "dot st st-" + statusOf(p.id); dot.title = STATUS_TEXT[statusOf(p.id)];
       w.appendChild(av); w.appendChild(dot); item.appendChild(w); item.appendChild(txt);
-      item.addEventListener("click", () => { closeSidebar(); showContact(p); });
+      item.addEventListener("click", () => { closeSidebar(); if (p.id === myId) openSelf(); else showContact(p); });
+      if (p.id === myId) { item.title = "📝 Message yourself — notes, files, links"; sub.textContent = "📝 Message yourself"; }
       contactListEl.appendChild(item);
     });
   }
@@ -1828,7 +1830,7 @@ if ("serviceWorker" in navigator) {
 
   const amAppAdmin = () => !!(myProfile && myProfile.role === "admin");
   const otherMember = (g) => (g && g.kind === "direct") ? (g.members.find(id => id !== myId) || myId) : null;
-  const chatTitleOf = (g) => !g ? "Team Chat" : g.kind === "direct" ? nameOf(otherMember(g)) : g.kind === "self" ? "⏰ My reminders" : g.name;
+  const chatTitleOf = (g) => !g ? "Team Chat" : g.kind === "direct" ? nameOf(otherMember(g)) : g.kind === "self" ? "📝 My notes" : g.name;
   function canPin() {
     const g = groupById(currentGroupId);
     if (!g) return amAppAdmin();
@@ -1911,7 +1913,7 @@ if ("serviceWorker" in navigator) {
   function chatIcon(e) {
     if (!e.g) { const ic = document.createElement("div"); ic.className = "team-icon"; ic.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>'; return ic; }
     if (e.g.kind === "announce") { const ic = document.createElement("div"); ic.className = "team-icon"; ic.textContent = "📢"; return ic; }
-    if (e.g.kind === "self") { const ic = document.createElement("div"); ic.className = "team-icon"; ic.textContent = "⏰"; return ic; }
+    if (e.g.kind === "self") { const ic = document.createElement("div"); ic.className = "team-icon"; ic.textContent = "📝"; return ic; }
     if (e.g.kind === "direct") return personIcon(otherMember(e.g));
     return groupIcon(e.g);
   }
@@ -1930,7 +1932,7 @@ if ("serviceWorker" in navigator) {
     if (e.s.last_text) {
       const who = e.s.last_sender === myId ? "You: " : (e.g && e.g.kind === "direct") ? "" : e.s.last_sender ? nameOf(e.s.last_sender).split(" ")[0] + ": " : "";
       prev = who + e.s.last_text;
-    } else prev = !e.g ? "Everyone" : e.g.kind === "announce" ? "From admins" : e.g.kind === "direct" ? statusLine(otherMember(e.g)) : e.g.members.length + " members";
+    } else prev = !e.g ? "Everyone" : e.g.kind === "announce" ? "From admins" : e.g.kind === "direct" ? statusLine(otherMember(e.g)) : e.g.kind === "self" ? "Only you · notes & reminders" : e.g.members.length + " members";
     if (typers[e.key] && Object.values(typers[e.key]).some(t => t > Date.now())) prev = "typing…";
     sub.textContent = (e.p.muted ? "🔕 " : "") + prev;
     txt.appendChild(top); txt.appendChild(sub);
@@ -2066,7 +2068,7 @@ if ("serviceWorker" in navigator) {
     let sub;
     if (!g) { const ic = document.createElement("div"); ic.className = "team-icon"; ic.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>'; avSlot.appendChild(ic); sub = "Everyone"; }
     else if (g.kind === "announce") { const ic = document.createElement("div"); ic.className = "team-icon"; ic.textContent = "📢"; avSlot.appendChild(ic); sub = "Company announcements · only admins post"; }
-    else if (g.kind === "self") { const ic = document.createElement("div"); ic.className = "team-icon"; ic.textContent = "⏰"; avSlot.appendChild(ic); sub = "Only you can see this · your reminders and notes"; }
+    else if (g.kind === "self") { const ic = document.createElement("div"); ic.className = "team-icon"; ic.textContent = "📝"; avSlot.appendChild(ic); sub = "Only you can see this · notes, files, links and ⏰ reminders"; }
     else if (g.kind === "direct") { const o = otherMember(g); avSlot.appendChild(personIcon(o)); sub = statusLine(o); }
     else { avSlot.appendChild(groupIcon(g)); sub = g.members.map(nameOf).sort().join(", "); }
     $("chat-title-name").textContent = chatTitleOf(g);
@@ -2101,6 +2103,21 @@ if ("serviceWorker" in navigator) {
 
   // start (or reopen) a private chat with someone
   let directBusy = false;
+  // 📝 My notes: your own private chat (also receives ⏰ reminders)
+  let selfBusy = false;
+  async function openSelf() {
+    let g = groups.find(x => x.kind === "self");
+    if (!g) {
+      if (selfBusy) return; selfBusy = true;
+      try {
+        const { data: gid, error } = await sb.rpc("get_or_create_self");
+        if (error || !gid) { showBanner("Couldn't open My notes" + (error ? ": " + error.message : "."), true); return; }
+        await loadGroups(); loadSummaries(); g = groupById(gid);
+      } finally { selfBusy = false; }
+    }
+    if (g) openChat(g.id);
+  }
+  $("menu-self").addEventListener("click", () => { meMenu.classList.remove("open"); closeSidebar(); openSelf(); });
   async function openDirect(uid) {
     if (!uid || uid === myId || directBusy) return;
     let g = groups.find(x => x.kind === "direct" && x.members.includes(uid));
@@ -3102,8 +3119,8 @@ if ("serviceWorker" in navigator) {
     const box = $("fwd-list"); box.innerHTML = "";
     const targets = [{ id: "team", name: "Team Chat", sub: "Everyone" }].concat(groups
       .filter(g => g.kind !== "announce" || amAppAdmin())
-      .filter(g => g.kind !== "self")
-      .map(g => ({ id: g.id, name: chatTitleOf(g), sub: g.kind === "announce" ? "Announcement" : g.kind === "direct" ? "Private chat" : g.members.length + " members" })));
+      .map(g => ({ id: g.id, name: chatTitleOf(g), sub: g.kind === "announce" ? "Announcement" : g.kind === "direct" ? "Private chat" : g.kind === "self" ? "Only you" : g.members.length + " members" })));
+    if (!groups.some(g => g.kind === "self")) targets.push({ id: "self", name: "📝 My notes", sub: "Only you" });   // created on send
     // people you have no chat with yet → a private chat is started when you forward
     const inChats = new Set(groups.filter(g => g.kind === "direct").map(otherMember));
     contacts.filter(c => c.id !== myId && !inChats.has(c.id)).forEach(c => targets.push({ id: "u:" + c.id, name: c.name || "Unnamed", sub: "New private chat", extra: (c.mobile || "") + " " + (c.email || "") }));
@@ -3114,7 +3131,7 @@ if ("serviceWorker" in navigator) {
       const cb = document.createElement("input"); cb.type = "checkbox";
       cb.addEventListener("change", () => cb.checked ? fwdSelected.add(t.id) : fwdSelected.delete(t.id));
       const ic = document.createElement("div"); ic.className = "group-icon"; ic.style.width = ic.style.height = "32px";
-      ic.style.background = t.id === "team" ? "var(--bg-header)" : colorFor(t.id); ic.textContent = t.id === "team" ? "👥" : t.sub === "Announcement" ? "📢" : initials(t.name);
+      ic.style.background = t.id === "team" ? "var(--bg-header)" : colorFor(t.id); ic.textContent = t.id === "team" ? "👥" : t.sub === "Announcement" ? "📢" : t.sub === "Only you" ? "📝" : initials(t.name);
       const txt = document.createElement("div"); txt.className = "side-text";
       txt.innerHTML = '<div class="side-name"></div><div class="side-sub"></div>';
       txt.firstChild.textContent = t.name; txt.lastChild.textContent = t.sub;
@@ -3137,12 +3154,13 @@ if ("serviceWorker" in navigator) {
     const btn = $("fwd-send"); btn.disabled = true;
     const keys = [];
     for (const k of fwdSelected) {
+      if (k === "self") { const { data: sid, error } = await sb.rpc("get_or_create_self"); if (error || !sid) { btn.disabled = false; $("fwd-note").textContent = "Couldn't open My notes" + (error ? ": " + error.message : "."); return; } keys.push(sid); continue; }
       if (!k.startsWith("u:")) { keys.push(k); continue; }
       const { data: gid, error } = await sb.rpc("get_or_create_direct", { p_other: k.slice(2) });   // start the private chat first
       if (error || !gid) { btn.disabled = false; $("fwd-note").textContent = "Couldn't start chat" + (error ? ": " + error.message : "."); return; }
       keys.push(gid);
     }
-    if (fwdSelected.size !== keys.length || [...fwdSelected].some(k => k.startsWith("u:"))) { await loadGroups(); loadSummaries(); }
+    if ([...fwdSelected].some(k => k.startsWith("u:") || k === "self")) { await loadGroups(); loadSummaries(); }
     const rows = keys.map(k => stones
       ? Object.assign({ id: newId(), sender_id: myId, group_id: k === "team" ? null : k, text: "" }, stones.length === 1 ? { stone: stones[0] } : { stone_list: stones })
       : {
@@ -5571,7 +5589,7 @@ if ("serviceWorker" in navigator) {
     // chat area
     "Members": ["સભ્યો", "सदस्य"], "Today": ["આજે", "आज"], "Yesterday": ["ગઈકાલે", "कल"], "No messages yet": ["હજી કોઈ મેસેજ નથી", "अभी कोई मैसेज नहीं"],
     "Send the first message.": ["પહેલો મેસેજ મોકલો.", "पहला मैसेज भेजें."], "⬆ Load older messages": ["⬆ જૂના મેસેજ જુઓ", "⬆ पुराने मैसेज देखें"],
-    "⬇ Download": ["⬇ ડાઉનલોડ", "⬇ डाउनलोड"], "📌 ON HOLD": ["📌 હોલ્ડ પર", "📌 होल्ड पर"], "⏳ HOLD REQUESTED": ["⏳ હોલ્ડ માંગ્યો", "⏳ होल्ड मांगा"], "Delivered": ["પહોંચી ગયો", "पहुंच गया"], "Read": ["વાંચ્યો", "पढ़ लिया"], "Sending…": ["મોકલાય છે…", "भेजा जा रहा है…"], "⚠ Not sent · Tap to retry": ["⚠ ન ગયો · ફરી મોકલવા દબાવો", "⚠ नहीं गया · दोबारा भेजने के लिए दबाएं"],
+    "⬇ Download": ["⬇ ડાઉનલોડ", "⬇ डाउनलोड"], "📌 ON HOLD": ["📌 હોલ્ડ પર", "📌 होल्ड पर"], "⏳ HOLD REQUESTED": ["⏳ હોલ્ડ માંગ્યો", "⏳ होल्ड मांगा"], "📝 My notes": ["📝 મારી નોંધ", "📝 मेरे नोट्स"], "📝 My notes (message yourself)": ["📝 મારી નોંધ (પોતાને મેસેજ)", "📝 मेरे नोट्स (खुद को मैसेज)"], "📝 Message yourself": ["📝 પોતાને મેસેજ", "📝 खुद को मैसेज"], "Delivered": ["પહોંચી ગયો", "पहुंच गया"], "Read": ["વાંચ્યો", "पढ़ लिया"], "Sending…": ["મોકલાય છે…", "भेजा जा रहा है…"], "⚠ Not sent · Tap to retry": ["⚠ ન ગયો · ફરી મોકલવા દબાવો", "⚠ नहीं गया · दोबारा भेजने के लिए दबाएं"],
     "Edited": ["બદલેલો", "बदला गया"], "📌 Pinned": ["📌 પિન કરેલો", "📌 पिन किया"], "↪ Forwarded": ["↪ ફોરવર્ડ કરેલો", "↪ फॉरवर्ड किया"], "You": ["તમે", "आप"],
     "Message the team…": ["ટીમને મેસેજ લખો…", "टीम को मैसेज लिखें…"], "Post an announcement…": ["જાહેરાત લખો…", "घोषणा लिखें…"],
     "📢 Only admins can post announcements.": ["📢 ફક્ત એડમિન જાહેરાત કરી શકે.", "📢 केवल एडमिन घोषणा कर सकते हैं."],
@@ -5612,7 +5630,7 @@ if ("serviceWorker" in navigator) {
     "No groups yet. Tap + NEW GROUP.": ["હજી કોઈ ગ્રુપ નથી.", "अभी कोई ग्रुप नहीं."], "Say hello": ["નમસ્તે કહો", "नमस्ते कहें"],
   };
   const LANG_IDX = { gu: 0, hi: 1 };
-  const MR = {"Email": "ईमेल", "Password": "पासवर्ड", "Sign In": "साइन इन", "Sign up": "साइन अप", "Forgot Password?": "पासवर्ड विसरलात?", "Employee name": "कर्मचाऱ्याचे नाव", "Mobile number": "मोबाइल नंबर", "Confirm password": "पासवर्ड पुन्हा लिहा", "Create account": "अकाउंट तयार करा", "Send reset link": "रीसेट लिंक पाठवा", "← Back to login": "← लॉगिनवर परत", "Choose photo": "फोटो निवडा", "Waiting for approval": "मंजुरीची वाट", "Check again": "पुन्हा तपासा", "Account disabled": "अकाउंट बंद आहे", "Save new password": "नवीन पासवर्ड सेव्ह करा", "New password": "नवीन पासवर्ड", "Confirm new password": "नवीन पासवर्ड पुन्हा लिहा", "Edit profile": "प्रोफाइल बदला", "🔔 Notifications": "🔔 सूचना", "🛡️ Admin panel": "🛡️ ॲडमिन पॅनल", "Log out": "लॉग आउट", "✅ My tasks & reminders": "✅ माझी कामे आणि रिमाइंडर", "🔗 Client links": "🔗 क्लायंट लिंक", "🎨 Theme": "🎨 थीम", "⭐ Saved messages": "⭐ सेव्ह केलेले मेसेज", "🌐 Language": "🌐 भाषा", "🕘 Attendance": "🕘 हजेरी", "📱 My devices": "📱 माझे डिव्हाइस", "Chat": "चॅट", "Unread": "न वाचलेले", "Meeting chats": "मीटिंग चॅट", "Unmuted": "म्यूट नाही", "Favorites": "आवडते", "Chats": "चॅट्स", "Contacts": "संपर्क", "Team Chat": "टीम चॅट", "Announcements": "घोषणा", "Everyone": "सर्वजण", "From admins": "ॲडमिनकडून", "You can post": "तुम्ही पोस्ट करू शकता", "Tap ⋯ on a chat → Add to favorites.": "चॅटवर ⋯ दाबा → आवडत्यांमध्ये जोडा.", "No chats yet. Tap ✏️ to start one.": "अजून चॅट नाही. ✏️ दाबून सुरू करा.", "Available": "उपलब्ध", "Busy": "व्यस्त", "Do not disturb": "त्रास देऊ नका", "Be right back": "लगेच येतो", "Away": "दूर", "Offline": "ऑफलाइन", "online": "ऑनलाइन", "⏰ My reminders": "⏰ माझे रिमाइंडर", "⭐ Add to favorites": "⭐ आवडत्यांमध्ये जोडा", "☆ Remove from favorites": "☆ आवडत्यांमधून काढा", "🔕 Mute": "🔕 म्यूट", "🔔 Unmute": "🔔 अनम्यूट", "✔️ Mark as read": "✔️ वाचले म्हणून नोंदवा", "Set your status": "तुमचा स्टेटस", "Available (automatic)": "उपलब्ध (आपोआप)", "Appear away": "दूर दिसा", "Appear offline": "ऑफलाइन दिसा", "Members": "सदस्य", "Today": "आज", "Yesterday": "काल", "No messages yet": "अजून मेसेज नाही", "Send the first message.": "पहिला मेसेज पाठवा.", "⬆ Load older messages": "⬆ जुने मेसेज पहा", "⬇ Download": "⬇ डाउनलोड", "📌 ON HOLD": "📌 होल्डवर", "⏳ HOLD REQUESTED": "⏳ होल्ड मागितला", "Delivered": "पोहोचला", "Read": "वाचला", "Sending…": "पाठवत आहे…", "⚠ Not sent · Tap to retry": "⚠ गेला नाही · पुन्हा पाठवण्यासाठी दाबा", "Edited": "बदललेला", "📌 Pinned": "📌 पिन केलेला", "↪ Forwarded": "↪ फॉरवर्ड केलेला", "You": "तुम्ही", "Message the team…": "टीमला मेसेज लिहा…", "Post an announcement…": "घोषणा लिहा…", "📢 Only admins can post announcements.": "📢 फक्त ॲडमिन घोषणा करू शकतात.", "Get notified about new messages?": "नवीन मेसेजची सूचना हवी आहे?", "Turn on": "चालू करा", "Not now": "आत्ता नको", "Pinned message": "पिन केलेला मेसेज", "↩️ Reply": "↩️ उत्तर", "📌 Pin": "📌 पिन", "📌 Unpin": "📌 पिन काढा", "✅ Create task": "✅ काम तयार करा", "⏰ Remind me": "⏰ आठवण करून द्या", "✏️ Edit": "✏️ बदला", "↪️ Forward": "↪️ फॉरवर्ड", "📋 Copy text": "📋 मजकूर कॉपी करा", "🗑️ Delete for everyone": "🗑️ सर्वांसाठी हटवा", "🗑️ Discard": "🗑️ रद्द करा", "⭐ Save message": "⭐ मेसेज सेव्ह करा", "☆ Unsave": "☆ सेव्हमधून काढा", "📷 Camera": "📷 कॅमेरा", "💎 Share a stone": "💎 स्टोन शेअर करा", "🔍 Scan stock packet": "🔍 पॅकेट स्कॅन करा", "📊 Poll": "📊 मतदान", "✅ Task": "✅ काम", "⏰ Schedule / remind me": "⏰ वेळ ठरवा / आठवण करून द्या", "❗ Mark as important": "❗ महत्त्वाचे करा", "Cancel": "रद्द करा", "Close": "बंद करा", "Save": "सेव्ह करा", "Done": "झाले", "Copy": "कॉपी", "Create group": "ग्रुप तयार करा", "Start chat": "चॅट सुरू करा", "New chat": "नवीन चॅट", "Search messages": "मेसेज शोधा", "Forward to…": "फॉरवर्ड करा…", "Forward": "फॉरवर्ड", "Name": "नाव", "Mobile": "मोबाइल", "Change photo": "फोटो बदला", "Remove photo": "फोटो काढा", "Add people": "लोक जोडा", "Leave group": "ग्रुप सोडा", "Delete group": "ग्रुप हटवा", "Rename": "नाव बदला", "Remove": "काढा", "Add": "जोडा", "Message info": "मेसेज माहिती", "Create task": "काम तयार करा", "Post poll": "मतदान टाका", "Schedule": "वेळ ठरवा", "Send request": "विनंती पाठवा", "Approve": "मंजूर", "Reject": "नामंजूर", "Disable": "बंद करा", "Enable": "चालू करा", "Make admin": "ॲडमिन करा", "Remove admin": "ॲडमिन काढा", "Admin panel": "ॲडमिन पॅनल", "Users": "युजर्स", "Share in chat": "चॅटमध्ये शेअर करा", "📌 Request hold": "📌 होल्ड मागा", "💲 Offer discount": "💲 ऑफर डिस्काउंट", "Offer discount %": "ऑफर डिस्काउंट %", "Offer price $/ct": "ऑफर प्राइस $/ct", "Clear filters": "फिल्टर काढा", "Shape": "शेप", "Carat": "कॅरेट", "Color": "कलर", "Clarity": "क्लॅरिटी", "Sort": "क्रम", "Any": "कोणतेही", "Party": "पार्टी", "Note": "टीप", "Hold until": "होल्ड कधीपर्यंत", "Requested by": "मागणारे", "Assigned to": "कोणाला सोपवले", "Due": "शेवटची तारीख", "✓ Mark done": "✓ पूर्ण झाले", "Reopen": "पुन्हा उघडा", "Close poll": "मतदान बंद करा", "Join meeting": "मीटिंगमध्ये सामील व्हा", "👁 Preview": "👁 पहा", "🔍 Scan": "🔍 स्कॅन", "🔗 Client link": "🔗 क्लायंट लिंक", "Create link": "लिंक तयार करा", "Find": "शोधा", "Assigned to me": "मला सोपवलेली", "Created by me": "मी तयार केलेली", "⏰ Scheduled": "⏰ ठरवलेले", "Media": "फोटो", "Files": "फाइल्स", "Links": "लिंक", "Stones": "स्टोन", "Check in": "हजेरी लावा", "Check out": "चेक आउट", "Company announcements · only admins post": "कंपनीच्या घोषणा · फक्त ॲडमिन लिहू शकतात", "Announcements from admins will appear here.": "ॲडमिनच्या घोषणा इथे दिसतील.", "Only you can see this · your reminders and notes": "फक्त तुम्हाला दिसते · तुमचे रिमाइंडर आणि नोंदी", "Search name or mobile…": "नाव किंवा मोबाइल शोधा…", "Filter by name or mobile…": "नाव किंवा मोबाइलने शोधा…", "Photos, files and links in this chat": "या चॅटमधील फोटो, फाइल्स आणि लिंक", "Start a video meeting in this chat": "या चॅटमध्ये व्हिडिओ मीटिंग सुरू करा", "Record a voice note": "व्हॉइस नोट रेकॉर्ड करा", "Attach a file or photo": "फाइल किंवा फोटो जोडा", "No groups yet. Tap + NEW GROUP.": "अजून ग्रुप नाही.", "Say hello": "नमस्कार म्हणा"};   // मराठी
+  const MR = {"Email": "ईमेल", "Password": "पासवर्ड", "Sign In": "साइन इन", "Sign up": "साइन अप", "Forgot Password?": "पासवर्ड विसरलात?", "Employee name": "कर्मचाऱ्याचे नाव", "Mobile number": "मोबाइल नंबर", "Confirm password": "पासवर्ड पुन्हा लिहा", "Create account": "अकाउंट तयार करा", "Send reset link": "रीसेट लिंक पाठवा", "← Back to login": "← लॉगिनवर परत", "Choose photo": "फोटो निवडा", "Waiting for approval": "मंजुरीची वाट", "Check again": "पुन्हा तपासा", "Account disabled": "अकाउंट बंद आहे", "Save new password": "नवीन पासवर्ड सेव्ह करा", "New password": "नवीन पासवर्ड", "Confirm new password": "नवीन पासवर्ड पुन्हा लिहा", "Edit profile": "प्रोफाइल बदला", "🔔 Notifications": "🔔 सूचना", "🛡️ Admin panel": "🛡️ ॲडमिन पॅनल", "Log out": "लॉग आउट", "✅ My tasks & reminders": "✅ माझी कामे आणि रिमाइंडर", "🔗 Client links": "🔗 क्लायंट लिंक", "🎨 Theme": "🎨 थीम", "⭐ Saved messages": "⭐ सेव्ह केलेले मेसेज", "🌐 Language": "🌐 भाषा", "🕘 Attendance": "🕘 हजेरी", "📱 My devices": "📱 माझे डिव्हाइस", "Chat": "चॅट", "Unread": "न वाचलेले", "Meeting chats": "मीटिंग चॅट", "Unmuted": "म्यूट नाही", "Favorites": "आवडते", "Chats": "चॅट्स", "Contacts": "संपर्क", "Team Chat": "टीम चॅट", "Announcements": "घोषणा", "Everyone": "सर्वजण", "From admins": "ॲडमिनकडून", "You can post": "तुम्ही पोस्ट करू शकता", "Tap ⋯ on a chat → Add to favorites.": "चॅटवर ⋯ दाबा → आवडत्यांमध्ये जोडा.", "No chats yet. Tap ✏️ to start one.": "अजून चॅट नाही. ✏️ दाबून सुरू करा.", "Available": "उपलब्ध", "Busy": "व्यस्त", "Do not disturb": "त्रास देऊ नका", "Be right back": "लगेच येतो", "Away": "दूर", "Offline": "ऑफलाइन", "online": "ऑनलाइन", "⏰ My reminders": "⏰ माझे रिमाइंडर", "⭐ Add to favorites": "⭐ आवडत्यांमध्ये जोडा", "☆ Remove from favorites": "☆ आवडत्यांमधून काढा", "🔕 Mute": "🔕 म्यूट", "🔔 Unmute": "🔔 अनम्यूट", "✔️ Mark as read": "✔️ वाचले म्हणून नोंदवा", "Set your status": "तुमचा स्टेटस", "Available (automatic)": "उपलब्ध (आपोआप)", "Appear away": "दूर दिसा", "Appear offline": "ऑफलाइन दिसा", "Members": "सदस्य", "Today": "आज", "Yesterday": "काल", "No messages yet": "अजून मेसेज नाही", "Send the first message.": "पहिला मेसेज पाठवा.", "⬆ Load older messages": "⬆ जुने मेसेज पहा", "⬇ Download": "⬇ डाउनलोड", "📌 ON HOLD": "📌 होल्डवर", "⏳ HOLD REQUESTED": "⏳ होल्ड मागितला", "📝 My notes": "📝 माझ्या नोंदी", "📝 My notes (message yourself)": "📝 माझ्या नोंदी (स्वतःला मेसेज)", "📝 Message yourself": "📝 स्वतःला मेसेज", "Delivered": "पोहोचला", "Read": "वाचला", "Sending…": "पाठवत आहे…", "⚠ Not sent · Tap to retry": "⚠ गेला नाही · पुन्हा पाठवण्यासाठी दाबा", "Edited": "बदललेला", "📌 Pinned": "📌 पिन केलेला", "↪ Forwarded": "↪ फॉरवर्ड केलेला", "You": "तुम्ही", "Message the team…": "टीमला मेसेज लिहा…", "Post an announcement…": "घोषणा लिहा…", "📢 Only admins can post announcements.": "📢 फक्त ॲडमिन घोषणा करू शकतात.", "Get notified about new messages?": "नवीन मेसेजची सूचना हवी आहे?", "Turn on": "चालू करा", "Not now": "आत्ता नको", "Pinned message": "पिन केलेला मेसेज", "↩️ Reply": "↩️ उत्तर", "📌 Pin": "📌 पिन", "📌 Unpin": "📌 पिन काढा", "✅ Create task": "✅ काम तयार करा", "⏰ Remind me": "⏰ आठवण करून द्या", "✏️ Edit": "✏️ बदला", "↪️ Forward": "↪️ फॉरवर्ड", "📋 Copy text": "📋 मजकूर कॉपी करा", "🗑️ Delete for everyone": "🗑️ सर्वांसाठी हटवा", "🗑️ Discard": "🗑️ रद्द करा", "⭐ Save message": "⭐ मेसेज सेव्ह करा", "☆ Unsave": "☆ सेव्हमधून काढा", "📷 Camera": "📷 कॅमेरा", "💎 Share a stone": "💎 स्टोन शेअर करा", "🔍 Scan stock packet": "🔍 पॅकेट स्कॅन करा", "📊 Poll": "📊 मतदान", "✅ Task": "✅ काम", "⏰ Schedule / remind me": "⏰ वेळ ठरवा / आठवण करून द्या", "❗ Mark as important": "❗ महत्त्वाचे करा", "Cancel": "रद्द करा", "Close": "बंद करा", "Save": "सेव्ह करा", "Done": "झाले", "Copy": "कॉपी", "Create group": "ग्रुप तयार करा", "Start chat": "चॅट सुरू करा", "New chat": "नवीन चॅट", "Search messages": "मेसेज शोधा", "Forward to…": "फॉरवर्ड करा…", "Forward": "फॉरवर्ड", "Name": "नाव", "Mobile": "मोबाइल", "Change photo": "फोटो बदला", "Remove photo": "फोटो काढा", "Add people": "लोक जोडा", "Leave group": "ग्रुप सोडा", "Delete group": "ग्रुप हटवा", "Rename": "नाव बदला", "Remove": "काढा", "Add": "जोडा", "Message info": "मेसेज माहिती", "Create task": "काम तयार करा", "Post poll": "मतदान टाका", "Schedule": "वेळ ठरवा", "Send request": "विनंती पाठवा", "Approve": "मंजूर", "Reject": "नामंजूर", "Disable": "बंद करा", "Enable": "चालू करा", "Make admin": "ॲडमिन करा", "Remove admin": "ॲडमिन काढा", "Admin panel": "ॲडमिन पॅनल", "Users": "युजर्स", "Share in chat": "चॅटमध्ये शेअर करा", "📌 Request hold": "📌 होल्ड मागा", "💲 Offer discount": "💲 ऑफर डिस्काउंट", "Offer discount %": "ऑफर डिस्काउंट %", "Offer price $/ct": "ऑफर प्राइस $/ct", "Clear filters": "फिल्टर काढा", "Shape": "शेप", "Carat": "कॅरेट", "Color": "कलर", "Clarity": "क्लॅरिटी", "Sort": "क्रम", "Any": "कोणतेही", "Party": "पार्टी", "Note": "टीप", "Hold until": "होल्ड कधीपर्यंत", "Requested by": "मागणारे", "Assigned to": "कोणाला सोपवले", "Due": "शेवटची तारीख", "✓ Mark done": "✓ पूर्ण झाले", "Reopen": "पुन्हा उघडा", "Close poll": "मतदान बंद करा", "Join meeting": "मीटिंगमध्ये सामील व्हा", "👁 Preview": "👁 पहा", "🔍 Scan": "🔍 स्कॅन", "🔗 Client link": "🔗 क्लायंट लिंक", "Create link": "लिंक तयार करा", "Find": "शोधा", "Assigned to me": "मला सोपवलेली", "Created by me": "मी तयार केलेली", "⏰ Scheduled": "⏰ ठरवलेले", "Media": "फोटो", "Files": "फाइल्स", "Links": "लिंक", "Stones": "स्टोन", "Check in": "हजेरी लावा", "Check out": "चेक आउट", "Company announcements · only admins post": "कंपनीच्या घोषणा · फक्त ॲडमिन लिहू शकतात", "Announcements from admins will appear here.": "ॲडमिनच्या घोषणा इथे दिसतील.", "Only you can see this · your reminders and notes": "फक्त तुम्हाला दिसते · तुमचे रिमाइंडर आणि नोंदी", "Search name or mobile…": "नाव किंवा मोबाइल शोधा…", "Filter by name or mobile…": "नाव किंवा मोबाइलने शोधा…", "Photos, files and links in this chat": "या चॅटमधील फोटो, फाइल्स आणि लिंक", "Start a video meeting in this chat": "या चॅटमध्ये व्हिडिओ मीटिंग सुरू करा", "Record a voice note": "व्हॉइस नोट रेकॉर्ड करा", "Attach a file or photo": "फाइल किंवा फोटो जोडा", "No groups yet. Tap + NEW GROUP.": "अजून ग्रुप नाही.", "Say hello": "नमस्कार म्हणा"};   // मराठी
   let lang = "en"; try { lang = localStorage.getItem("kg-lang") || "en"; } catch (e) {}
   const TR_SKIP = ".bubble, .stone-card, .slist, .task-card, .poll-card, .disc-card, .hold-card, .sheet-tbl, .search-hit, #client-view, .link-box, .cv-card, script, style";
   const tx = (key) => { if (lang === "en" || !TR[key]) return key; if (lang === "mr") return MR[key] || key; return TR[key][LANG_IDX[lang]] || key; };
