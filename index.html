@@ -523,9 +523,43 @@
   .hold-flag.approved { color:#c0392b; background:color-mix(in srgb, #c0392b 9%, transparent); }
   .hold-flag.pending { color:#C27C0E; background:color-mix(in srgb, #C27C0E 9%, transparent); }
   .hold-warn { margin-top:10px; padding:8px 10px; border-radius:8px; font-size:13px; font-weight:600; color:#c0392b; background:color-mix(in srgb, #c0392b 9%, transparent); border:1px solid color-mix(in srgb, #c0392b 35%, transparent); }
+  .stock-tools { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 8px; }
+  .stock-tools .cnt { color:#C27C0E; font-weight:700; }
+  .stock-hdr-btn.has-new::after { content:""; display:inline-block; width:8px; height:8px; border-radius:50%; background:#f39c12; margin-left:6px; vertical-align:middle; }
+  .hold-flag.sold { color:#fff; background:#7b241c; border-color:#7b241c; }
+  .hold-flag.memo { color:#6c3483; background:color-mix(in srgb, #6c3483 10%, transparent); }
+  .req-form { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:6px 8px; }
+  .req-form label { font-size:11px; color:var(--text-dim); display:flex; flex-direction:column; gap:2px; }
+  .req-form label.wide { grid-column:span 2; }
+  .req-form .rng { display:flex; gap:4px; } .req-form .rng > * { flex:1; min-width:0; }
+  .req-form .field, .req-form select { margin:0 !important; min-width:0; width:100%; }
+  @media (max-width: 640px) { .req-form { grid-template-columns:repeat(2, minmax(0,1fr)); } }
+  .req-row { display:flex; gap:6px; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); }
+  .req-row .side-text { flex:1; min-width:0; }
+  .pill.new { color:#C27C0E; }
+  .mv-kind { display:flex; gap:16px; margin:4px 0 2px; font-weight:600; } .mv-kind input { width:auto; margin-right:4px; }
+  .tabs-row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px; }
+  .tabs-row button { border:1px solid var(--border); background:var(--bg); color:var(--text); border-radius:999px; padding:5px 12px; font:inherit; font-size:13px; cursor:pointer; }
+  .tabs-row button.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .tabs-row select { margin-left:auto; width:auto; padding:5px 8px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--text); font:inherit; font-size:13px; }
+  .reg-wrap { overflow:auto; border:1px solid var(--border); border-radius:10px; max-height:60vh; }
+  .reg-table, .rep-table { border-collapse:collapse; width:100%; font-size:12.5px; white-space:nowrap; }
+  .reg-table th, .rep-table th { position:sticky; top:0; background:var(--bg-raised); color:var(--text-dim); font-size:11px; text-align:left; padding:6px 8px; border-bottom:1px solid var(--border); }
+  .reg-table td, .rep-table td { padding:5px 8px; border-bottom:1px solid var(--border); color:var(--text); }
+  .reg-table .num, .rep-table .num { text-align:right; font-variant-numeric:tabular-nums; }
+  .reg-table .sid, .rep-table .sid { font-weight:700; }
+  .reg-table tr.late td { color:#c0392b; }
+  .reg-table td.acts { display:flex; gap:4px; }
+  .reg-table tr.tot td, .rep-table tr.tot td { font-weight:700; border-top:2px solid var(--border); }
+  .rep-table td.hit { cursor:pointer; } .rep-table td.hit:hover { background:color-mix(in srgb, var(--accent) 12%, transparent); text-decoration:underline; }
+  .rep-table td.b { font-weight:700; }
+  .reg-table td.down { color:#1e8449; } .reg-table td.up { color:#c0392b; }
+  .chg-ids { margin-top:10px; font-size:12.5px; line-height:1.7; word-break:break-word; color:var(--text); }
+  .upload-card { margin-top:6px; }
+  .link-row .interest { color:#C27C0E; font-weight:600; }
   .stock-hdr-btn:hover { background:rgba(255,255,255,.22); }
   /* inside a chat (＋ → Share a stone) the client tools are hidden — they live on the 💎 Stock page */
-  #stone-modal[data-mode="chat"] .client-only { display:none !important; }
+  #stone-modal[data-mode="chat"] .client-only, #stone-modal[data-mode="chat"] .stock-only { display:none !important; }
   /* devices + activity */
   .dev-row { display:flex; gap:10px; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); }
   .dev-row .ic { font-size:22px; width:30px; text-align:center; }
@@ -984,6 +1018,7 @@
           <label>Sort<select id="sf-sort"><option value="stock_id">Stock ID</option><option value="carat:desc">Carat ↓</option><option value="carat">Carat ↑</option><option value="rate">Rate ↑</option><option value="rate:desc">Rate ↓</option><option value="back">Back % (best first)</option></select></label>
           <label style="justify-content:flex-end;"><span style="display:flex; flex-wrap:wrap; gap:6px;"><button class="small-btn" id="sf-clear" type="button">Clear filters</button><button class="small-btn" id="sf-scan" type="button">🔍 Scan</button></span></label>
         </div>
+        <div class="stock-tools stock-only"><button class="small-btn" id="st-req" type="button">🎯 Requirements <span class="cnt" id="st-req-new"></span></button><button class="small-btn" id="st-reg" type="button">📒 Sold / Memo</button><button class="small-btn" id="st-rep" type="button">📊 Report</button></div>
         <div id="stone-results"></div>
       </div>
       <div class="panel-foot sel-bar">
@@ -1143,6 +1178,80 @@
       <div class="panel-foot"><button class="small-btn" id="links-close">Close</button></div>
     </div>
   </div>
+  <!-- 🎯 client requirements -->
+  <div class="modal-back" id="req-modal">
+    <div class="panel wide">
+      <div class="panel-head">🎯 Client requirements</div>
+      <div class="panel-body">
+        <div class="side-sub" style="margin-bottom:8px;">Save what a client is looking for. The app counts matching stones in your stock and shows 🆕 new ones after each stock upload.</div>
+        <div id="req-list"></div>
+        <div class="sec-label" id="req-form-title">Add a requirement</div>
+        <div class="req-form">
+          <label>Party<input class="field" id="rq-party" list="party-dl" autocomplete="off" placeholder="e.g. ABC Jewels"></label>
+          <label>Shape<select class="field" id="rq-shape"><option value="">Any</option></select></label>
+          <label>Carat<span class="rng"><input class="field" id="rq-ct1" type="number" step="0.01" min="0" placeholder="from"><input class="field" id="rq-ct2" type="number" step="0.01" min="0" placeholder="to"></span></label>
+          <label>Color<span class="rng"><select class="field" id="rq-col1"></select><select class="field" id="rq-col2"></select></span></label>
+          <label>Clarity<span class="rng"><select class="field" id="rq-cla1"></select><select class="field" id="rq-cla2"></select></span></label>
+          <label>Max rate $/ct<input class="field" id="rq-rate" type="number" min="0" placeholder="budget"></label>
+          <label class="wide">Note<input class="field" id="rq-note" maxlength="200" placeholder="e.g. needs GIA, eye clean"></label>
+        </div>
+        <div class="panel-note" id="req-msg"></div>
+      </div>
+      <div class="panel-foot"><button class="small-btn" id="req-cancel-edit" style="display:none;">Cancel edit</button><span class="grow"></span><button class="small-btn primary" id="req-save">Save requirement</button><button class="small-btn" id="req-close">Close</button></div>
+    </div>
+  </div>
+  <!-- 🏷 sold / memo out -->
+  <div class="modal-back" id="move-modal">
+    <div class="panel">
+      <div class="panel-head">🏷 Sold / Memo out</div>
+      <div class="panel-body">
+        <div id="mv-stone" style="margin-bottom:8px;"></div>
+        <div class="mv-kind"><label><input type="radio" name="mv-kind" value="sold" checked> 🏷 Sold</label><label><input type="radio" name="mv-kind" value="memo"> 📒 Memo out</label></div>
+        <div class="sec-label">Party</div><input class="field" id="mv-party" list="party-dl" autocomplete="off" placeholder="e.g. ABC Jewels">
+        <div style="display:flex; gap:8px;"><label class="side-sub" style="flex:1;">Rate $/ct<input class="field" id="mv-rate" type="number" step="1" min="0"></label>
+          <label class="side-sub" style="flex:1;">Amount $<input class="field" id="mv-amount" type="number" step="1" min="0"></label></div>
+        <div id="mv-memo-wrap" style="display:none;"><div class="sec-label">Memo back by</div><input type="date" class="field" id="mv-until"></div>
+        <div class="sec-label">Note (optional)</div><input class="field" id="mv-note" maxlength="200">
+        <div class="hold-warn" id="mv-warn" style="display:none;"></div>
+        <div class="side-sub" style="margin-top:8px;">Only marks the stone in KG Chatboat (🏷 SOLD / 📒 ON MEMO badge — the party is never shown). Update your main stock system as usual.</div>
+        <div class="panel-note" id="mv-msg"></div>
+      </div>
+      <div class="panel-foot"><button class="small-btn" id="mv-cancel">Cancel</button><button class="small-btn primary" id="mv-save">Save</button></div>
+    </div>
+  </div>
+  <!-- 📒 sold / memo register -->
+  <div class="modal-back" id="reg-modal">
+    <div class="panel wide">
+      <div class="panel-head">📒 Sold / Memo register</div>
+      <div class="panel-body">
+        <div class="tabs-row" id="reg-tabs"><button data-t="memo">📒 On memo</button><button data-t="sold">🏷 Sold</button><button data-t="party">🤝 Party-wise sales</button>
+          <select id="reg-period"><option value="30">Last 30 days</option><option value="month">This month</option><option value="365">Last 12 months</option><option value="all">All</option></select></div>
+        <div id="reg-body"></div>
+      </div>
+      <div class="panel-foot"><button class="small-btn" id="reg-xls">⬇ Excel</button><span class="grow"></span><button class="small-btn" id="reg-close">Close</button></div>
+    </div>
+  </div>
+  <!-- 📊 stock report -->
+  <div class="modal-back" id="rep-modal">
+    <div class="panel wide">
+      <div class="panel-head">📊 Stock report</div>
+      <div class="panel-body">
+        <div class="tabs-row" id="rep-tabs"><button data-t="size">Shape × Size</button><button data-t="cc">Color × Clarity</button>
+          <select id="rep-measure"><option value="n">Number of stones</option><option value="ct">Total carats</option><option value="amt">Amount $</option></select></div>
+        <div class="side-sub" id="rep-info"></div>
+        <div id="rep-body"></div>
+      </div>
+      <div class="panel-foot"><button class="small-btn" id="rep-xls">⬇ Excel</button><span class="grow"></span><button class="small-btn" id="rep-close">Close</button></div>
+    </div>
+  </div>
+  <!-- 📦 stock upload changes -->
+  <div class="modal-back" id="chg-modal">
+    <div class="panel wide">
+      <div class="panel-head" id="chg-title">📦 Stock changes</div>
+      <div class="panel-body" id="chg-body"></div>
+      <div class="panel-foot"><button class="small-btn" id="chg-close">Close</button></div>
+    </div>
+  </div>
   <div id="client-view"></div>
   <div class="modal-back" id="saved-modal">
     <div class="panel wide">
@@ -1194,7 +1303,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v41 · 25 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v42 · 26 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -1272,6 +1381,7 @@ if ("serviceWorker" in navigator) {
       const digits = String(data.contact_mobile || "").replace(/\D/g, ""), wa = digits ? (digits.length === 10 ? "91" + digits : digits) : "";
       function drawBar() {
         const list = [...picks];
+        clearTimeout(drawBar.t); drawBar.t = setTimeout(() => { sb.rpc("selection_interest", { p_id: selToken, p_ids: list }).then(() => {}, () => {}); }, 900);   // tells the staff member who sent the link
         const txt = "Hello" + (data.contact_name ? " " + data.contact_name : "") + ", about your selection \"" + (data.title || "diamonds") + "\"" + (list.length ? " — I'm interested in: " + list.join(", ") : "") + ".";
         bar.innerHTML = (list.length ? '<span>' + list.length + ' selected</span>' : '<span>Tap ☆ on the stones you like</span>') +
           (wa ? '<a target="_blank" rel="noopener" href="https://wa.me/' + wa + '?text=' + encodeURIComponent(txt) + '">WhatsApp ' + esc(data.contact_name || "us") + '</a>' : "");
@@ -3525,6 +3635,7 @@ if ("serviceWorker" in navigator) {
       mk("wa", "WhatsApp", "wa-btn client-only", () => shareWhatsApp(stoneText(st)));
       mk("pin", "Request hold", "hold-btn", () => { $("stone-modal").classList.remove("open"); openHoldForm(st); });
       mk("send", "Share in chat", "primary", () => shareStonesFromPicker([st]));
+      mk("tag", "Sold / Memo out", "stock-only", () => openMoveForm(st));
       if (st.image_url) mk("photo", "Photo", "", () => window.open(st.image_url, "_blank", "noopener"));
       if (st.video_url) mk("video", "Video", "", () => window.open(st.video_url, "_blank", "noopener"));
       if (st.cert_url) mk("cert", "Certificate", "", () => window.open(st.cert_url, "_blank", "noopener"));
@@ -3696,10 +3807,11 @@ if ("serviceWorker" in navigator) {
   }
   // ---- "already on hold" flags for stones (who / which party is never shown) ----
   const holdFlags = {};   // stock_id → { status: "approved" | "pending", until, mine }
+  const moveFlags = {};   // stock_id → { id, kind: "sold" | "memo", until, mine }  (memo returned = no flag)
   async function loadHoldFlags(ids) {
     ids = Array.from(new Set((ids || []).filter(Boolean))); if (!ids.length) return;
     const today = isoDay(Date.now());
-    ids.forEach(id => delete holdFlags[id]);
+    ids.forEach(id => { delete holdFlags[id]; delete moveFlags[id]; });
     for (let i = 0; i < ids.length; i += 150) {
       const { data } = await sb.from("hold_requests").select("id,stock_id,status,hold_until,requested_by").in("stock_id", ids.slice(i, i + 150)).in("status", ["pending", "approved"]);
       (data || []).forEach(h => {
@@ -3707,10 +3819,17 @@ if ("serviceWorker" in navigator) {
         const cur = holdFlags[h.stock_id];
         if (!cur || (h.status === "approved" && cur.status !== "approved")) holdFlags[h.stock_id] = { id: h.id, status: h.status, until: h.hold_until, mine: h.requested_by === myId };
       });
+      const mv = await sb.from("stone_moves").select("id,stock_id,kind,memo_until,returned_at,created_by,created_at").in("stock_id", ids.slice(i, i + 150)).is("returned_at", null).order("created_at", { ascending: true });
+      (mv.data || []).forEach(x => { moveFlags[x.stock_id] = { id: x.id, kind: x.kind, until: x.memo_until, mine: x.created_by === myId }; });   // latest wins
     }
   }
   const fmtDayShort = (d) => d ? new Date(d + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
   function holdFlagEl(stockId) {
+    const mf = moveFlags[stockId];
+    if (mf) { const b = document.createElement("span"); b.className = "hold-flag " + (mf.kind === "sold" ? "sold" : "memo");
+      const late = mf.kind === "memo" && mf.until && mf.until < isoDay(Date.now());
+      b.textContent = mf.kind === "sold" ? "🏷 SOLD" : late ? "📒 MEMO OVERDUE" : "📒 ON MEMO";
+      b.title = mf.kind === "sold" ? "Marked sold in KG Chatboat" : "Given on memo" + (mf.until ? " · back by " + fmtDayShort(mf.until) : ""); return b; }
     const f = holdFlags[stockId]; if (!f) return null;
     const b = document.createElement("span"); b.className = "hold-flag " + f.status;
     b.textContent = f.status === "approved" ? "📌 ON HOLD" : "⏳ HOLD REQUESTED";
@@ -4059,6 +4178,8 @@ if ("serviceWorker" in navigator) {
     const rows = stockParsed; if (!rows || !rows.length) return;
     btn.disabled = true; const note = $("admin-note");
     try {
+      note.textContent = "Comparing with current stock…";
+      const before = await readAllStones("stock_id,rate,status");   // for the 📦 "what changed" summary
       for (let i = 0; i < rows.length; i += 500) {
         note.textContent = "Uploading " + Math.min(i + 500, rows.length).toLocaleString() + " / " + rows.length.toLocaleString() + "…";
         const { error } = await sb.from("stones").upsert(rows.slice(i, i + 500));
@@ -4067,6 +4188,7 @@ if ("serviceWorker" in navigator) {
       const byStatus = {}; rows.forEach(r => { const k = r.status ? String(r.status).trim().toUpperCase() : "NO STATUS"; byStatus[k] = (byStatus[k] || 0) + 1; });
       note.textContent = "Done: " + rows.length.toLocaleString() + " stones uploaded (" + Object.keys(byStatus).map(k => k + " " + byStatus[k].toLocaleString()).join(", ") + ").";
       sb.rpc("log_event", { p_action: "stock_uploaded", p_target: rows.length + " stones", p_details: byStatus }).then(() => {}, () => {});
+      if (before.length) postStockChanges(before, rows).catch(e => console.warn("stock changes", e));   // first ever upload: nothing to compare
       stockParsed = null; adminTabs.stock();
     } catch (e) { note.textContent = "Upload failed: " + e.message; btn.disabled = false; }
   }
@@ -4510,7 +4632,7 @@ if ("serviceWorker" in navigator) {
   $("links-close").addEventListener("click", () => $("links-modal").classList.remove("open"));
   async function drawLinks() {
     const body = $("links-body"); body.innerHTML = '<div class="side-empty">Loading…</div>';
-    const { data } = await sb.from("client_selections").select("id,title,party,stones,show_prices,created_by,created_at,expires_at,views,last_viewed_at").order("created_at", { ascending: false }).limit(200);
+    const { data } = await sb.from("client_selections").select("id,title,party,stones,show_prices,created_by,created_at,expires_at,views,last_viewed_at,interested,interested_at").order("created_at", { ascending: false }).limit(200);
     body.innerHTML = "";
     if (!data || !data.length) { body.innerHTML = '<div class="side-empty">No client links yet. In 💎 Share a stone, tick stones → 🔗 Client link.</div>'; return; }
     await ensureProfiles(data.map(d => d.created_by).filter(Boolean));
@@ -4525,8 +4647,365 @@ if ("serviceWorker" in navigator) {
       cp.addEventListener("click", async () => { try { await navigator.clipboard.writeText(linkUrl(d.id)); showBanner("Link copied."); setTimeout(() => showBanner(""), 1200); } catch (e) {} });
       const del = document.createElement("button"); del.className = "small-btn danger"; del.textContent = "Delete";
       del.addEventListener("click", async () => { if (!confirm("Delete this link? The client won't be able to open it any more.")) return; await sb.from("client_selections").delete().eq("id", d.id); drawLinks(); });
+      if (d.interested && d.interested.length) { const iv = document.createElement("div"); iv.className = "side-sub interest"; iv.textContent = "⭐ Interested: " + d.interested.join(", ") + (d.interested_at ? " · " + new Date(d.interested_at).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : ""); t.appendChild(iv); }
       r.appendChild(t); r.appendChild(cp); r.appendChild(del); body.appendChild(r);
     });
+  }
+
+
+  // =====================================================================
+  // ---------- v42: 🎯 requirements · 🏷 sold / memo · 📦 stock changes · 🔔 client-link alerts · 📊 report ----------
+  // =====================================================================
+  ICONS.tag = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>';
+  const canStock = () => !!myProfile && (myProfile.role === "admin" || !!myProfile.stock_access);
+  const money = (v) => v == null || v === "" ? "–" : "$" + Number(v).toLocaleString(undefined, { maximumFractionDigits: 0 });
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  function toast(text) { showBanner(text); clearTimeout(toast.t); toast.t = setTimeout(() => showBanner(""), 7000);
+    try { if ("Notification" in window && Notification.permission === "granted" && document.visibilityState !== "visible") new Notification("KG Chatboat", { body: text, icon: "./icon-192.png" }); } catch (e) {} }
+  // every stone (past the 1,000-rows-per-request limit)
+  async function readAllStones(cols) {
+    const { count } = await sb.from("stones").select("stock_id", { count: "exact", head: true });
+    const reqs = []; for (let i = 0; i < Math.min(count || 0, 200000); i += 1000) reqs.push(sb.from("stones").select(cols).order("stock_id").range(i, i + 999));
+    return [].concat(...(await Promise.all(reqs)).map(r => r.data || []));
+  }
+  // open the 💎 Stock page with a ready search (IDs or filters)
+  function openStockWith(opts) {
+    if (!canStock()) { showBanner("Ask an admin for 💎 Stock access.", true); return; }
+    ["req-modal", "reg-modal", "rep-modal", "chg-modal"].forEach(id => $(id).classList.remove("open"));
+    openStonePicker("stock");
+    if (opts.ids) { $("stone-q").value = opts.ids.slice(0, 500).join(", "); runStoneSearch(); return; }
+    const f = opts.filters || {};
+    const setSel = (id, v) => { const e = $(id); if (v && ![...e.options].some(o => o.value === v)) { const o = document.createElement("option"); o.value = o.textContent = v; e.appendChild(o); } e.value = v || ""; };
+    setSel("sf-shape", f.shape); $("sf-ct1").value = f.ct1 ?? ""; $("sf-ct2").value = f.ct2 ?? "";
+    setSel("sf-col1", f.col1); setSel("sf-col2", f.col2); setSel("sf-cla1", f.cla1); setSel("sf-cla2", f.cla2);
+    $("sf-r1").value = ""; $("sf-r2").value = f.rate ?? "";
+    runStoneSearch();
+  }
+
+  // ---------------- 🏷 Sold / Memo out ----------------
+  let moveStone = null;
+  function openMoveForm(st) {
+    moveStone = stoneSnap(st); loadParties();
+    $("mv-stone").innerHTML = ""; $("mv-stone").appendChild(stoneCard(moveStone, { buttons: false }));
+    document.querySelector('input[name="mv-kind"][value="sold"]').checked = true; $("mv-memo-wrap").style.display = "none";
+    $("mv-party").value = ""; $("mv-note").value = ""; $("mv-msg").textContent = "";
+    $("mv-rate").value = moveStone.rate != null ? Math.round(moveStone.rate) : ""; $("mv-amount").value = moveStone.amount != null ? Math.round(moveStone.amount) : "";
+    $("mv-until").value = isoDay(Date.now() + 7 * 86400000); $("mv-until").min = isoDay(Date.now());
+    const mf = moveFlags[moveStone.stock_id], hf = holdFlags[moveStone.stock_id], w = $("mv-warn");
+    w.style.display = mf || (hf && !hf.mine) ? "" : "none";
+    w.textContent = mf ? (mf.kind === "sold" ? "⚠ This stone is already marked SOLD." : "⚠ This stone is already ON MEMO" + (mf.until ? " (back by " + fmtDayShort(mf.until) + ")" : "") + ".")
+      : hf ? "⚠ This stone is " + (hf.status === "approved" ? "ON HOLD" : "requested for hold") + " by someone else." : "";
+    $("move-modal").classList.add("open"); $("mv-party").focus();
+  }
+  document.querySelectorAll('input[name="mv-kind"]').forEach(r => r.addEventListener("change", () => { $("mv-memo-wrap").style.display = r.value === "memo" && r.checked ? "" : document.querySelector('input[name="mv-kind"]:checked').value === "memo" ? "" : "none"; }));
+  $("mv-rate").addEventListener("input", () => { const ct = Number(moveStone && moveStone.carat); if (ct && $("mv-rate").value !== "") $("mv-amount").value = Math.round(Number($("mv-rate").value) * ct); });
+  $("mv-amount").addEventListener("input", () => { const ct = Number(moveStone && moveStone.carat); if (ct && $("mv-amount").value !== "") $("mv-rate").value = Math.round(Number($("mv-amount").value) / ct); });
+  $("mv-cancel").addEventListener("click", () => $("move-modal").classList.remove("open"));
+  $("mv-save").addEventListener("click", async () => {
+    const kind = document.querySelector('input[name="mv-kind"]:checked').value, party = $("mv-party").value.trim();
+    if (!party) { $("mv-msg").textContent = "Enter the party name."; return; }
+    if (kind === "memo" && !$("mv-until").value) { $("mv-msg").textContent = "Choose the date the memo should come back."; return; }
+    const mf = moveFlags[moveStone.stock_id];
+    if (mf && !confirm("This stone is already " + (mf.kind === "sold" ? "marked SOLD" : "ON MEMO") + ". Save anyway?")) return;
+    const btn = $("mv-save"); btn.disabled = true;
+    try {
+      const row = { stock_id: moveStone.stock_id, stone: moveStone, kind, party, rate: $("mv-rate").value === "" ? null : Number($("mv-rate").value),
+        amount: $("mv-amount").value === "" ? null : Number($("mv-amount").value), memo_until: kind === "memo" ? $("mv-until").value : null, note: $("mv-note").value.trim() || null, created_by: myId };
+      const { error } = await sb.from("stone_moves").insert(row);
+      if (error) { $("mv-msg").textContent = "Couldn't save: " + error.message; return; }
+      if (!parties.some(pt => pt.name.toLowerCase() === party.toLowerCase())) sb.from("parties").insert({ name: party }).then(() => loadParties(true));
+      $("move-modal").classList.remove("open");
+      showBanner((kind === "sold" ? "🏷 " + moveStone.stock_id + " marked SOLD." : "📒 " + moveStone.stock_id + " given on memo.")); setTimeout(() => showBanner(""), 2000);
+      await loadHoldFlags([moveStone.stock_id]);
+      if ($("stone-modal").classList.contains("open")) runStoneSearch();
+    } finally { btn.disabled = false; }
+  });
+
+  // ---------------- 📒 register ----------------
+  let regTab = "memo", regRows = [], regXls = null;
+  $("st-reg").addEventListener("click", () => openRegister("memo"));
+  $("reg-close").addEventListener("click", () => $("reg-modal").classList.remove("open"));
+  $("reg-tabs").addEventListener("click", (e) => { const b = e.target.closest("button[data-t]"); if (b) { regTab = b.dataset.t; drawRegister(); } });
+  $("reg-period").addEventListener("change", () => openRegister(regTab));
+  async function openRegister(tab) {
+    regTab = tab; $("reg-modal").classList.add("open"); $("reg-body").innerHTML = '<div class="side-empty">Loading…</div>';
+    let q = sb.from("stone_moves").select("*").order("created_at", { ascending: false }).limit(5000);
+    if (!amAppAdmin()) q = q.eq("created_by", myId);        // staff see their own; admins see everyone's
+    const { data, error } = await q;
+    if (error) { $("reg-body").innerHTML = '<div class="side-empty"></div>'; $("reg-body").firstChild.textContent = "Couldn't load: " + error.message; return; }
+    regRows = data || []; await ensureProfiles(regRows.map(r => r.created_by).filter(Boolean)); drawRegister();
+  }
+  function periodStart() { const v = $("reg-period").value, now = new Date();
+    return v === "all" ? 0 : v === "month" ? new Date(now.getFullYear(), now.getMonth(), 1).getTime() : Date.now() - Number(v) * 86400000; }
+  function drawRegister() {
+    [...$("reg-tabs").querySelectorAll("button")].forEach(b => b.classList.toggle("active", b.dataset.t === regTab));
+    $("reg-period").style.display = regTab === "memo" ? "none" : "";
+    const body = $("reg-body"); body.innerHTML = ""; const today = isoDay(Date.now()), from = periodStart();
+    const t = el("table", "reg-table"), head = el("tr"), tb = el("tbody");
+    const th = (cols) => cols.forEach(c => head.appendChild(el("th", typeof c === "string" && /\$|ct|Stones/.test(c) ? "num" : "", c)));
+    const td = (tr, v, cls) => { const x = el("td", cls || "", v == null || v === "" ? "–" : String(v)); tr.appendChild(x); return x; };
+    let xls = [];
+    if (regTab === "memo") {
+      const list = regRows.filter(r => r.kind === "memo" && !r.returned_at).sort((a, b) => String(a.memo_until).localeCompare(String(b.memo_until)));
+      th(["Stock ID", "Stone", "Party", "Given", "Back by", "Amount $", amAppAdmin() ? "By" : "", ""]);
+      xls.push(["Stock ID", "Stone", "Party", "Given", "Back by", "Amount $", "By"]);
+      list.forEach(r => { const tr = el("tr"); const late = r.memo_until && r.memo_until < today; if (late) tr.className = "late";
+        td(tr, r.stock_id, "sid"); td(tr, stoneLine(r.stone || {})); td(tr, r.party); td(tr, fmtDayShort(isoDay(r.created_at))); td(tr, (late ? "⚠ " : "") + fmtDayShort(r.memo_until)); td(tr, money(r.amount), "num");
+        td(tr, amAppAdmin() ? nameOf(r.created_by) : "");
+        const a = el("td", "acts"); tr.appendChild(a);
+        const ret = el("button", "small-btn", "✓ Returned"); ret.addEventListener("click", () => updateMove(r, { returned_at: new Date().toISOString() }, "Memo " + r.stock_id + " returned?"));
+        const sold = el("button", "small-btn primary", "🏷 Sold"); sold.addEventListener("click", () => memoToSold(r));
+        a.appendChild(ret); a.appendChild(sold); tb.appendChild(tr);
+        xls.push([r.stock_id, stoneLine(r.stone || {}), r.party, isoDay(r.created_at), r.memo_until, r.amount, nameOf(r.created_by)]); });
+      if (!list.length) body.appendChild(el("div", "side-empty", "No stones on memo."));
+    } else if (regTab === "sold") {
+      const list = regRows.filter(r => r.kind === "sold" && new Date(r.created_at).getTime() >= from);
+      th(["Date", "Stock ID", "Stone", "Party", "Rate $/ct", "Amount $", amAppAdmin() ? "By" : ""]);
+      xls.push(["Date", "Stock ID", "Stone", "Carat", "Party", "Rate $/ct", "Amount $", "By"]);
+      let tot = 0, ct = 0;
+      list.forEach(r => { const tr = el("tr"); td(tr, fmtDayShort(isoDay(r.created_at))); td(tr, r.stock_id, "sid"); td(tr, stoneLine(r.stone || {})); td(tr, r.party);
+        td(tr, money(r.rate), "num"); td(tr, money(r.amount), "num"); td(tr, amAppAdmin() ? nameOf(r.created_by) : ""); tb.appendChild(tr);
+        tot += Number(r.amount) || 0; ct += Number(r.stone && r.stone.carat) || 0;
+        xls.push([isoDay(r.created_at), r.stock_id, stoneLine(r.stone || {}), r.stone && r.stone.carat, r.party, r.rate, r.amount, nameOf(r.created_by)]); });
+      if (list.length) { const tr = el("tr", "tot"); td(tr, list.length + " sold"); td(tr, ""); td(tr, ct.toFixed(2) + " ct"); td(tr, ""); td(tr, ""); td(tr, money(tot), "num"); td(tr, ""); tb.appendChild(tr); }
+      else body.appendChild(el("div", "side-empty", "Nothing sold in this period."));
+    } else {
+      const by = {}; regRows.filter(r => r.kind === "sold" && new Date(r.created_at).getTime() >= from).forEach(r => {
+        const k = r.party.trim().toUpperCase(), b = by[k] = by[k] || { party: r.party, n: 0, ct: 0, amt: 0 }; b.n++; b.ct += Number(r.stone && r.stone.carat) || 0; b.amt += Number(r.amount) || 0; });
+      const list = Object.values(by).sort((a, b) => b.amt - a.amt);
+      th(["Party", "Stones", "Carats", "Amount $", "Avg $/ct"]); xls.push(["Party", "Stones", "Carats", "Amount $", "Avg $/ct"]);
+      list.forEach(b => { const tr = el("tr"); td(tr, b.party, "sid"); td(tr, b.n, "num"); td(tr, b.ct.toFixed(2), "num"); td(tr, money(b.amt), "num"); td(tr, b.ct ? money(b.amt / b.ct) : "–", "num"); tb.appendChild(tr);
+        xls.push([b.party, b.n, +b.ct.toFixed(2), Math.round(b.amt), b.ct ? Math.round(b.amt / b.ct) : null]); });
+      if (!list.length) body.appendChild(el("div", "side-empty", "Nothing sold in this period."));
+    }
+    if (tb.children.length) { const thead = el("thead"); thead.appendChild(head); t.appendChild(thead); t.appendChild(tb); const w = el("div", "reg-wrap"); w.appendChild(t); body.appendChild(w); }
+    regXls = xls;
+  }
+  async function updateMove(r, patch, ask) {
+    if (ask && !confirm(ask)) return;
+    const { error } = await sb.from("stone_moves").update(patch).eq("id", r.id);
+    if (error) { showBanner("Couldn't update: " + error.message, true); return; }
+    Object.assign(r, patch); drawRegister(); loadHoldFlags([r.stock_id]);
+  }
+  async function memoToSold(r) {
+    const amt = prompt("Sold to " + r.party + " — final amount $ (leave as is if unchanged):", r.amount != null ? Math.round(r.amount) : "");
+    if (amt === null) return;
+    const ct = Number(r.stone && r.stone.carat) || 0, amount = amt === "" ? r.amount : Number(amt);
+    const { error } = await sb.from("stone_moves").insert({ stock_id: r.stock_id, stone: r.stone, kind: "sold", party: r.party, amount, rate: ct && amount ? Math.round(amount / ct) : r.rate, note: "from memo", created_by: myId });
+    if (error) { showBanner("Couldn't save: " + error.message, true); return; }
+    await updateMove(r, { returned_at: new Date().toISOString() }); openRegister("memo");
+  }
+  $("reg-xls").addEventListener("click", async () => {
+    if (!regXls || regXls.length < 2) return; const XLSX = await loadSheetJs(), wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(regXls), regTab === "memo" ? "On memo" : regTab === "sold" ? "Sold" : "Party-wise");
+    XLSX.writeFile(wb, "KG_" + (regTab === "memo" ? "memo" : regTab === "sold" ? "sold" : "party_sales") + "_" + isoDay(Date.now()) + ".xlsx");
+  });
+
+  // ---------------- 🎯 requirements ----------------
+  let reqs = [], reqEditing = null;
+  fillSel("rq-col1", COLORS, "from"); fillSel("rq-col2", COLORS, "to"); fillSel("rq-cla1", CLARITIES, "from"); fillSel("rq-cla2", CLARITIES, "to");
+  $("st-req").addEventListener("click", openReqs);
+  $("req-close").addEventListener("click", () => $("req-modal").classList.remove("open"));
+  function reqQuery(r, sel, opts) {
+    let q = sb.from("stones").select(sel || "stock_id", opts || { count: "exact", head: true });
+    if (r.shape) q = q.eq("shape", r.shape);
+    if (r.carat_min != null) q = q.gte("carat", r.carat_min);
+    if (r.carat_max != null) q = q.lte("carat", r.carat_max);
+    const cr = rangeOf(COLORS, r.color_from, r.color_to); if (cr) q = q.in("color", cr);
+    const lr = rangeOf(CLARITIES, r.clarity_from, r.clarity_to); if (lr) q = q.in("clarity", lr);
+    if (r.rate_max != null) q = q.lte("rate", r.rate_max);
+    return q;
+  }
+  const reqText = (r) => [r.shape || "Any shape", r.carat_min != null || r.carat_max != null ? (r.carat_min ?? "") + "–" + (r.carat_max ?? "") + " ct" : "",
+    r.color_from || r.color_to ? (r.color_from || "") + "–" + (r.color_to || "") : "", r.clarity_from || r.clarity_to ? (r.clarity_from || "") + "–" + (r.clarity_to || "") : "",
+    r.rate_max != null ? "≤ $" + Number(r.rate_max).toLocaleString() + "/ct" : ""].filter(Boolean).join(" · ");
+  async function reqCounts(r) {
+    const [all, fresh] = await Promise.all([reqQuery(r), reqQuery(r).gt("first_seen_at", r.last_checked_at || r.created_at)]);
+    r._n = all.count || 0; r._new = fresh.count || 0;
+  }
+  async function loadReqs() {
+    let q = sb.from("client_requirements").select("*").eq("active", true).order("created_at", { ascending: false });
+    if (!amAppAdmin()) q = q.eq("created_by", myId);
+    const { data } = await q; reqs = data || [];
+    await Promise.all(reqs.map(reqCounts));
+    const totalNew = reqs.filter(r => r.created_by === myId).reduce((a, r) => a + (r._new || 0), 0);
+    $("st-req-new").textContent = totalNew ? "🆕 " + totalNew : ""; $("stock-btn").classList.toggle("has-new", totalNew > 0);
+    $("stock-btn").title = totalNew ? totalNew + " new stones match your client requirements" : "Search stock · send to clients by WhatsApp, Excel or Client link";
+    return reqs;
+  }
+  async function openReqs() {
+    $("req-modal").classList.add("open"); loadParties(); resetReqForm();
+    const shapes = [...$("sf-shape").options].map(o => o.value).filter(Boolean), rs = $("rq-shape");
+    rs.innerHTML = '<option value="">Any</option>'; shapes.forEach(v => { const o = document.createElement("option"); o.value = o.textContent = v; rs.appendChild(o); });
+    $("req-list").innerHTML = '<div class="side-empty">Loading…</div>'; await loadReqs(); await ensureProfiles(reqs.map(r => r.created_by)); drawReqs();
+  }
+  function drawReqs() {
+    const box = $("req-list"); box.innerHTML = "";
+    if (!reqs.length) { box.appendChild(el("div", "side-empty", "No requirements yet — add one below.")); return; }
+    reqs.forEach(r => {
+      const row = el("div", "req-row"), txt = el("div", "side-text");
+      const nm = el("div", "side-name", r.party); if (r._new) nm.appendChild(el("span", "pill new", "🆕 " + r._new + " new"));
+      txt.appendChild(nm); txt.appendChild(el("div", "side-sub", reqText(r) + (r.note ? " · " + r.note : "") + (r.created_by !== myId ? " · by " + nameOf(r.created_by) : "")));
+      const view = el("button", "small-btn primary", "💎 " + (r._n || 0) + " match" + (r._n === 1 ? "" : "es"));
+      view.addEventListener("click", async () => {
+        if (r.created_by === myId) { await sb.from("client_requirements").update({ last_checked_at: new Date().toISOString() }).eq("id", r.id); r.last_checked_at = new Date().toISOString(); }
+        openStockWith({ filters: { shape: r.shape, ct1: r.carat_min, ct2: r.carat_max, col1: r.color_from, col2: r.color_to, cla1: r.clarity_from, cla2: r.clarity_to, rate: r.rate_max } });
+        setTimeout(loadReqs, 1500);
+      });
+      const ed = el("button", "small-btn", "✏️"); ed.title = "Edit"; ed.addEventListener("click", () => editReq(r));
+      const done = el("button", "small-btn", "✓ Done"); done.title = "Client found a stone / not needed any more";
+      done.addEventListener("click", async () => { if (!confirm("Close the requirement for " + r.party + "?")) return; await sb.from("client_requirements").update({ active: false }).eq("id", r.id); await loadReqs(); drawReqs(); });
+      row.appendChild(txt); row.appendChild(view); row.appendChild(ed); row.appendChild(done); box.appendChild(row);
+    });
+  }
+  const RQ = ["rq-party", "rq-shape", "rq-ct1", "rq-ct2", "rq-col1", "rq-col2", "rq-cla1", "rq-cla2", "rq-rate", "rq-note"];
+  function resetReqForm() { reqEditing = null; RQ.forEach(id => $(id).value = ""); $("req-msg").textContent = ""; $("req-form-title").textContent = "Add a requirement"; $("req-cancel-edit").style.display = "none"; $("req-save").textContent = "Save requirement"; }
+  function editReq(r) {
+    reqEditing = r; $("req-form-title").textContent = "Edit requirement — " + r.party; $("req-cancel-edit").style.display = ""; $("req-save").textContent = "Save changes";
+    const v = { "rq-party": r.party, "rq-shape": r.shape, "rq-ct1": r.carat_min, "rq-ct2": r.carat_max, "rq-col1": r.color_from, "rq-col2": r.color_to, "rq-cla1": r.clarity_from, "rq-cla2": r.clarity_to, "rq-rate": r.rate_max, "rq-note": r.note };
+    RQ.forEach(id => $(id).value = v[id] ?? ""); $("rq-party").focus();
+  }
+  $("req-cancel-edit").addEventListener("click", resetReqForm);
+  $("req-save").addEventListener("click", async () => {
+    const party = $("rq-party").value.trim(); if (!party) { $("req-msg").textContent = "Enter the party name."; return; }
+    const num = (id) => $(id).value === "" ? null : Number($(id).value), txt = (id) => $(id).value || null;
+    const row = { party, shape: txt("rq-shape"), carat_min: num("rq-ct1"), carat_max: num("rq-ct2"), color_from: txt("rq-col1"), color_to: txt("rq-col2"),
+      clarity_from: txt("rq-cla1"), clarity_to: txt("rq-cla2"), rate_max: num("rq-rate"), note: $("rq-note").value.trim() || null };
+    const btn = $("req-save"); btn.disabled = true;
+    try {
+      const { error } = reqEditing ? await sb.from("client_requirements").update(row).eq("id", reqEditing.id)
+        : await sb.from("client_requirements").insert(Object.assign(row, { created_by: myId }));
+      if (error) { $("req-msg").textContent = "Couldn't save: " + error.message; return; }
+      if (!parties.some(pt => pt.name.toLowerCase() === party.toLowerCase())) sb.from("parties").insert({ name: party }).then(() => loadParties(true));
+      resetReqForm(); await loadReqs(); drawReqs();
+    } finally { btn.disabled = false; }
+  });
+  $("stock-btn").addEventListener("click", () => { if (canStock()) loadReqs(); });
+
+  // ---------------- 📊 stock report ----------------
+  let repTab = "size", repData = null, repXls = null;
+  const SIZES = [[0, 0.299, "< 0.30"], [0.30, 0.499, "0.30–0.49"], [0.50, 0.699, "0.50–0.69"], [0.70, 0.899, "0.70–0.89"], [0.90, 0.999, "0.90–0.99"],
+                 [1.00, 1.499, "1.00–1.49"], [1.50, 1.999, "1.50–1.99"], [2.00, 2.999, "2.00–2.99"], [3.00, 1e9, "3.00 +"]];
+  $("st-rep").addEventListener("click", openReport);
+  $("rep-close").addEventListener("click", () => $("rep-modal").classList.remove("open"));
+  $("rep-tabs").addEventListener("click", (e) => { const b = e.target.closest("button[data-t]"); if (b) { repTab = b.dataset.t; drawReport(); } });
+  $("rep-measure").addEventListener("change", drawReport);
+  async function openReport() {
+    $("rep-modal").classList.add("open"); $("rep-body").innerHTML = '<div class="side-empty">Reading all stones…</div>'; $("rep-info").textContent = "";
+    repData = await readAllStones("stock_id,shape,carat,color,clarity,amount,status"); drawReport();
+  }
+  function drawReport() {
+    if (!repData) return;
+    [...$("rep-tabs").querySelectorAll("button")].forEach(b => b.classList.toggle("active", b.dataset.t === repTab));
+    const meas = $("rep-measure").value, val = (s) => meas === "n" ? 1 : meas === "ct" ? (Number(s.carat) || 0) : (Number(s.amount) || 0);
+    const fmt = (v) => !v ? "" : meas === "n" ? v.toLocaleString() : meas === "ct" ? v.toFixed(2) : "$" + Math.round(v).toLocaleString();
+    let rows, cols, rowOf, colOf, filterOf;
+    if (repTab === "size") {
+      const cnt = {}; repData.forEach(s => { const k = s.shape || "?"; cnt[k] = (cnt[k] || 0) + 1; });
+      const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]); rows = top.slice(0, 15); if (top.length > 15) rows.push("Others");
+      cols = SIZES.map(x => x[2]); rowOf = (s) => rows.includes(s.shape || "?") ? (s.shape || "?") : "Others";
+      colOf = (s) => { const c = Number(s.carat) || 0; const z = SIZES.find(x => c >= x[0] && c <= x[1] + 1e-9); return z ? z[2] : null; };
+      filterOf = (r, c) => { if (r === "Others" || r === "?") return null; const z = SIZES.find(x => x[2] === c); return { shape: r, ct1: z ? z[0] : null, ct2: z && z[1] < 1e8 ? z[1] : null }; };
+    } else {
+      rows = COLORS.filter(c => repData.some(s => s.color === c)); if (repData.some(s => !COLORS.includes(s.color))) rows.push("Other");
+      cols = CLARITIES.filter(c => repData.some(s => s.clarity === c)); if (repData.some(s => !CLARITIES.includes(s.clarity))) cols.push("Other");
+      rowOf = (s) => COLORS.includes(s.color) ? s.color : "Other"; colOf = (s) => CLARITIES.includes(s.clarity) ? s.clarity : "Other";
+      filterOf = (r, c) => r === "Other" || c === "Other" ? null : { col1: r, col2: r, cla1: c, cla2: c };
+    }
+    const cell = {}, rt = {}, ct = {}; let tot = 0;
+    repData.forEach(s => { const r = rowOf(s), c = colOf(s); if (c == null) return; const v = val(s); cell[r + "|" + c] = (cell[r + "|" + c] || 0) + v; rt[r] = (rt[r] || 0) + v; ct[c] = (ct[c] || 0) + v; tot += v; });
+    $("rep-info").textContent = repData.length.toLocaleString() + " stones in the uploaded stock · click a number to see those stones";
+    const t = el("table", "rep-table"), hr = el("tr"); hr.appendChild(el("th", "", repTab === "size" ? "Shape ↓  Size →" : "Color ↓  Clarity →"));
+    cols.forEach(c => hr.appendChild(el("th", "num", c))); hr.appendChild(el("th", "num", "Total"));
+    const thead = el("thead"); thead.appendChild(hr); t.appendChild(thead); const tb = el("tbody");
+    const xls = [[repTab === "size" ? "Shape / Size" : "Color / Clarity"].concat(cols, ["Total"])];
+    rows.forEach(r => { const tr = el("tr"); tr.appendChild(el("td", "sid", r)); const xr = [r];
+      cols.forEach(c => { const v = cell[r + "|" + c] || 0, d = el("td", "num" + (v ? " hit" : ""), fmt(v)); const f = v && filterOf(r, c);
+        if (f) { d.title = "Open these stones in 💎 Stock"; d.addEventListener("click", () => openStockWith({ filters: f })); }
+        tr.appendChild(d); xr.push(meas === "ct" ? +v.toFixed(2) : Math.round(v)); });
+      tr.appendChild(el("td", "num b", fmt(rt[r] || 0))); xr.push(meas === "ct" ? +(rt[r] || 0).toFixed(2) : Math.round(rt[r] || 0)); tb.appendChild(tr); xls.push(xr); });
+    const ft = el("tr", "tot"); ft.appendChild(el("td", "", "Total")); cols.forEach(c => ft.appendChild(el("td", "num", fmt(ct[c] || 0)))); ft.appendChild(el("td", "num", fmt(tot)));
+    tb.appendChild(ft); xls.push(["Total"].concat(cols.map(c => meas === "ct" ? +(ct[c] || 0).toFixed(2) : Math.round(ct[c] || 0)), [meas === "ct" ? +tot.toFixed(2) : Math.round(tot)]));
+    t.appendChild(tb); const w = el("div", "reg-wrap"); w.appendChild(t); $("rep-body").innerHTML = ""; $("rep-body").appendChild(w); repXls = xls;
+  }
+  $("rep-xls").addEventListener("click", async () => {
+    if (!repXls) return; const XLSX = await loadSheetJs(), wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(repXls), repTab === "size" ? "Shape x Size" : "Color x Clarity");
+    XLSX.writeFile(wb, "KG_stock_report_" + $("rep-measure").value + "_" + isoDay(Date.now()) + ".xlsx");
+  });
+
+  // ---------------- 📦 what changed in a stock upload ----------------
+  const ANNOUNCE_ID = "00000000-0000-0000-0000-0000000000a1";
+  async function postStockChanges(before, rows) {
+    const old = new Map(before.map(r => [r.stock_id, r])), fresh = new Set(rows.map(r => r.stock_id));
+    const newIds = rows.filter(r => !old.has(r.stock_id)).map(r => r.stock_id);
+    const goneIds = before.filter(r => !fresh.has(r.stock_id) && !/sold/i.test(r.status || "")).map(r => r.stock_id);
+    const price = [], status = [];
+    rows.forEach(r => { const o = old.get(r.stock_id); if (!o) return;
+      if (r.rate != null && o.rate != null && Math.abs(Number(r.rate) - Number(o.rate)) >= 0.5) price.push({ id: r.stock_id, from: Number(o.rate), to: Number(r.rate) });
+      if ("status" in r && String(r.status || "").toLowerCase() !== String(o.status || "").toLowerCase()) status.push({ id: r.stock_id, from: o.status || "", to: r.status || "" }); });
+    const cap = (a) => a.slice(0, 3000);
+    const { data: up, error } = await sb.from("stock_uploads").insert({ total: rows.length, new_ids: cap(newIds), gone_ids: cap(goneIds), price_changes: cap(price), status_changes: cap(status), created_by: myId }).select().single();
+    if (error) { console.warn(error); return; }
+    const down = price.filter(p => p.to < p.from).length;
+    const text = "📦 Stock updated: " + rows.length.toLocaleString() + " stones" +
+      "\n🆕 New: " + newIds.length.toLocaleString() + " · ➖ Not in today's file: " + goneIds.length.toLocaleString() +
+      "\n💲 Price changes: " + price.length.toLocaleString() + (price.length ? " (" + down + " cheaper)" : "") + " · 🔄 Status changes: " + status.length.toLocaleString();
+    await sb.from("messages").insert({ id: newId(), sender_id: myId, group_id: ANNOUNCE_ID, text, stock_upload_id: up.id });
+  }
+  const uploadsById = {}, upLoading = new Set();
+  const _prevExtra = extraCard;
+  extraCard = (m) => {
+    if (!m.stock_upload_id) return _prevExtra(m);
+    const u = uploadsById[m.stock_upload_id];
+    if (!u) { if (!upLoading.has(m.stock_upload_id)) { upLoading.add(m.stock_upload_id); sb.from("stock_uploads").select("*").eq("id", m.stock_upload_id).maybeSingle().then(({ data }) => { if (data) { uploadsById[data.id] = data; render(true); } }); } return null; }
+    const c = el("div", "upload-card"), bar = el("div", "sc-links");
+    const btn = (label, fn) => { const b = el("button", "small-btn", label); b.addEventListener("click", (e) => { e.stopPropagation(); fn(); }); bar.appendChild(b); };
+    if (u.new_ids.length) btn("🆕 New (" + u.new_ids.length + ")", () => showChanges(u, "new"));
+    if ((u.price_changes || []).length) btn("💲 Prices (" + u.price_changes.length + ")", () => showChanges(u, "price"));
+    if ((u.status_changes || []).length) btn("🔄 Status (" + u.status_changes.length + ")", () => showChanges(u, "status"));
+    if (u.gone_ids.length) btn("➖ Not in file (" + u.gone_ids.length + ")", () => showChanges(u, "gone"));
+    if (bar.children.length) c.appendChild(bar);
+    return bar.children.length ? c : null;
+  };
+  function showChanges(u, kind) {
+    const titles = { new: "🆕 New stones", gone: "➖ Not in today's file (maybe sold / returned)", price: "💲 Price changes", status: "🔄 Status changes" };
+    $("chg-title").textContent = titles[kind] + " · " + new Date(u.created_at).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    const body = $("chg-body"); body.innerHTML = "";
+    const ids = kind === "new" ? u.new_ids : kind === "gone" ? u.gone_ids : (kind === "price" ? u.price_changes : u.status_changes).map(x => x.id);
+    if (canStock()) { const o = el("button", "small-btn primary", "💎 Open " + Math.min(ids.length, 500) + " in Stock"); o.addEventListener("click", () => openStockWith({ ids })); body.appendChild(o); }
+    if (kind === "new" || kind === "gone") body.appendChild(el("div", "chg-ids", ids.join(", ")));
+    else { const t = el("table", "reg-table"), tb = el("tbody"), hr = el("tr");
+      ["Stock ID", "Before", "Now", kind === "price" ? "Change" : ""].forEach(h => hr.appendChild(el("th", h === "Stock ID" ? "" : "num", h))); const th = el("thead"); th.appendChild(hr); t.appendChild(th);
+      (kind === "price" ? u.price_changes : u.status_changes).forEach(x => { const tr = el("tr"); tr.appendChild(el("td", "sid", x.id));
+        if (kind === "price") { tr.appendChild(el("td", "num", money(x.from))); tr.appendChild(el("td", "num", money(x.to))); const d = x.to - x.from; tr.appendChild(el("td", "num " + (d < 0 ? "down" : "up"), (d > 0 ? "+" : "−") + "$" + Math.abs(Math.round(d)).toLocaleString() + " (" + (d > 0 ? "+" : "") + (d / x.from * 100).toFixed(1) + "%)")); }
+        else { tr.appendChild(el("td", "num", x.from || "–")); tr.appendChild(el("td", "num", x.to || "–")); tr.appendChild(el("td", "")); }
+        tb.appendChild(tr); });
+      t.appendChild(tb); const w = el("div", "reg-wrap"); w.appendChild(t); body.appendChild(w); }
+    $("chg-modal").classList.add("open");
+  }
+  $("chg-close").addEventListener("click", () => $("chg-modal").classList.remove("open"));
+
+  // ---------------- 🔔 client-link alerts + reminders after login ----------------
+  let linkCh = null; const linkState = {};
+  async function watchMyLinks() {
+    if (linkCh || !canStock()) return;
+    const { data } = await sb.from("client_selections").select("id,title,party,views,interested_at").eq("created_by", myId);
+    (data || []).forEach(d => linkState[d.id] = d);
+    linkCh = sb.channel("my-links").on("postgres_changes", { event: "UPDATE", schema: "public", table: "client_selections", filter: "created_by=eq." + myId }, (payload) => {
+      const n = payload.new; if (!n || !n.id) return; const o = linkState[n.id] || {}; linkState[n.id] = n;
+      const who = n.party || "Client", what = "“" + (n.title || "selection") + "”";
+      if (n.interested_at && n.interested_at !== o.interested_at && (n.interested || []).length) toast("⭐ " + who + " is interested in " + n.interested.join(", ") + " (" + what + ")");
+      else if ((n.views || 0) > (o.views || 0)) toast("👁 " + who + " opened your client link " + what);
+      if ($("links-modal").classList.contains("open")) drawLinks();
+    }).subscribe();
+  }
+  async function afterEnterExtras() {
+    if (!myId || !canStock()) return;
+    watchMyLinks();
+    loadReqs().catch(() => {});
+    const { data } = await sb.from("stone_moves").select("id").eq("kind", "memo").eq("created_by", myId).is("returned_at", null).lt("memo_until", isoDay(Date.now()));
+    if (data && data.length) toast("📒 " + data.length + " stone" + (data.length > 1 ? "s" : "") + " on memo should be back by now — 💎 Stock → 📒 Sold / Memo");
   }
 
   // =====================================================================
@@ -5115,6 +5594,7 @@ if ("serviceWorker" in navigator) {
     startPresence();
     loadSaved();
     maybeOfferNotifications();
+    setTimeout(() => { if (typeof afterEnterExtras === "function") afterEnterExtras(); }, 1500);   // memo reminders, 🎯 new matches, client-link alerts
     const want = new URLSearchParams(location.search).get("chat");
     if (want) { history.replaceState(null, "", location.pathname); if (want !== "team") openChat(want); }
   }
