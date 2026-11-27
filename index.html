@@ -744,18 +744,16 @@
       radial-gradient(1100px 600px at 12% -10%, rgba(0,153,194,.18), transparent 60%),
       radial-gradient(900px 520px at 110% 110%, rgba(16,22,43,.16), transparent 60%),
       radial-gradient(600px 400px at 85% 15%, rgba(63,182,217,.12), transparent 65%),
-      url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDY0IDY0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDk5QzIiIHN0cm9rZS13aWR0aD0iMC44IiBzdHJva2Utb3BhY2l0eT0iMC4wNyI+PHBhdGggZD0iTTMyIDZMNDYgMjBMMzIgNDJMMTggMjBaIE0xOCAyMEg0NiBNMjUgNkgzOSIvPjwvc3ZnPg==) 0 0 / 96px 96px,
+      url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgdmlld0JveD0iMCAwIDY0IDY0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDk5QzIiIHN0cm9rZS13aWR0aD0iMC45IiBzdHJva2Utb3BhY2l0eT0iMC4xMyI+PHBhdGggZD0iTTMyIDZMNDYgMjBMMzIgNDJMMTggMjBaIE0xOCAyMEg0NiBNMjUgNkgzOSIvPjwvc3ZnPg==) 0 0 / 96px 96px,
       linear-gradient(160deg, #F7FBFD 0%, #EEF6FA 45%, #E6EFF5 100%); }
   .login-screen::before, .login-screen::after { content:""; position:fixed; pointer-events:none; background:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMTYwIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDk5QzIiIHN0cm9rZS13aWR0aD0iMS42IiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNjAgMjBIMTQwTDE4MCA1NUwxMDAgMTUwTDIwIDU1WiIvPjxwYXRoIGQ9Ik0yMCA1NUgxODBNNjAgMjBMODAgNTVMMTAwIDIwTDEyMCA1NUwxNDAgMjBNODAgNTVMMTAwIDE1MEwxMjAgNTVNNDAgNTVMMTAwIDE1MEwxNjAgNTVNNjAgMjBMNDAgNTVNMTQwIDIwTDE2MCA1NSIvPjwvc3ZnPg==) center/contain no-repeat; z-index:-0; }
-  .login-screen::before { width:420px; height:336px; left:-110px; top:-60px; opacity:.13; transform:rotate(-14deg); animation:kgfloat 14s ease-in-out infinite; }
-  .login-screen::after { width:560px; height:448px; right:-160px; bottom:-140px; opacity:.10; transform:rotate(12deg); animation:kgfloat2 18s ease-in-out infinite; }
+  .login-screen::before { width:420px; height:336px; left:-110px; top:-60px; opacity:.32; transform:rotate(-14deg); animation:kgfloat 14s ease-in-out infinite; }
+  .login-screen::after { width:560px; height:448px; right:-160px; bottom:-140px; opacity:.26; transform:rotate(12deg); animation:kgfloat2 18s ease-in-out infinite; }
   @keyframes kgfloat { 50% { transform:rotate(-10deg) translateY(18px); } }
   @keyframes kgfloat2 { 50% { transform:rotate(16deg) translateY(-16px); } }
   .login-screen > * { position:relative; z-index:1; }
-  .login-sparkle { position:fixed !important; z-index:0 !important; width:10px; height:10px; pointer-events:none; opacity:0; animation:kgspark 6s ease-in-out infinite; }
-  .login-sparkle::before, .login-sparkle::after { content:""; position:absolute; left:50%; top:50%; background:#3FB6D9; border-radius:2px; transform:translate(-50%,-50%); }
-  .login-sparkle::before { width:2px; height:10px; } .login-sparkle::after { width:10px; height:2px; }
-  @keyframes kgspark { 0%, 100% { opacity:0; transform:scale(.4) rotate(0); } 45% { opacity:.9; transform:scale(1) rotate(45deg); } 60% { opacity:0; } }
+  .login-sparkle { position:fixed !important; z-index:0 !important; width:var(--sz,18px); height:var(--sz,18px); pointer-events:none; opacity:0; background:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzFGQThDRiIgZD0iTTEyIDBDMTIuOSA3LjIgMTYuOCAxMS4xIDI0IDEyQzE2LjggMTIuOSAxMi45IDE2LjggMTIgMjRDMTEuMSAxNi44IDcuMiAxMi45IDAgMTJDNy4yIDExLjEgMTEuMSA3LjIgMTIgMFoiLz48L3N2Zz4=) center/contain no-repeat; filter:drop-shadow(0 0 4px rgba(63,182,217,.6)); animation:kgspark 5s ease-in-out infinite; }
+  @keyframes kgspark { 0%, 100% { opacity:0; transform:scale(.3) rotate(0); } 40% { opacity:1; transform:scale(1) rotate(20deg); } 70% { opacity:0; transform:scale(.5) rotate(45deg); } }
   .login-logo-wrap { padding:6px 0 4px; background:transparent; box-shadow:none; }
   .login-card { background:rgba(255,255,255,.92); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.9); border-radius:18px; overflow:hidden; position:relative;
     box-shadow:0 30px 70px rgba(16,22,43,.16), 0 2px 10px rgba(16,22,43,.06); }
@@ -825,7 +823,7 @@
 
   <!-- LOGIN -->
   <div class="login-screen" id="view-login">
-    <i class="login-sparkle" style="left:18%;top:28%;animation-delay:0s"></i><i class="login-sparkle" style="left:80%;top:22%;animation-delay:1.6s"></i><i class="login-sparkle" style="left:72%;top:78%;animation-delay:3.1s"></i><i class="login-sparkle" style="left:10%;top:70%;animation-delay:4.4s"></i><i class="login-sparkle" style="left:90%;top:55%;animation-delay:2.4s"></i><i class="login-sparkle" style="left:30%;top:88%;animation-delay:5.2s"></i>
+    <i class="login-sparkle" style="left:18%;top:28%;--sz:22px;animation-delay:0s"></i><i class="login-sparkle" style="left:80%;top:22%;--sz:16px;animation-delay:1.2s"></i><i class="login-sparkle" style="left:72%;top:78%;--sz:24px;animation-delay:2.6s"></i><i class="login-sparkle" style="left:10%;top:70%;--sz:14px;animation-delay:3.6s"></i><i class="login-sparkle" style="left:90%;top:55%;--sz:20px;animation-delay:1.9s"></i><i class="login-sparkle" style="left:30%;top:88%;--sz:16px;animation-delay:4.3s"></i><i class="login-sparkle" style="left:6%;top:12%;--sz:18px;animation-delay:2.2s"></i><i class="login-sparkle" style="left:94%;top:8%;--sz:14px;animation-delay:3.1s"></i><i class="login-sparkle" style="left:50%;top:6%;--sz:12px;animation-delay:0.7s"></i><i class="login-sparkle" style="left:58%;top:94%;--sz:18px;animation-delay:3.9s"></i><i class="login-sparkle" style="left:24%;top:52%;--sz:12px;animation-delay:1.5s"></i><i class="login-sparkle" style="left:86%;top:88%;--sz:14px;animation-delay:0.4s"></i>
     <div class="login-logo-wrap">
       <div class="login-logo-img" role="img" aria-label="K.GIRDHARLAL — There's more to making diamonds"></div>
     </div>
@@ -846,7 +844,7 @@
 
   <!-- SIGN UP -->
   <div class="login-screen" id="view-signup" style="display:none;">
-    <i class="login-sparkle" style="left:18%;top:28%;animation-delay:0s"></i><i class="login-sparkle" style="left:80%;top:22%;animation-delay:1.6s"></i><i class="login-sparkle" style="left:72%;top:78%;animation-delay:3.1s"></i><i class="login-sparkle" style="left:10%;top:70%;animation-delay:4.4s"></i><i class="login-sparkle" style="left:90%;top:55%;animation-delay:2.4s"></i><i class="login-sparkle" style="left:30%;top:88%;animation-delay:5.2s"></i>
+    <i class="login-sparkle" style="left:18%;top:28%;--sz:22px;animation-delay:0s"></i><i class="login-sparkle" style="left:80%;top:22%;--sz:16px;animation-delay:1.2s"></i><i class="login-sparkle" style="left:72%;top:78%;--sz:24px;animation-delay:2.6s"></i><i class="login-sparkle" style="left:10%;top:70%;--sz:14px;animation-delay:3.6s"></i><i class="login-sparkle" style="left:90%;top:55%;--sz:20px;animation-delay:1.9s"></i><i class="login-sparkle" style="left:30%;top:88%;--sz:16px;animation-delay:4.3s"></i><i class="login-sparkle" style="left:6%;top:12%;--sz:18px;animation-delay:2.2s"></i><i class="login-sparkle" style="left:94%;top:8%;--sz:14px;animation-delay:3.1s"></i><i class="login-sparkle" style="left:50%;top:6%;--sz:12px;animation-delay:0.7s"></i><i class="login-sparkle" style="left:58%;top:94%;--sz:18px;animation-delay:3.9s"></i><i class="login-sparkle" style="left:24%;top:52%;--sz:12px;animation-delay:1.5s"></i><i class="login-sparkle" style="left:86%;top:88%;--sz:14px;animation-delay:0.4s"></i>
     <div class="login-logo-wrap">
       <div class="login-logo-img" role="img" aria-label="K.GIRDHARLAL — There's more to making diamonds"></div>
     </div>
@@ -892,7 +890,7 @@
 
   <!-- FORGOT PASSWORD -->
   <div class="login-screen" id="view-forgot" style="display:none;">
-    <i class="login-sparkle" style="left:18%;top:28%;animation-delay:0s"></i><i class="login-sparkle" style="left:80%;top:22%;animation-delay:1.6s"></i><i class="login-sparkle" style="left:72%;top:78%;animation-delay:3.1s"></i><i class="login-sparkle" style="left:10%;top:70%;animation-delay:4.4s"></i><i class="login-sparkle" style="left:90%;top:55%;animation-delay:2.4s"></i><i class="login-sparkle" style="left:30%;top:88%;animation-delay:5.2s"></i>
+    <i class="login-sparkle" style="left:18%;top:28%;--sz:22px;animation-delay:0s"></i><i class="login-sparkle" style="left:80%;top:22%;--sz:16px;animation-delay:1.2s"></i><i class="login-sparkle" style="left:72%;top:78%;--sz:24px;animation-delay:2.6s"></i><i class="login-sparkle" style="left:10%;top:70%;--sz:14px;animation-delay:3.6s"></i><i class="login-sparkle" style="left:90%;top:55%;--sz:20px;animation-delay:1.9s"></i><i class="login-sparkle" style="left:30%;top:88%;--sz:16px;animation-delay:4.3s"></i><i class="login-sparkle" style="left:6%;top:12%;--sz:18px;animation-delay:2.2s"></i><i class="login-sparkle" style="left:94%;top:8%;--sz:14px;animation-delay:3.1s"></i><i class="login-sparkle" style="left:50%;top:6%;--sz:12px;animation-delay:0.7s"></i><i class="login-sparkle" style="left:58%;top:94%;--sz:18px;animation-delay:3.9s"></i><i class="login-sparkle" style="left:24%;top:52%;--sz:12px;animation-delay:1.5s"></i><i class="login-sparkle" style="left:86%;top:88%;--sz:14px;animation-delay:0.4s"></i>
     <div class="login-logo-wrap">
       <div class="login-logo-img" role="img" aria-label="K.GIRDHARLAL — There's more to making diamonds"></div>
     </div>
@@ -908,7 +906,7 @@
 
   <!-- SET NEW PASSWORD (from reset email link) -->
   <div class="login-screen" id="view-reset" style="display:none;">
-    <i class="login-sparkle" style="left:18%;top:28%;animation-delay:0s"></i><i class="login-sparkle" style="left:80%;top:22%;animation-delay:1.6s"></i><i class="login-sparkle" style="left:72%;top:78%;animation-delay:3.1s"></i><i class="login-sparkle" style="left:10%;top:70%;animation-delay:4.4s"></i><i class="login-sparkle" style="left:90%;top:55%;animation-delay:2.4s"></i><i class="login-sparkle" style="left:30%;top:88%;animation-delay:5.2s"></i>
+    <i class="login-sparkle" style="left:18%;top:28%;--sz:22px;animation-delay:0s"></i><i class="login-sparkle" style="left:80%;top:22%;--sz:16px;animation-delay:1.2s"></i><i class="login-sparkle" style="left:72%;top:78%;--sz:24px;animation-delay:2.6s"></i><i class="login-sparkle" style="left:10%;top:70%;--sz:14px;animation-delay:3.6s"></i><i class="login-sparkle" style="left:90%;top:55%;--sz:20px;animation-delay:1.9s"></i><i class="login-sparkle" style="left:30%;top:88%;--sz:16px;animation-delay:4.3s"></i><i class="login-sparkle" style="left:6%;top:12%;--sz:18px;animation-delay:2.2s"></i><i class="login-sparkle" style="left:94%;top:8%;--sz:14px;animation-delay:3.1s"></i><i class="login-sparkle" style="left:50%;top:6%;--sz:12px;animation-delay:0.7s"></i><i class="login-sparkle" style="left:58%;top:94%;--sz:18px;animation-delay:3.9s"></i><i class="login-sparkle" style="left:24%;top:52%;--sz:12px;animation-delay:1.5s"></i><i class="login-sparkle" style="left:86%;top:88%;--sz:14px;animation-delay:0.4s"></i>
     <div class="login-logo-wrap">
       <div class="login-logo-img" role="img" aria-label="K.GIRDHARLAL — There's more to making diamonds"></div>
     </div>
@@ -925,7 +923,7 @@
 
   <!-- WAITING FOR APPROVAL / DISABLED -->
   <div class="login-screen" id="view-wait" style="display:none;">
-    <i class="login-sparkle" style="left:18%;top:28%;animation-delay:0s"></i><i class="login-sparkle" style="left:80%;top:22%;animation-delay:1.6s"></i><i class="login-sparkle" style="left:72%;top:78%;animation-delay:3.1s"></i><i class="login-sparkle" style="left:10%;top:70%;animation-delay:4.4s"></i><i class="login-sparkle" style="left:90%;top:55%;animation-delay:2.4s"></i><i class="login-sparkle" style="left:30%;top:88%;animation-delay:5.2s"></i>
+    <i class="login-sparkle" style="left:18%;top:28%;--sz:22px;animation-delay:0s"></i><i class="login-sparkle" style="left:80%;top:22%;--sz:16px;animation-delay:1.2s"></i><i class="login-sparkle" style="left:72%;top:78%;--sz:24px;animation-delay:2.6s"></i><i class="login-sparkle" style="left:10%;top:70%;--sz:14px;animation-delay:3.6s"></i><i class="login-sparkle" style="left:90%;top:55%;--sz:20px;animation-delay:1.9s"></i><i class="login-sparkle" style="left:30%;top:88%;--sz:16px;animation-delay:4.3s"></i><i class="login-sparkle" style="left:6%;top:12%;--sz:18px;animation-delay:2.2s"></i><i class="login-sparkle" style="left:94%;top:8%;--sz:14px;animation-delay:3.1s"></i><i class="login-sparkle" style="left:50%;top:6%;--sz:12px;animation-delay:0.7s"></i><i class="login-sparkle" style="left:58%;top:94%;--sz:18px;animation-delay:3.9s"></i><i class="login-sparkle" style="left:24%;top:52%;--sz:12px;animation-delay:1.5s"></i><i class="login-sparkle" style="left:86%;top:88%;--sz:14px;animation-delay:0.4s"></i>
     <div class="login-logo-wrap">
       <div class="login-logo-img" role="img" aria-label="K.GIRDHARLAL — There's more to making diamonds"></div>
     </div>
@@ -1660,7 +1658,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v59 · 27 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v61 · 27 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
