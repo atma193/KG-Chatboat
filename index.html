@@ -574,6 +574,17 @@
   .drop-overlay.open { display:flex; }
   .drop-overlay div { background:var(--bg-raised); color:var(--text); border:3px dashed var(--accent); border-radius:18px; padding:28px 40px; font-size:20px; font-weight:700; }
   .list-sep { margin:10px 12px 2px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-dim); }
+  .set-help { font-size:13px; color:var(--text-dim); line-height:1.5; margin-bottom:10px; white-space:normal; max-width:640px; }
+  .set-field { display:flex; flex-direction:column; gap:4px; font-size:12.5px; color:var(--text-dim); margin-bottom:10px; max-width:520px; }
+  .set-field .field { width:100%; box-sizing:border-box; margin:0 !important; }
+  .set-ok { font-size:13px; font-weight:600; margin:2px 0 8px; color:#1e8449; }
+  .set-ok.err { color:var(--danger, #c0392b); }
+  .co-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 14px; max-width:640px; }
+  .co-grid .full { grid-column:1 / -1; }
+  @media (max-width:560px) { .co-grid { grid-template-columns:1fr; } }
+  .co-banner { background:rgba(230,126,34,.12); border:1px solid rgba(230,126,34,.45); border-radius:10px; padding:10px 12px; font-size:13.5px; line-height:1.5; margin-bottom:14px; max-width:640px; }
+  .co-steps { font-size:13px; color:var(--text-dim); line-height:1.6; margin:0 0 12px 18px; padding:0; max-width:620px; }
+  .signup-closed { background:rgba(230,126,34,.12); border:1px solid rgba(230,126,34,.45); border-radius:10px; padding:10px 12px; font-size:13.5px; line-height:1.5; margin:0 0 10px; }
   .stock-hdr-btn:hover { background:rgba(255,255,255,.22); }
   /* inside a chat (＋ → Share a stone) the client tools are hidden — they live on the 💎 Stock page */
   #stone-modal[data-mode="chat"] .client-only, #stone-modal[data-mode="chat"] .stock-only { display:none !important; }
@@ -710,18 +721,35 @@
     </div>
     <div class="login-card" style="max-width:420px;">
       <span class="back-link" id="signup-back">&larr; Back to login</span>
-      <div class="login-card-title"><b>KG Chatboat</b> &nbsp;|&nbsp; Sign up</div>
+      <div class="login-card-title"><b>KG Chatboat</b> &nbsp;|&nbsp; <span id="signup-title">Sign up</span></div>
+      <div class="side-sub" id="signup-company" style="display:none; margin:-4px 0 8px; font-weight:600;"></div>
+      <div class="signup-closed" id="signup-closed" style="display:none;"></div>
       <div class="photo-row">
         <div class="photo-preview" id="signup-photo-preview">+</div>
         <button class="ghost-btn" id="signup-photo-btn" type="button">Choose photo</button>
+        <span class="side-sub" id="signup-photo-label" style="display:none;">Company logo (optional)</span>
         <input type="file" id="signup-photo-input" accept="image/*" style="display:none;">
       </div>
-      <div class="field-label">Employee name</div>
+      <div class="field-label" id="signup-name-label">Employee name</div>
       <input type="text" class="field-input" id="signup-name" placeholder="e.g. Hitesh Shah">
-      <div class="field-label">Mobile number</div>
+      <div class="field-label" id="signup-mobile-label">Mobile number</div>
       <input type="tel" class="field-input" id="signup-mobile" placeholder="e.g. 98200 00000">
-      <div class="field-label">Email</div>
+      <div id="signup-coemail-wrap" style="display:none;">
+        <div class="field-label">Company email *</div>
+        <input type="email" class="field-input" id="signup-co-email" placeholder="e.g. info@kgirdharlal.com" autocomplete="off">
+        <div class="side-sub" style="margin:-4px 0 8px; white-space:normal; overflow:visible; line-height:1.4;">🏢 Your company's registered email — only this company's employees can join. Ask your admin if you don't know it.</div>
+      </div>
+      <div class="field-label" id="signup-email-label">Email</div>
       <input type="email" class="field-input" id="signup-email" autocomplete="username">
+      <div class="side-sub" id="signup-domain-hint" style="display:none; margin:-4px 0 8px;"></div>
+      <div id="signup-co-fields" style="display:none;">
+        <div class="field-label">Address</div>
+        <input type="text" class="field-input" id="signup-co-address" placeholder="Office address">
+        <div class="field-label">GST number</div>
+        <input type="text" class="field-input" id="signup-co-gst" placeholder="e.g. 27AAAAA0000A1Z5">
+        <div class="field-label">Website</div>
+        <input type="text" class="field-input" id="signup-co-website" placeholder="e.g. kgirdharlal.com">
+      </div>
       <div class="field-label">Password</div>
       <input type="password" class="field-input" id="signup-password" autocomplete="new-password">
       <div class="field-label">Confirm password</div>
@@ -806,7 +834,7 @@
           <button id="menu-theme">🎨 Theme</button>
           <button id="menu-edit-profile">Edit profile</button>
           <button id="menu-notif">🔔 Notifications</button>
-          <button id="menu-admin" style="display:none;">🛡️ Admin panel</button>
+          <button id="menu-admin" style="display:none;">🏢 Company profile</button>
           <button id="menu-logout">Log out</button>
           <div id="app-version" style="padding:6px 14px 8px; font-size:11px; color:var(--text-dim); border-top:1px solid var(--border); margin-top:4px;"></div>
         </div>
@@ -998,10 +1026,11 @@
   </div>
   <div class="modal-back" id="admin-modal">
     <div class="panel wide">
-      <div class="panel-head">Admin panel</div>
+      <div class="panel-head" id="admin-head">🏢 Company profile</div>
       <div class="tabs" id="admin-tabs">
+        <button data-tab="company">🏢 Profile</button>
         <button data-tab="dash">📊 Dashboard</button>
-        <button data-tab="users" class="active">Users</button>
+        <button data-tab="users">👥 Users</button>
         <button data-tab="stock">💎 Stock</button>
         <button data-tab="holds">📌 Hold requests</button>
         <button data-tab="discounts">💲 Discounts</button>
@@ -1344,7 +1373,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v48 · 26 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v53 · 26 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -1369,7 +1398,40 @@ if ("serviceWorker" in navigator) {
   const $ = (id) => document.getElementById(id);
   const views = { login: $("view-login"), signup: $("view-signup"), forgot: $("view-forgot"), reset: $("view-reset"), wait: $("view-wait") };
   const chatShell = $("chat-shell");
+  let companyDomains = [];
+  let companyInfo = null, signupCompanyMode = false;   // { has_admin, ready, name, domains } — public, from the company_info() RPC
+  async function loadCompanyDomains() {
+    companyInfo = null;
+    try { const { data, error } = await sb.rpc("company_info"); if (!error && data) companyInfo = data; } catch (e) {}
+    if (companyInfo) companyDomains = (companyInfo.domains || []).map(d => String(d).toLowerCase());
+    else { try { const { data } = await sb.rpc("company_domains"); companyDomains = (data || []).map(d => String(d).toLowerCase()); } catch (e) { companyDomains = []; } }
+    if (ALLOWED_EMAIL_DOMAIN && !companyDomains.includes(ALLOWED_EMAIL_DOMAIN.toLowerCase())) companyDomains.push(ALLOWED_EMAIL_DOMAIN.toLowerCase());
+    const h = $("signup-domain-hint"), cl = $("signup-closed"); if (!h) return;
+    const closed = !!(companyInfo && companyInfo.has_admin && !companyInfo.ready);
+    const first = !!(companyInfo && !companyInfo.has_admin);
+    cl.style.display = closed || first ? "" : "none";
+    cl.innerHTML = closed ? "🏢 <b>Sign up is not open yet.</b><br>The admin must first create the company profile. Please try again later or ask your admin."
+                 : first ? "🏢 <b>Register your company first.</b><br>This becomes the company (admin) account. After that, employees sign up here with their own email and this company email." : "";
+    signupCompanyMode = first;
+    $("signup-title").textContent = first ? "Register company" : "Sign up";
+    $("signup-name-label").textContent = first ? "Company name *" : "Employee name";
+    $("signup-name").placeholder = first ? "e.g. K.GIRDHARLAL" : "e.g. Hitesh Shah";
+    $("signup-mobile-label").textContent = first ? "Company phone *" : "Mobile number";
+    $("signup-mobile").placeholder = first ? "e.g. +91 22 0000 0000" : "e.g. 98200 00000";
+    $("signup-co-fields").style.display = first ? "" : "none";
+    $("signup-photo-label").style.display = first ? "" : "none";
+    $("signup-btn").textContent = first ? "Register company" : "Create account";
+    $("signup-btn").disabled = closed;
+    $("signup-company").textContent = companyInfo && companyInfo.name ? "Join " + companyInfo.name : "";
+    $("signup-company").style.display = companyInfo && companyInfo.name ? "" : "none";
+    h.style.display = "none";
+    $("signup-coemail-wrap").style.display = first ? "none" : "";
+    $("signup-email-label").textContent = first ? "Company email * (company login)" : "Employee email * (your login)";
+    $("signup-email").placeholder = first ? "e.g. info@kgirdharlal.com" : "e.g. raj@gmail.com";
+
+  }
   function showView(name) {
+    if (name === "signup" && typeof sb !== "undefined" && sb) loadCompanyDomains();
     Object.values(views).forEach(v => v.style.display = "none");
     chatShell.style.display = "none";
     if (name === "chat") { chatShell.style.display = "flex"; }
@@ -1491,8 +1553,21 @@ if ("serviceWorker" in navigator) {
     if (!name || !mobile || !email || !password) { note("signup-note","Fill in name, mobile, email and password.","error"); return; }
     if (password !== password2) { note("signup-note","Passwords don't match.","error"); return; }
     if (password.length < 6) { note("signup-note","Password must be at least 6 characters.","error"); return; }
-    if (ALLOWED_EMAIL_DOMAIN && !email.toLowerCase().endsWith("@" + ALLOWED_EMAIL_DOMAIN.toLowerCase())) {
-      note("signup-note","Please use your @" + ALLOWED_EMAIL_DOMAIN + " email.","error"); return;
+    await loadCompanyDomains();
+    let pendingCompany = null;
+    if (signupCompanyMode) {
+      const dom = email.toLowerCase().split("@")[1] || "";
+      if (!/^[^@\s]+@[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(email)) { note("signup-note","Please enter a valid company email, e.g. info@kgirdharlal.com","error"); return; }
+      if (PUBLIC_MAIL.includes(dom)) { note("signup-note","Please use the company's own email (e.g. info@kgirdharlal.com), not " + dom + " — employees will sign up with the same @domain.","error"); return; }
+      pendingCompany = { name, email: email.toLowerCase(), phone: mobile, address: $("signup-co-address").value.trim(), gst: $("signup-co-gst").value.trim().toUpperCase(), website: $("signup-co-website").value.trim() };
+    }
+    if (companyInfo && companyInfo.has_admin && !companyInfo.ready) { note("signup-note","Sign up is not open yet — the admin must first create the company profile.","error"); return; }
+    const coEmail = signupCompanyMode ? "" : $("signup-co-email").value.trim();
+    if (!signupCompanyMode && companyInfo && companyInfo.has_admin) {   // employee: must know the company's registered email (the database checks it too)
+      if (!coEmail) { note("signup-note","Enter your company's email (ask your admin).","error"); return; }
+      if (coEmail.toLowerCase() === email.toLowerCase()) { note("signup-note","Employee email must be your own email (for your login), not the company email.","error"); return; }
+      let ok = true; try { const { data, error } = await sb.rpc("signup_allowed", { p_company_email: coEmail }); if (!error) ok = data !== false; } catch (e) {}
+      if (!ok) { note("signup-note","Wrong company email. Only this company's employees can sign up — ask your admin for the company email.","error"); return; }
     }
     note("signup-note","Creating your account…");
     signingUp = true;
@@ -1501,8 +1576,8 @@ if ("serviceWorker" in navigator) {
     const cur = (await sb.auth.getSession()).data.session;
     let data, error;
     if (cur && cur.user && cur.user.email && cur.user.email.toLowerCase() === email.toLowerCase()) { data = { user: cur.user, session: cur }; }
-    else { ({ data, error } = await sb.auth.signUp({ email, password })); }
-    if (error) { note("signup-note", error.message, "error"); return; }
+    else { ({ data, error } = await sb.auth.signUp({ email, password, options: { data: { company_email: coEmail } } })); }
+    if (error) { note("signup-note", /company profile/i.test(error.message) ? "Sign up is not open yet — the admin must first create the company profile." : /database error saving new user|company email/i.test(error.message) ? "Wrong company email — ask your admin for the company email." : error.message, "error"); return; }
 
     let photo_url = null;
     if (pendingSignupPhoto && data.user) {
@@ -1519,8 +1594,12 @@ if ("serviceWorker" in navigator) {
       }
     }
 
+    if (pendingCompany) {   // save the company profile now if signed in; otherwise right after the first login (checkCompanySetup)
+      try { localStorage.setItem("kg-pending-company", JSON.stringify(pendingCompany)); } catch (e) {}
+      if (data.session) await saveCompanyProfile(pendingCompany).catch(() => {});
+    }
     if (!data.session) {
-      note("signup-note","Account created — check your email to confirm it, then log in.","ok");
+      note("signup-note", pendingCompany ? "Company registered — check your email to confirm it, then log in." : "Account created — check your email to confirm it, then log in.","ok");
       setTimeout(() => showView("login"), 2500);
     } else {
       note("signup-note","");
@@ -1616,7 +1695,7 @@ if ("serviceWorker" in navigator) {
   // ---------- admin panel: approve / disable / make admin ----------
   let adminTab = "users", adminUsers = [];
   const adminTabs = {};   // tab name → render function (other features add tabs)
-  $("menu-admin").addEventListener("click", () => { meMenu.classList.remove("open"); openAdmin("users"); });
+  $("menu-admin").addEventListener("click", () => { meMenu.classList.remove("open"); openAdmin("company"); });
   $("admin-close").addEventListener("click", () => $("admin-modal").classList.remove("open"));
   $("admin-tabs").addEventListener("click", (e) => { const b = e.target.closest("button[data-tab]"); if (b) openAdmin(b.dataset.tab); });
   function openAdmin(tab) {
@@ -3646,7 +3725,7 @@ if ("serviceWorker" in navigator) {
       const { count } = await sb.from("stones").select("stock_id", { count: "exact", head: true });
       if (runStoneSearch.last !== stamp) return;
       box.innerHTML = '<div class="side-empty"></div>';
-      box.firstChild.textContent = count ? count.toLocaleString() + " stones in stock. Type a Stock ID / certificate number, or use the filters." : "No stock uploaded yet." + (amAppAdmin() ? " Upload it in Admin panel → Stock." : " Ask an admin to upload it.");
+      box.firstChild.textContent = count ? count.toLocaleString() + " stones in stock. Type a Stock ID / certificate number, or use the filters." : "No stock uploaded yet." + (amAppAdmin() ? " Upload it in 🏢 Company profile → Stock." : " Ask an admin to upload it.");
       stoneResults = []; updateSelBar(); return;
     }
     // several stock IDs / certificate numbers at once (separated by space, comma, new line…)
@@ -3676,7 +3755,7 @@ if ("serviceWorker" in navigator) {
         const [{ count: total, error: e2 }, { data: ex }] = await Promise.all([sb.from("stones").select("stock_id", { count: "exact", head: true }), sb.from("stones").select("stock_id,cert_no").order("updated_at", { ascending: false }).limit(4)]);
         box.firstChild.textContent = "No stone with Stock ID / report no. “" + qv + "”. Uploaded stock has " + (total || 0).toLocaleString() + " stones" +
           (ex && ex.length ? " — for example Stock ID " + ex.map(x => "“" + x.stock_id + "”").join(", ") + (ex.some(x => x.cert_no) ? " / report no. " + ex.filter(x => x.cert_no).map(x => "“" + x.cert_no + "”").join(", ") : "") : "") +
-          ". If these don't look like your Stock IDs, upload the file again in Admin panel → Stock and choose the right Stock ID column." + (e2 ? " (" + e2.message + ")" : "");
+          ". If these don't look like your Stock IDs, upload the file again in 🏢 Company profile → Stock and choose the right Stock ID column." + (e2 ? " (" + e2.message + ")" : "");
       } else box.firstChild.textContent = "No stones match these filters.";
       updateSelBar(); return;
     }
@@ -5098,6 +5177,7 @@ if ("serviceWorker" in navigator) {
     }).subscribe();
   }
   async function afterEnterExtras() {
+    if (typeof checkCompanySetup === "function") checkCompanySetup().catch(() => {});
     if (!myId || !canStock()) return;
     watchMyLinks();
     loadReqs().catch(() => {});
@@ -5598,7 +5678,7 @@ if ("serviceWorker" in navigator) {
     "Check again": ["ફરી તપાસો", "फिर से जांचें"], "Account disabled": ["એકાઉન્ટ બંધ છે", "अकाउंट बंद है"], "Save new password": ["નવો પાસવર્ડ સાચવો", "नया पासवर्ड सेव करें"],
     "New password": ["નવો પાસવર્ડ", "नया पासवर्ड"], "Confirm new password": ["નવો પાસવર્ડ ફરી લખો", "नया पासवर्ड दोबारा लिखें"],
     // my menu
-    "Edit profile": ["પ્રોફાઇલ બદલો", "प्रोफ़ाइल बदलें"], "🔔 Notifications": ["🔔 સૂચનાઓ", "🔔 सूचनाएं"], "🛡️ Admin panel": ["🛡️ એડમિન પેનલ", "🛡️ एडमिन पैनल"],
+    "Edit profile": ["પ્રોફાઇલ બદલો", "प्रोफ़ाइल बदलें"], "🔔 Notifications": ["🔔 સૂચનાઓ", "🔔 सूचनाएं"], "🛡️ Admin panel": ["🛡️ એડમિન પેનલ", "🛡️ एडमिन पैनल"], "🏢 Company profile": ["🏢 કંપની પ્રોફાઇલ", "🏢 कंपनी प्रोफ़ाइल"], "🏢 Profile": ["🏢 પ્રોફાઇલ", "🏢 प्रोफ़ाइल"], "👥 Users": ["👥 યુઝર્સ", "👥 यूज़र्स"],
     "Log out": ["લોગ આઉટ", "लॉग आउट"], "✅ My tasks & reminders": ["✅ મારા કામ અને રિમાઇન્ડર", "✅ मेरे काम और रिमाइंडर"], "🔗 Client links": ["🔗 ક્લાયન્ટ લિંક", "🔗 क्लाइंट लिंक"],
     "🎨 Theme": ["🎨 થીમ", "🎨 थीम"], "⭐ Saved messages": ["⭐ સાચવેલા મેસેજ", "⭐ सेव किए मैसेज"], "🌐 Language": ["🌐 ભાષા", "🌐 भाषा"],
     "🕘 Attendance": ["🕘 હાજરી", "🕘 हाज़िरी"], "📱 My devices": ["📱 મારા ડિવાઇસ", "📱 मेरे डिवाइस"],
@@ -5657,7 +5737,7 @@ if ("serviceWorker" in navigator) {
     "No groups yet. Tap + NEW GROUP.": ["હજી કોઈ ગ્રુપ નથી.", "अभी कोई ग्रुप नहीं."], "Say hello": ["નમસ્તે કહો", "नमस्ते कहें"],
   };
   const LANG_IDX = { gu: 0, hi: 1 };
-  const MR = {"Email": "ईमेल", "Password": "पासवर्ड", "Sign In": "साइन इन", "Sign up": "साइन अप", "Forgot Password?": "पासवर्ड विसरलात?", "Employee name": "कर्मचाऱ्याचे नाव", "Mobile number": "मोबाइल नंबर", "Confirm password": "पासवर्ड पुन्हा लिहा", "Create account": "अकाउंट तयार करा", "Send reset link": "रीसेट लिंक पाठवा", "← Back to login": "← लॉगिनवर परत", "Choose photo": "फोटो निवडा", "Waiting for approval": "मंजुरीची वाट", "Check again": "पुन्हा तपासा", "Account disabled": "अकाउंट बंद आहे", "Save new password": "नवीन पासवर्ड सेव्ह करा", "New password": "नवीन पासवर्ड", "Confirm new password": "नवीन पासवर्ड पुन्हा लिहा", "Edit profile": "प्रोफाइल बदला", "🔔 Notifications": "🔔 सूचना", "🛡️ Admin panel": "🛡️ ॲडमिन पॅनल", "Log out": "लॉग आउट", "✅ My tasks & reminders": "✅ माझी कामे आणि रिमाइंडर", "🔗 Client links": "🔗 क्लायंट लिंक", "🎨 Theme": "🎨 थीम", "⭐ Saved messages": "⭐ सेव्ह केलेले मेसेज", "🌐 Language": "🌐 भाषा", "🕘 Attendance": "🕘 हजेरी", "📱 My devices": "📱 माझे डिव्हाइस", "Chat": "चॅट", "Unread": "न वाचलेले", "Meeting chats": "मीटिंग चॅट", "Unmuted": "म्यूट नाही", "Favorites": "आवडते", "Chats": "चॅट्स", "Contacts": "संपर्क", "Team Chat": "टीम चॅट", "Announcements": "घोषणा", "Everyone": "सर्वजण", "From admins": "ॲडमिनकडून", "You can post": "तुम्ही पोस्ट करू शकता", "Tap ⋯ on a chat → Add to favorites.": "चॅटवर ⋯ दाबा → आवडत्यांमध्ये जोडा.", "No chats yet. Tap ✏️ to start one.": "अजून चॅट नाही. ✏️ दाबून सुरू करा.", "Available": "उपलब्ध", "Busy": "व्यस्त", "Do not disturb": "त्रास देऊ नका", "Be right back": "लगेच येतो", "Away": "दूर", "Offline": "ऑफलाइन", "online": "ऑनलाइन", "⏰ My reminders": "⏰ माझे रिमाइंडर", "⭐ Add to favorites": "⭐ आवडत्यांमध्ये जोडा", "☆ Remove from favorites": "☆ आवडत्यांमधून काढा", "🔕 Mute": "🔕 म्यूट", "🔔 Unmute": "🔔 अनम्यूट", "✔️ Mark as read": "✔️ वाचले म्हणून नोंदवा", "Set your status": "तुमचा स्टेटस", "Available (automatic)": "उपलब्ध (आपोआप)", "Appear away": "दूर दिसा", "Appear offline": "ऑफलाइन दिसा", "Members": "सदस्य", "Today": "आज", "Yesterday": "काल", "No messages yet": "अजून मेसेज नाही", "Send the first message.": "पहिला मेसेज पाठवा.", "⬆ Load older messages": "⬆ जुने मेसेज पहा", "⬇ Download": "⬇ डाउनलोड", "📌 ON HOLD": "📌 होल्डवर", "⏳ HOLD REQUESTED": "⏳ होल्ड मागितला", "📝 My notes": "📝 माझ्या नोंदी", "📝 My notes (message yourself)": "📝 माझ्या नोंदी (स्वतःला मेसेज)", "📝 Message yourself": "📝 स्वतःला मेसेज", "Delivered": "पोहोचला", "Read": "वाचला", "Sending…": "पाठवत आहे…", "⚠ Not sent · Tap to retry": "⚠ गेला नाही · पुन्हा पाठवण्यासाठी दाबा", "Edited": "बदललेला", "📌 Pinned": "📌 पिन केलेला", "↪ Forwarded": "↪ फॉरवर्ड केलेला", "You": "तुम्ही", "Message the team…": "टीमला मेसेज लिहा…", "Post an announcement…": "घोषणा लिहा…", "📢 Only admins can post announcements.": "📢 फक्त ॲडमिन घोषणा करू शकतात.", "Get notified about new messages?": "नवीन मेसेजची सूचना हवी आहे?", "Turn on": "चालू करा", "Not now": "आत्ता नको", "Pinned message": "पिन केलेला मेसेज", "↩️ Reply": "↩️ उत्तर", "📌 Pin": "📌 पिन", "📌 Unpin": "📌 पिन काढा", "✅ Create task": "✅ काम तयार करा", "⏰ Remind me": "⏰ आठवण करून द्या", "✏️ Edit": "✏️ बदला", "↪️ Forward": "↪️ फॉरवर्ड", "📋 Copy text": "📋 मजकूर कॉपी करा", "🗑️ Delete for everyone": "🗑️ सर्वांसाठी हटवा", "🗑️ Discard": "🗑️ रद्द करा", "⭐ Save message": "⭐ मेसेज सेव्ह करा", "☆ Unsave": "☆ सेव्हमधून काढा", "📷 Camera": "📷 कॅमेरा", "💎 Share a stone": "💎 स्टोन शेअर करा", "🔍 Scan stock packet": "🔍 पॅकेट स्कॅन करा", "📊 Poll": "📊 मतदान", "✅ Task": "✅ काम", "⏰ Schedule / remind me": "⏰ वेळ ठरवा / आठवण करून द्या", "❗ Mark as important": "❗ महत्त्वाचे करा", "Cancel": "रद्द करा", "Close": "बंद करा", "Save": "सेव्ह करा", "Done": "झाले", "Copy": "कॉपी", "Create group": "ग्रुप तयार करा", "Start chat": "चॅट सुरू करा", "New chat": "नवीन चॅट", "Search messages": "मेसेज शोधा", "Forward to…": "फॉरवर्ड करा…", "Forward": "फॉरवर्ड", "Name": "नाव", "Mobile": "मोबाइल", "Change photo": "फोटो बदला", "Remove photo": "फोटो काढा", "Add people": "लोक जोडा", "Leave group": "ग्रुप सोडा", "Delete group": "ग्रुप हटवा", "Rename": "नाव बदला", "Remove": "काढा", "Add": "जोडा", "Message info": "मेसेज माहिती", "Create task": "काम तयार करा", "Post poll": "मतदान टाका", "Schedule": "वेळ ठरवा", "Send request": "विनंती पाठवा", "Approve": "मंजूर", "Reject": "नामंजूर", "Disable": "बंद करा", "Enable": "चालू करा", "Make admin": "ॲडमिन करा", "Remove admin": "ॲडमिन काढा", "Admin panel": "ॲडमिन पॅनल", "Users": "युजर्स", "Share in chat": "चॅटमध्ये शेअर करा", "📌 Request hold": "📌 होल्ड मागा", "💲 Offer discount": "💲 ऑफर डिस्काउंट", "Offer discount %": "ऑफर डिस्काउंट %", "Offer price $/ct": "ऑफर प्राइस $/ct", "Clear filters": "फिल्टर काढा", "Shape": "शेप", "Carat": "कॅरेट", "Color": "कलर", "Clarity": "क्लॅरिटी", "Sort": "क्रम", "Any": "कोणतेही", "Party": "पार्टी", "Note": "टीप", "Hold until": "होल्ड कधीपर्यंत", "Requested by": "मागणारे", "Assigned to": "कोणाला सोपवले", "Due": "शेवटची तारीख", "✓ Mark done": "✓ पूर्ण झाले", "Reopen": "पुन्हा उघडा", "Close poll": "मतदान बंद करा", "Join meeting": "मीटिंगमध्ये सामील व्हा", "👁 Preview": "👁 पहा", "🔍 Scan": "🔍 स्कॅन", "🔗 Client link": "🔗 क्लायंट लिंक", "Create link": "लिंक तयार करा", "Find": "शोधा", "Assigned to me": "मला सोपवलेली", "Created by me": "मी तयार केलेली", "⏰ Scheduled": "⏰ ठरवलेले", "Media": "फोटो", "Files": "फाइल्स", "Links": "लिंक", "Stones": "स्टोन", "Check in": "हजेरी लावा", "Check out": "चेक आउट", "Company announcements · only admins post": "कंपनीच्या घोषणा · फक्त ॲडमिन लिहू शकतात", "Announcements from admins will appear here.": "ॲडमिनच्या घोषणा इथे दिसतील.", "Only you can see this · your reminders and notes": "फक्त तुम्हाला दिसते · तुमचे रिमाइंडर आणि नोंदी", "Search name or mobile…": "नाव किंवा मोबाइल शोधा…", "Filter by name or mobile…": "नाव किंवा मोबाइलने शोधा…", "Photos, files and links in this chat": "या चॅटमधील फोटो, फाइल्स आणि लिंक", "Start a video meeting in this chat": "या चॅटमध्ये व्हिडिओ मीटिंग सुरू करा", "Record a voice note": "व्हॉइस नोट रेकॉर्ड करा", "Attach a file or photo": "फाइल किंवा फोटो जोडा", "No groups yet. Tap + NEW GROUP.": "अजून ग्रुप नाही.", "Say hello": "नमस्कार म्हणा"};   // मराठी
+  const MR = {"Email": "ईमेल", "Password": "पासवर्ड", "Sign In": "साइन इन", "Sign up": "साइन अप", "Forgot Password?": "पासवर्ड विसरलात?", "Employee name": "कर्मचाऱ्याचे नाव", "Mobile number": "मोबाइल नंबर", "Confirm password": "पासवर्ड पुन्हा लिहा", "Create account": "अकाउंट तयार करा", "Send reset link": "रीसेट लिंक पाठवा", "← Back to login": "← लॉगिनवर परत", "Choose photo": "फोटो निवडा", "Waiting for approval": "मंजुरीची वाट", "Check again": "पुन्हा तपासा", "Account disabled": "अकाउंट बंद आहे", "Save new password": "नवीन पासवर्ड सेव्ह करा", "New password": "नवीन पासवर्ड", "Confirm new password": "नवीन पासवर्ड पुन्हा लिहा", "Edit profile": "प्रोफाइल बदला", "🔔 Notifications": "🔔 सूचना", "🛡️ Admin panel": "🛡️ ॲडमिन पॅनल", "🏢 Company profile": "🏢 कंपनी प्रोफाइल", "🏢 Profile": "🏢 प्रोफाइल", "👥 Users": "👥 युजर्स", "Log out": "लॉग आउट", "✅ My tasks & reminders": "✅ माझी कामे आणि रिमाइंडर", "🔗 Client links": "🔗 क्लायंट लिंक", "🎨 Theme": "🎨 थीम", "⭐ Saved messages": "⭐ सेव्ह केलेले मेसेज", "🌐 Language": "🌐 भाषा", "🕘 Attendance": "🕘 हजेरी", "📱 My devices": "📱 माझे डिव्हाइस", "Chat": "चॅट", "Unread": "न वाचलेले", "Meeting chats": "मीटिंग चॅट", "Unmuted": "म्यूट नाही", "Favorites": "आवडते", "Chats": "चॅट्स", "Contacts": "संपर्क", "Team Chat": "टीम चॅट", "Announcements": "घोषणा", "Everyone": "सर्वजण", "From admins": "ॲडमिनकडून", "You can post": "तुम्ही पोस्ट करू शकता", "Tap ⋯ on a chat → Add to favorites.": "चॅटवर ⋯ दाबा → आवडत्यांमध्ये जोडा.", "No chats yet. Tap ✏️ to start one.": "अजून चॅट नाही. ✏️ दाबून सुरू करा.", "Available": "उपलब्ध", "Busy": "व्यस्त", "Do not disturb": "त्रास देऊ नका", "Be right back": "लगेच येतो", "Away": "दूर", "Offline": "ऑफलाइन", "online": "ऑनलाइन", "⏰ My reminders": "⏰ माझे रिमाइंडर", "⭐ Add to favorites": "⭐ आवडत्यांमध्ये जोडा", "☆ Remove from favorites": "☆ आवडत्यांमधून काढा", "🔕 Mute": "🔕 म्यूट", "🔔 Unmute": "🔔 अनम्यूट", "✔️ Mark as read": "✔️ वाचले म्हणून नोंदवा", "Set your status": "तुमचा स्टेटस", "Available (automatic)": "उपलब्ध (आपोआप)", "Appear away": "दूर दिसा", "Appear offline": "ऑफलाइन दिसा", "Members": "सदस्य", "Today": "आज", "Yesterday": "काल", "No messages yet": "अजून मेसेज नाही", "Send the first message.": "पहिला मेसेज पाठवा.", "⬆ Load older messages": "⬆ जुने मेसेज पहा", "⬇ Download": "⬇ डाउनलोड", "📌 ON HOLD": "📌 होल्डवर", "⏳ HOLD REQUESTED": "⏳ होल्ड मागितला", "📝 My notes": "📝 माझ्या नोंदी", "📝 My notes (message yourself)": "📝 माझ्या नोंदी (स्वतःला मेसेज)", "📝 Message yourself": "📝 स्वतःला मेसेज", "Delivered": "पोहोचला", "Read": "वाचला", "Sending…": "पाठवत आहे…", "⚠ Not sent · Tap to retry": "⚠ गेला नाही · पुन्हा पाठवण्यासाठी दाबा", "Edited": "बदललेला", "📌 Pinned": "📌 पिन केलेला", "↪ Forwarded": "↪ फॉरवर्ड केलेला", "You": "तुम्ही", "Message the team…": "टीमला मेसेज लिहा…", "Post an announcement…": "घोषणा लिहा…", "📢 Only admins can post announcements.": "📢 फक्त ॲडमिन घोषणा करू शकतात.", "Get notified about new messages?": "नवीन मेसेजची सूचना हवी आहे?", "Turn on": "चालू करा", "Not now": "आत्ता नको", "Pinned message": "पिन केलेला मेसेज", "↩️ Reply": "↩️ उत्तर", "📌 Pin": "📌 पिन", "📌 Unpin": "📌 पिन काढा", "✅ Create task": "✅ काम तयार करा", "⏰ Remind me": "⏰ आठवण करून द्या", "✏️ Edit": "✏️ बदला", "↪️ Forward": "↪️ फॉरवर्ड", "📋 Copy text": "📋 मजकूर कॉपी करा", "🗑️ Delete for everyone": "🗑️ सर्वांसाठी हटवा", "🗑️ Discard": "🗑️ रद्द करा", "⭐ Save message": "⭐ मेसेज सेव्ह करा", "☆ Unsave": "☆ सेव्हमधून काढा", "📷 Camera": "📷 कॅमेरा", "💎 Share a stone": "💎 स्टोन शेअर करा", "🔍 Scan stock packet": "🔍 पॅकेट स्कॅन करा", "📊 Poll": "📊 मतदान", "✅ Task": "✅ काम", "⏰ Schedule / remind me": "⏰ वेळ ठरवा / आठवण करून द्या", "❗ Mark as important": "❗ महत्त्वाचे करा", "Cancel": "रद्द करा", "Close": "बंद करा", "Save": "सेव्ह करा", "Done": "झाले", "Copy": "कॉपी", "Create group": "ग्रुप तयार करा", "Start chat": "चॅट सुरू करा", "New chat": "नवीन चॅट", "Search messages": "मेसेज शोधा", "Forward to…": "फॉरवर्ड करा…", "Forward": "फॉरवर्ड", "Name": "नाव", "Mobile": "मोबाइल", "Change photo": "फोटो बदला", "Remove photo": "फोटो काढा", "Add people": "लोक जोडा", "Leave group": "ग्रुप सोडा", "Delete group": "ग्रुप हटवा", "Rename": "नाव बदला", "Remove": "काढा", "Add": "जोडा", "Message info": "मेसेज माहिती", "Create task": "काम तयार करा", "Post poll": "मतदान टाका", "Schedule": "वेळ ठरवा", "Send request": "विनंती पाठवा", "Approve": "मंजूर", "Reject": "नामंजूर", "Disable": "बंद करा", "Enable": "चालू करा", "Make admin": "ॲडमिन करा", "Remove admin": "ॲडमिन काढा", "Admin panel": "ॲडमिन पॅनल", "Users": "युजर्स", "Share in chat": "चॅटमध्ये शेअर करा", "📌 Request hold": "📌 होल्ड मागा", "💲 Offer discount": "💲 ऑफर डिस्काउंट", "Offer discount %": "ऑफर डिस्काउंट %", "Offer price $/ct": "ऑफर प्राइस $/ct", "Clear filters": "फिल्टर काढा", "Shape": "शेप", "Carat": "कॅरेट", "Color": "कलर", "Clarity": "क्लॅरिटी", "Sort": "क्रम", "Any": "कोणतेही", "Party": "पार्टी", "Note": "टीप", "Hold until": "होल्ड कधीपर्यंत", "Requested by": "मागणारे", "Assigned to": "कोणाला सोपवले", "Due": "शेवटची तारीख", "✓ Mark done": "✓ पूर्ण झाले", "Reopen": "पुन्हा उघडा", "Close poll": "मतदान बंद करा", "Join meeting": "मीटिंगमध्ये सामील व्हा", "👁 Preview": "👁 पहा", "🔍 Scan": "🔍 स्कॅन", "🔗 Client link": "🔗 क्लायंट लिंक", "Create link": "लिंक तयार करा", "Find": "शोधा", "Assigned to me": "मला सोपवलेली", "Created by me": "मी तयार केलेली", "⏰ Scheduled": "⏰ ठरवलेले", "Media": "फोटो", "Files": "फाइल्स", "Links": "लिंक", "Stones": "स्टोन", "Check in": "हजेरी लावा", "Check out": "चेक आउट", "Company announcements · only admins post": "कंपनीच्या घोषणा · फक्त ॲडमिन लिहू शकतात", "Announcements from admins will appear here.": "ॲडमिनच्या घोषणा इथे दिसतील.", "Only you can see this · your reminders and notes": "फक्त तुम्हाला दिसते · तुमचे रिमाइंडर आणि नोंदी", "Search name or mobile…": "नाव किंवा मोबाइल शोधा…", "Filter by name or mobile…": "नाव किंवा मोबाइलने शोधा…", "Photos, files and links in this chat": "या चॅटमधील फोटो, फाइल्स आणि लिंक", "Start a video meeting in this chat": "या चॅटमध्ये व्हिडिओ मीटिंग सुरू करा", "Record a voice note": "व्हॉइस नोट रेकॉर्ड करा", "Attach a file or photo": "फाइल किंवा फोटो जोडा", "No groups yet. Tap + NEW GROUP.": "अजून ग्रुप नाही.", "Say hello": "नमस्कार म्हणा"};   // मराठी
   let lang = "en"; try { lang = localStorage.getItem("kg-lang") || "en"; } catch (e) {}
   const TR_SKIP = ".bubble, .stone-card, .slist, .task-card, .poll-card, .disc-card, .hold-card, .sheet-tbl, .search-hit, #client-view, .link-box, .cv-card, script, style";
   const tx = (key) => { if (lang === "en" || !TR[key]) return key; if (lang === "mr") return MR[key] || key; return TR[key][LANG_IDX[lang]] || key; };
@@ -5821,7 +5901,8 @@ if ("serviceWorker" in navigator) {
       <select class="field" id="set-autologout" style="max-width:260px;">
         <option value="0">Off</option><option value="15">After 15 minutes</option><option value="30">After 30 minutes</option><option value="60">After 1 hour</option>
         <option value="120">After 2 hours</option><option value="240">After 4 hours</option><option value="480">After 8 hours</option><option value="1440">After 24 hours</option></select>
-      <div><button class="small-btn primary" id="set-save">Save</button></div>`;
+      <div><button class="small-btn primary" id="set-save">Save</button></div>
+      <div class="set-help" style="margin-top:18px;">🏢 Company name, company email and who can sign up are in the <b>🏢 Profile</b> tab.</div>`;
     $("set-autologout").value = String(autoLogoutMin);
     $("set-save").addEventListener("click", async () => {
       const v = Number($("set-autologout").value);
@@ -5829,6 +5910,80 @@ if ("serviceWorker" in navigator) {
       if (error) { $("admin-note").textContent = "Couldn't save: " + error.message; return; }
       autoLogoutMin = v; $("admin-note").textContent = "Saved. Auto logout: " + (v ? v + " minutes" : "off") + ".";
       sb.rpc("log_event", { p_action: "settings_changed", p_target: "auto logout", p_details: { minutes: v } }).then(() => {}, () => {});
+    });
+  };
+
+
+  // =====================================================================
+  // ---------- v51: 🏢 Company profile (create it first → staff sign up only with the company email) ----------
+  // =====================================================================
+  const PUBLIC_MAIL = ["gmail.com","googlemail.com","yahoo.com","yahoo.co.in","yahoo.in","outlook.com","hotmail.com","live.com","msn.com","icloud.com","me.com","rediffmail.com","rediff.com","aol.com","proton.me","protonmail.com","zoho.com","zohomail.in","ymail.com","mail.com","gmx.com"];
+  let companyProfile = null;
+  async function saveCompanyProfile(prof) {   // company email's domain = the only email domain allowed for new employees
+    const dom = prof.email.split("@")[1], now = new Date().toISOString();
+    const { error } = await sb.from("app_settings").upsert([{ key: "company_profile", value: prof, updated_at: now },
+      { key: "company_email_domains", value: [dom], updated_at: now }, { key: "company_email_exceptions", value: [], updated_at: now }]);
+    if (error) throw error;
+    try { localStorage.removeItem("kg-pending-company"); } catch (e) {}
+    sb.rpc("log_event", { p_action: "settings_changed", p_target: "company profile", p_details: { name: prof.name, domain: dom } }).then(() => {}, () => {});
+    return dom;
+  }
+  async function loadCompanyProfile() {
+    const { data } = await sb.from("app_settings").select("key,value").in("key", ["company_profile", "company_email_domains", "company_email_exceptions"]);
+    const get = (k) => { const r = (data || []).find(x => x.key === k); return r ? r.value : null; };
+    const p = get("company_profile");
+    companyProfile = Object.assign({ name: "", email: "", phone: "", address: "", gst: "", website: "" }, p && typeof p === "object" && !Array.isArray(p) ? p : {});
+    companyProfile._domains = Array.isArray(get("company_email_domains")) ? get("company_email_domains") : [];
+    companyProfile._exceptions = Array.isArray(get("company_email_exceptions")) ? get("company_email_exceptions") : [];
+    companyProfile._ready = !!(companyProfile.name.trim() && /@/.test(companyProfile.email) && companyProfile._domains.length);
+    $("admin-head").textContent = "🏢 " + (companyProfile.name.trim() || "Company profile");
+    return companyProfile;
+  }
+  async function checkCompanySetup() {
+    if (!myId || !amAppAdmin()) return;
+    try { await loadCompanyProfile(); } catch (e) { return; }
+    if (!companyProfile._ready) {   // registered on the sign-up page before e-mail confirmation → save it now
+      let pend = null; try { pend = JSON.parse(localStorage.getItem("kg-pending-company") || "null"); } catch (e) {}
+      if (pend && pend.name && pend.email && (myProfile.email || "").toLowerCase() === pend.email) {
+        try { await saveCompanyProfile(pend); await loadCompanyProfile(); toast("🏢 Company profile saved — employees can now sign up using the company email " + pend.email); return; } catch (e) {}
+      }
+      openAdmin("company");
+    }
+  }
+  adminTabs.company = async () => {
+    const body = $("admin-body"); body.innerHTML = '<div class="side-empty">Loading…</div>';
+    try { await loadCompanyProfile(); } catch (e) { body.innerHTML = '<div class="side-empty">Couldn\'t load the company profile.</div>'; return; }
+    const c = companyProfile, esc = (v) => String(v || "").replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+    body.innerHTML = (c._ready ? "" : `<div class="co-banner"><b>Step 1 — create your company profile.</b><br>Until it is saved, nobody else can sign up. After saving, employees can create an account <b>only with the company email</b> (e.g. name@yourcompany.com), and you approve them in 👥 Users.</div>`) + `
+      <div class="sec-label">🏢 Company details</div>
+      <div class="co-grid">
+        <label class="set-field full"><span>Company name *</span><input class="field" id="co-name" value="${esc(c.name)}" placeholder="e.g. K.GIRDHARLAL"></label>
+        <label class="set-field"><span>Company email *</span><input class="field" id="co-email" type="email" value="${esc(c.email)}" placeholder="e.g. info@kgirdharlal.com" autocomplete="off"></label>
+        <label class="set-field"><span>Phone</span><input class="field" id="co-phone" value="${esc(c.phone)}" placeholder="e.g. +91 22 0000 0000"></label>
+        <label class="set-field full"><span>Address</span><input class="field" id="co-address" value="${esc(c.address)}" placeholder="Office address"></label>
+        <label class="set-field"><span>GST number</span><input class="field" id="co-gst" value="${esc(c.gst)}" placeholder="e.g. 27AAAAA0000A1Z5"></label>
+        <label class="set-field"><span>Website</span><input class="field" id="co-website" value="${esc(c.website)}" placeholder="e.g. kgirdharlal.com"></label>
+      </div>
+      <div class="set-help" id="co-signup-rule" style="margin-top:6px;">✉️ ${c.email ? "Employees sign up with their own email (for login) and must type the company email <b>" + esc(c.email) + "</b>. Then approve them in 👥 Users." : "After saving, employees sign up with their own email (for login) and must type this company email. Then approve them in 👥 Users."}</div>
+      <div class="set-ok" id="co-note"></div>
+      <div><button class="small-btn primary" id="co-save">${c._ready ? "Save company profile" : "Create company profile"}</button></div>`;
+    const domOf = (e) => (String(e).toLowerCase().split("@")[1] || "").trim();
+    $("co-save").addEventListener("click", async () => {
+      const bad = (t) => { $("co-note").className = "set-ok err"; $("co-note").textContent = t; };
+      const split = (v) => Array.from(new Set(v.split(/[,;\s]+/).map(x => x.trim().toLowerCase()).filter(Boolean)));
+      const prof = { name: $("co-name").value.trim(), email: $("co-email").value.trim().toLowerCase(), phone: $("co-phone").value.trim(), address: $("co-address").value.trim(),
+                     gst: $("co-gst").value.trim().toUpperCase(), website: $("co-website").value.trim() };
+      if (!prof.name) return bad("Please enter the company name.");
+      if (!/^[^@\s]+@[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(prof.email)) return bad("Please enter a valid company email, e.g. info@kgirdharlal.com");
+      if (PUBLIC_MAIL.includes(domOf(prof.email))) return bad("Please use the company's own email (e.g. info@kgirdharlal.com), not " + domOf(prof.email) + " — otherwise anyone with " + domOf(prof.email) + " could sign up.");
+      const wasReady = companyProfile && companyProfile._ready;
+      let dom; try { dom = await saveCompanyProfile(prof); } catch (e) { return bad("Couldn't save: " + e.message); }
+      await loadCompanyProfile();
+      $("co-note").className = "set-ok";
+      $("co-note").textContent = "✅ " + (wasReady ? "Saved." : "Company profile created.") + " Employees can now sign up with their own email + the company email " + prof.email + " — then approve them in 👥 Users.";
+      $("co-signup-rule").innerHTML = "✉️ Employees sign up with their own email (for login) and must type the company email <b>" + esc(prof.email) + "</b>. Then approve them in 👥 Users.";
+      $("co-save").textContent = "Save company profile";
+      const bn = body.querySelector(".co-banner"); if (bn) bn.remove();
     });
   };
 
