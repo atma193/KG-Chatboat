@@ -579,6 +579,57 @@
   .set-field .field { width:100%; box-sizing:border-box; margin:0 !important; }
   .set-ok { font-size:13px; font-weight:600; margin:2px 0 8px; color:#1e8449; }
   .set-ok.err { color:var(--danger, #c0392b); }
+  /* ---- v57 ---- */
+  .ack-row { display:flex; align-items:center; gap:8px; margin-top:4px; flex-wrap:wrap; }
+  .row.mine .ack-row { justify-content:flex-end; }
+  .ack-count { border:none; background:transparent; color:var(--accent, #2f6fde); font-size:12.5px; font-weight:600; cursor:pointer; padding:2px 4px; }
+  .ack-me { font-size:12.5px; color:#1e8449; font-weight:600; }
+  .ack-pending { display:block; width:calc(100% - 20px); margin:4px 10px 6px; padding:7px 10px; border:1px solid rgba(39,174,96,.45); background:rgba(39,174,96,.1); color:inherit; border-radius:10px; font-size:12.5px; font-weight:600; text-align:left; cursor:pointer; }
+  .stt-btn.on { background:#e74c3c; color:#fff; border-radius:50%; }
+  .stt-bar { display:none; align-items:center; gap:8px; padding:6px 12px; flex-wrap:wrap; font-size:13px; }
+  .stt-bar.open { display:flex; }
+  .stt-bar .chip { padding:3px 9px; font-size:12px; }
+  #stt-live { flex:1; min-width:120px; color:var(--text-dim); font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ev-card { padding:10px 12px; min-width:240px; max-width:360px; }
+  .ev-card.past { opacity:.7; }
+  .ev-card.ev-gone { font-style:italic; opacity:.7; }
+  .ev-title { font-weight:700; font-size:15px; margin-bottom:4px; }
+  .ev-line { font-size:13px; line-height:1.5; }
+  .ev-notes { font-size:12.5px; margin-top:4px; white-space:pre-wrap; opacity:.9; }
+  .ev-rsvp { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .ev-who { font-size:12px; opacity:.8; margin-top:6px; }
+  .ev-card .sc-links { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .ev-card a.small-btn { text-decoration:none; }
+  .row.mine .ev-card .small-btn:not(.primary):not(.danger) { color:inherit; background:transparent; border-color:rgba(255,255,255,.45); }
+  .cal-item { display:flex; align-items:center; gap:12px; padding:9px 6px; border-bottom:1px solid var(--border); cursor:pointer; }
+  .cal-item:hover { background:rgba(127,127,127,.08); }
+  .cal-time { width:72px; flex-shrink:0; font-weight:700; font-size:13px; }
+  .cal-me { font-size:12px; font-weight:600; padding:3px 8px; border-radius:10px; background:rgba(127,127,127,.15); white-space:nowrap; }
+  .cal-me.going { background:rgba(39,174,96,.18); color:#1e8449; } .cal-me.no { background:rgba(231,76,60,.15); color:#c0392b; }
+  .team-top { display:flex; gap:6px; align-items:center; margin-bottom:12px; }
+  .team-wrap { overflow:auto; max-width:100%; }
+  .team-table { border-collapse:collapse; width:100%; font-size:13px; }
+  .team-table th, .team-table td { padding:7px 10px; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
+  .team-table th { font-size:11.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--text-dim); }
+  .team-table td.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .team-table td.warn { color:#c0392b; font-weight:700; }
+  .st-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#9aa0a6; }
+  .st-dot.st-available { background:#27ae60; } .st-dot.st-away, .st-dot.st-brb { background:#f39c12; } .st-dot.st-busy, .st-dot.st-dnd { background:#e74c3c; }
+  .lock-screen { position:fixed; inset:0; z-index:2000; background:#fff; display:none; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:20px; color:#2B2E33; }
+  .lock-screen.open { display:flex; }
+  .lock-screen .login-logo-img { width:260px; }
+  .lock-name { font-size:14px; color:#6B6F76; margin-top:6px; }
+  .lock-h { font-size:18px; font-weight:600; }
+  .lock-dots { display:flex; gap:14px; margin:6px 0; }
+  .lock-dots span { width:14px; height:14px; border-radius:50%; border:2px solid #2B2E33; }
+  .lock-dots span.on { background:#2B2E33; }
+  .lock-dots.shake { animation:lockshake .35s; }
+  @keyframes lockshake { 25% { transform:translateX(-8px); } 75% { transform:translateX(8px); } }
+  .lock-msg { min-height:18px; font-size:13px; color:#c0392b; }
+  .lock-pad { display:grid; grid-template-columns:repeat(3, 72px); gap:12px; }
+  .lock-pad button { height:64px; border-radius:50%; border:1px solid #D6D9DD; background:#F6F7F9; font-size:24px; color:#2B2E33; cursor:pointer; }
+  .lock-pad button:active { background:#e4e7eb; }
+  .lock-forgot { margin-top:14px; border:none; background:none; color:#3B6FD8; font-size:13.5px; cursor:pointer; }
   /* ---- v54 ---- */
   .draft-tag { color:#c0392b; font-weight:600; }
   .auto-reply { font-style:italic; opacity:.92; }
@@ -867,6 +918,8 @@
           <button id="menu-broadcast">📣 Broadcast message</button>
           <button id="menu-self">📝 My notes (message yourself)</button>
           <button id="menu-ooo">🏖 Out of office / auto reply</button>
+          <button id="menu-calendar">📅 Calendar</button>
+          <button id="menu-lock">🔐 App lock (PIN)</button>
           <button id="menu-saved">⭐ Saved messages</button>
           <button id="menu-lang">🌐 Language</button>
           <button id="menu-devices">📱 My devices</button>
@@ -895,6 +948,7 @@
         <button class="chip" data-f="meeting">Meeting chats</button>
         <button class="chip" data-f="unmuted">Unmuted</button>
       </div>
+      <button class="ack-pending" id="ack-pending" style="display:none;"></button>
       <div class="side-list">
         <div class="sec-toggle" data-sec="fav"><span class="car">›</span>Favorites<span class="cnt" id="fav-count"></span></div>
         <div class="sec-body" id="sec-fav"><div id="fav-list"></div></div>
@@ -931,6 +985,8 @@
       <div class="mention-pop qr-pop" id="qr-pop"></div>
       <div class="pending-wrap" id="pending-wrap"></div>
       <div class="composer-locked" id="composer-locked">📢 Only admins can post announcements.</div>
+      <div class="urgent-bar" id="ack-bar"><span>✅</span><span class="grow"><b>Ask to acknowledge</b> — everyone gets a “✅ Understood” button and you see who confirmed</span><span class="x" id="ack-x" title="Cancel">&times;</span></div>
+      <div class="stt-bar" id="stt-bar"><span>🎙</span><span id="stt-live">Listening…</span><span id="stt-langs" style="display:flex; gap:4px;"></span><button class="small-btn primary" id="stt-stop">Stop</button></div>
       <div class="rec-bar" id="rec-bar"><span class="rec-dot"></span><span class="grow" id="rec-time">0:00</span><button class="small-btn" id="rec-cancel">Cancel</button><button class="small-btn primary" id="rec-send">Send ➤</button></div>
       <div class="composer" id="composer">
         <button class="icon-btn" id="attach-btn" title="Attach a file or photo">
@@ -941,6 +997,7 @@
         <button class="icon-btn" id="plus-btn" title="More: camera, stone, poll, task, schedule" style="font-size:20px; font-weight:300;">＋</button>
         <button class="icon-btn" id="qr-btn" title="Quick replies (or type / in the message box)" style="font-size:18px;">⚡</button>
         <textarea id="composer-input" placeholder="Message the team…" rows="1"></textarea>
+        <button class="icon-btn stt-btn" id="stt-btn" title="🎙 Speak to type (मराठी / हिंदी / ગુજરાતી / English)">🗣</button>
         <button class="icon-btn" id="mic-btn" title="Record a voice note">🎤</button>
         <button class="send-btn" id="send-btn" disabled>
           <svg viewBox="0 0 24 24" fill="none"><path d="M3 11.5L20.5 3 15 20.5l-4.5-7-7.5-2z" fill="currentColor"/></svg>
@@ -1071,6 +1128,69 @@
       <div class="panel-foot"><span class="grow"></span><button class="small-btn" id="pe-cancel">Cancel</button><button class="small-btn primary" id="pe-done">✔ Done</button></div>
     </div>
   </div>
+  <!-- v57 -->
+  <div class="modal-back" id="ackl-modal">
+    <div class="panel">
+      <div class="panel-head" id="ackl-title">✅ Acknowledged</div>
+      <div class="panel-body"><div id="ackl-list"></div></div>
+      <div class="panel-foot"><button class="small-btn primary" id="ackl-remind">🔔 Remind the pending people</button><span class="grow"></span><button class="small-btn" data-close="ackl-modal">Close</button></div>
+    </div>
+  </div>
+  <div class="modal-back" id="ev-modal">
+    <div class="panel">
+      <div class="panel-head">📅 New event</div>
+      <div class="panel-body">
+        <div class="side-sub" id="ev-chat" style="margin-bottom:8px;"></div>
+        <div class="co-grid">
+          <label class="set-field full"><span>Title *</span><input class="field" id="ev-title" maxlength="120" placeholder="e.g. Party visit — ABC Jewels / Hong Kong show planning"></label>
+          <label class="set-field"><span>Date *</span><input class="field" type="date" id="ev-date"></label>
+          <label class="set-field"><span>Start *</span><input class="field" type="time" id="ev-start"></label>
+          <label class="set-field"><span>End (optional)</span><input class="field" type="time" id="ev-end"></label>
+          <label class="set-field"><span>Reminder in chat</span><select class="field" id="ev-remind"><option value="">No reminder</option><option value="15">15 min before</option><option value="30">30 min before</option><option value="60">1 hour before</option><option value="1440">1 day before</option></select></label>
+          <label class="set-field full"><span>Place</span><input class="field" id="ev-loc" maxlength="200" placeholder="e.g. Office conference room / Bharat Diamond Bourse"></label>
+          <label class="set-field full"><span>Notes</span><textarea class="field" id="ev-notes" rows="2" maxlength="1000"></textarea></label>
+        </div>
+        <div class="set-ok err" id="ev-msg"></div>
+      </div>
+      <div class="panel-foot"><span class="grow"></span><button class="small-btn" data-close="ev-modal">Cancel</button><button class="small-btn primary" id="ev-save">Create &amp; post</button></div>
+    </div>
+  </div>
+  <div class="modal-back" id="cal-modal">
+    <div class="panel wide">
+      <div class="panel-head">📅 Calendar</div>
+      <div class="tabs" id="cal-tabs"><button data-t="up" class="active">Upcoming</button><button data-t="past">Past</button></div>
+      <div class="panel-body" id="cal-list"></div>
+      <div class="panel-foot"><span class="side-sub grow">Create events from ＋ → 📅 Event in any chat.</span><button class="small-btn" data-close="cal-modal">Close</button></div>
+    </div>
+  </div>
+  <div class="modal-back" id="lock-set-modal">
+    <div class="panel">
+      <div class="panel-head" id="ls-title">🔐 App lock</div>
+      <div class="panel-body">
+        <div class="set-help">The app asks for a 4-digit PIN when it's opened and after some minutes without use — on <b>this device only</b>. Forgot the PIN? You can always log out and sign in with your password.</div>
+        <div id="ls-cur-wrap"><label class="set-field"><span>Current PIN</span><input class="field" id="ls-cur" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label></div>
+        <label class="set-field"><span>New PIN (4 digits)</span><input class="field" id="ls-pin1" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label>
+        <label class="set-field"><span>New PIN again</span><input class="field" id="ls-pin2" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label>
+        <label class="set-field"><span>Lock after no use for</span><select class="field" id="ls-mins"><option value="1">1 minute</option><option value="5">5 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">1 hour</option></select></label>
+        <div class="set-ok err" id="ls-msg"></div>
+      </div>
+      <div class="panel-foot"><button class="small-btn danger" id="ls-off">Turn off</button><span class="grow"></span><button class="small-btn" data-close="lock-set-modal">Cancel</button><button class="small-btn primary" id="ls-save">Save</button></div>
+    </div>
+  </div>
+  <div class="lock-screen" id="lock-screen">
+    <div class="login-logo-img" role="img" aria-label="K.GIRDHARLAL"></div>
+    <div class="lock-name" id="lock-name"></div>
+    <div class="lock-h">🔐 Enter your PIN</div>
+    <div class="lock-dots" id="lock-dots"></div>
+    <div class="lock-msg" id="lock-msg"></div>
+    <div class="lock-pad" id="lock-pad">
+      <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+      <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+      <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+      <span></span><button data-k="0">0</button><button data-k="⌫">⌫</button>
+    </div>
+    <button class="lock-forgot" id="lock-forgot">Forgot PIN? Log out</button>
+  </div>
   <div class="act-menu" id="plus-menu">
     <button id="camera-btn">📷 Camera</button>
     <button id="stone-btn">💎 Share a stone</button>
@@ -1079,6 +1199,8 @@
     <button id="poll-btn">📊 Poll</button>
     <button id="task-btn">✅ Task</button>
     <button id="sched-btn">⏰ Schedule / remind me</button>
+    <button id="ack-btn">✅ Ask everyone to acknowledge</button>
+    <button id="event-btn">📅 Event / plan</button>
     <button id="contact-card-btn">👤 Contact card</button>
     <button id="location-btn">📍 My location</button>
   </div>
@@ -1156,6 +1278,7 @@
       <div class="tabs" id="admin-tabs">
         <button data-tab="company">🏢 Profile</button>
         <button data-tab="dash">📊 Dashboard</button>
+        <button data-tab="team">📈 Team activity</button>
         <button data-tab="users">👥 Users</button>
         <button data-tab="stock">💎 Stock</button>
         <button data-tab="holds">📌 Hold requests</button>
@@ -1499,7 +1622,7 @@
 
 <script>
 // ====================== CONFIG — fill these in from your Supabase project ======================
-const APP_VERSION = "v56 · 27 Nov 2026";   // shown at the bottom of the name menu — bump with each release
+const APP_VERSION = "v57 · 27 Nov 2026";   // shown at the bottom of the name menu — bump with each release
 const SUPABASE_URL = "https://nlwirhrjsyyeseeggctx.supabase.co";       // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5sd2lyaHJqc3l5ZXNlZWdnY3R4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU1MTE2ODYsImV4cCI6MjExMTA4NzY4Nn0.T2FVshqkwhlNF37v4dsq3quA778opSn0NxEOPqAlzLE";     // Project Settings → API → anon public key
 const ALLOWED_EMAIL_DOMAIN = "";  // e.g. "kgirdharlal.com" → only these emails can sign up. Leave "" to allow any (admin still approves everyone).
@@ -1665,6 +1788,7 @@ if ("serviceWorker" in navigator) {
     if (!email || !password) { note("login-note","Enter your email and password.","error"); return; }
     note("login-note","Signing in…");
     try { localStorage.removeItem("kg-device"); localStorage.setItem("kg-last-active", String(Date.now())); } catch (e) {}
+    window.__kgPwLogin = Date.now();
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) { note("login-note", error.message, "error"); return; }
     note("login-note","");
@@ -2601,7 +2725,7 @@ if ("serviceWorker" in navigator) {
     pinIdx = 0; renderPinBar(); render(true);
   }
   const findMsg = (id) => messages.find(m => m.id === id) || replyCache[id];
-  const snippet = (m) => !m ? "Original message" : m.deleted ? "🚫 Deleted message" : m.discount_id ? "💲 Offer discount" : m.meeting ? "📹 Meeting" : m.card ? (m.card.type === "location" ? "📍 Location" : "👤 " + (m.card.name || "Contact")) : m.task_id ? "✅ Task" + (tasksById[m.task_id] ? ": " + tasksById[m.task_id].title : "") : m.poll_id ? "📊 Poll" + (pollsById[m.poll_id] ? ": " + pollsById[m.poll_id].question : "") : m.stone_list ? "💎 " + m.stone_list.length + " stones" : (m.text || (m.attachment_type && m.attachment_type.startsWith("audio/") ? "🎤 Voice note" : m.attachment_type && m.attachment_type.startsWith("image/") ? "📷 Photo" : m.attachment_name ? "📎 " + m.attachment_name : m.stone ? "💎 Stone " + (m.stone.stock_id || "") : m.hold_id ? "📌 Hold request" : "Message"));
+  const snippet = (m) => !m ? "Original message" : m.deleted ? "🚫 Deleted message" : m.discount_id ? "💲 Offer discount" : m.meeting ? "📹 Meeting" : m.event_id ? "📅 " + ((eventsById[m.event_id] || {}).title || "Event") : m.card ? (m.card.type === "location" ? "📍 Location" : "👤 " + (m.card.name || "Contact")) : m.task_id ? "✅ Task" + (tasksById[m.task_id] ? ": " + tasksById[m.task_id].title : "") : m.poll_id ? "📊 Poll" + (pollsById[m.poll_id] ? ": " + pollsById[m.poll_id].question : "") : m.stone_list ? "💎 " + m.stone_list.length + " stones" : (m.text || (m.attachment_type && m.attachment_type.startsWith("audio/") ? "🎤 Voice note" : m.attachment_type && m.attachment_type.startsWith("image/") ? "📷 Photo" : m.attachment_name ? "📎 " + m.attachment_name : m.stone ? "💎 Stone " + (m.stone.stock_id || "") : m.hold_id ? "📌 Hold request" : "Message"));
 
   function renderPinBar() {
     const bar = $("pin-bar");
@@ -2680,6 +2804,7 @@ if ("serviceWorker" in navigator) {
           if (gid && !groups.some(g => g.id === gid)) loadGroups();
           return;
         }
+        if (m.ack_required && m.sender_id !== myId) refreshAckPending();
         if (m.thread_root) { onThreadReply(m); return; }
         const i = messages.findIndex(x => x.id === m.id);
         if (i >= 0) { if (messages[i]._status) { messages[i] = m; render(); } return; }
@@ -2698,6 +2823,20 @@ if ("serviceWorker" in navigator) {
         if (m.thread_root) onThreadReply(m, true);
       })
       .on("postgres_changes", { event:"*", schema:"public", table:"chat_groups" }, () => loadGroups())
+      .on("postgres_changes", { event:"INSERT", schema:"public", table:"message_acks" }, (payload) => {
+        const r = payload.new; if (!r || !r.message_id) return;
+        if (ackMap[r.message_id]) { ackMap[r.message_id].set(r.user_id, r.acked_at); render(true); }
+      })
+      .on("postgres_changes", { event:"*", schema:"public", table:"events" }, (payload) => {
+        const e = payload.eventType === "DELETE" ? payload.old : payload.new; if (!e || !e.id) return;
+        if (payload.eventType === "DELETE") eventsById[e.id] = { _missing: true }; else eventsById[e.id] = Object.assign({}, eventsById[e.id] && !eventsById[e.id]._missing ? eventsById[e.id] : {}, e);
+        render(true); if ($("cal-modal").classList.contains("open")) drawCalendar();
+      })
+      .on("postgres_changes", { event:"*", schema:"public", table:"event_rsvps" }, async (payload) => {
+        const r = payload.eventType === "DELETE" ? payload.old : payload.new; if (!r || !r.event_id || !rsvpsByEvent[r.event_id]) return;
+        rsvpsByEvent[r.event_id] = rsvpsByEvent[r.event_id].filter(x => x.user_id !== r.user_id); if (payload.eventType !== "DELETE") rsvpsByEvent[r.event_id].push(r);
+        await ensureProfiles([r.user_id]); render(true); if ($("cal-modal").classList.contains("open")) drawCalendar();
+      })
       .on("postgres_changes", { event:"*", schema:"public", table:"group_members" }, () => loadGroups().then(loadSummaries))
       .on("postgres_changes", { event:"*", schema:"public", table:"discount_requests" }, async (payload) => {
         const d = payload.new; if (!d || !d.id) return; discounts[d.id] = Object.assign(discounts[d.id] || {}, d);
@@ -3146,9 +3285,10 @@ if ("serviceWorker" in navigator) {
     closeMentionPop();
     const ments = mentionIdsIn(text);
     const isUrgent = urgentNext; setUrgent(false);
+    const isAck = ackNext; setAck(false);
     const locals = jobs.map((j, idx) => {
       const m = { id: newId(), sender_id: myId, group_id: currentGroupId, text: j.text || "", created_at: new Date().toISOString(), _status: "sending", _file: j.file || null,
-                  reply_to: idx === 0 ? replyId : null, mentions: idx === 0 && ments.length ? ments : null, urgent: idx === 0 && isUrgent };
+                  reply_to: idx === 0 ? replyId : null, mentions: idx === 0 && ments.length ? ments : null, urgent: idx === 0 && isUrgent, ack_required: idx === 0 && isAck };
       if (j.file) Object.assign(m, { attachment_url: j.file.previewUrl || "#", attachment_name: j.file.name, attachment_type: j.file.blob.type, attachment_size: j.file.blob.size });
       messages.push(m); return m;
     });
@@ -3173,6 +3313,8 @@ if ("serviceWorker" in navigator) {
       if (m.meeting) row.meeting = m.meeting;
       if (m.thread_root) row.thread_root = m.thread_root;
       if (m.card) row.card = m.card;
+      if (m.ack_required) row.ack_required = true;
+      if (m.event_id) row.event_id = m.event_id;
       if (m._file) {
         if (m._file.shrinking) await m._file.shrinking;   // wait for the smaller copy of a big photo
         if (!m._uploadedUrl) m._uploadedUrl = await uploadAttachment(m);
@@ -5337,6 +5479,7 @@ if ("serviceWorker" in navigator) {
   }
   async function afterEnterExtras() {
     if (typeof checkCompanySetup === "function") checkCompanySetup().catch(() => {});
+    try { afterEnterV57(); } catch (e) {}
     try { startCallChannel(); paintOooMenu(); if (oooActive(myProfile)) toast("🏖 You're out of office until " + fmtDateShort(myProfile.ooo_until) + " — name menu → 🏖 to turn it off."); } catch (e) {}
     if (!myId || !canStock()) return;
     watchMyLinks();
@@ -6525,6 +6668,370 @@ if ("serviceWorker" in navigator) {
   });
 
   // =====================================================================
+  // ---------- v57: 🎙 speak to type · ✅ must-acknowledge · 📅 events + calendar · 📈 team activity · 🔐 app lock ----------
+  // =====================================================================
+  const v57El = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+  // ---------------- 🎙 speak to type ----------------
+  const STT_LANGS = [["mr-IN", "मराठी"], ["hi-IN", "हिंदी"], ["gu-IN", "ગુજરાતી"], ["en-IN", "English"]];
+  let stt = null, sttLang = (() => { try { return localStorage.getItem("kg-stt-lang") || "mr-IN"; } catch (e) { return "mr-IN"; } })(), sttBase = "";
+  function drawSttLangs() {
+    const box = $("stt-langs"); box.innerHTML = "";
+    STT_LANGS.forEach(([code, label]) => { const b = v57El("button", "chip" + (code === sttLang ? " on" : ""), label);
+      b.addEventListener("click", () => { sttLang = code; try { localStorage.setItem("kg-stt-lang", code); } catch (e) {} drawSttLangs(); if (stt) { stopStt(true); startStt(); } }); box.appendChild(b); });
+  }
+  function startStt() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { showBanner("🎙 Speak-to-type works in Chrome or Edge (and Chrome on Android). This browser doesn't support it.", true); setTimeout(() => showBanner(""), 6000); return; }
+    const r = new SR(); r.lang = sttLang; r.continuous = true; r.interimResults = true;
+    sttBase = composerInput.value ? composerInput.value.replace(/\s*$/, " ") : "";
+    r.onresult = (ev) => {
+      let fin = "", interim = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++) { const t = ev.results[i][0].transcript; if (ev.results[i].isFinal) fin += t; else interim += t; }
+      if (fin) { sttBase = (sttBase + fin.trim() + " ").replace(/^\s+/, ""); }
+      composerInput.value = sttBase + interim;
+      composerInput.style.height = "auto"; composerInput.style.height = Math.min(composerInput.scrollHeight, 120) + "px"; updateSendEnabled();
+      $("stt-live").textContent = interim ? "“" + interim + "”" : "Listening…";
+    };
+    r.onerror = (ev) => { if (ev.error === "not-allowed" || ev.error === "service-not-allowed") showBanner("🎙 Allow the microphone for this site to speak-to-type.", true); else if (ev.error !== "no-speech" && ev.error !== "aborted") showBanner("🎙 " + ev.error, true); };
+    r.onend = () => { if (stt === r) { try { r.start(); } catch (e) { stopStt(); } } };   // keeps listening until Stop
+    try { r.start(); } catch (e) { showBanner("🎙 Couldn't start: " + e.message, true); return; }
+    stt = r; $("stt-bar").classList.add("open"); $("stt-btn").classList.add("on"); $("stt-live").textContent = "Listening…"; drawSttLangs();
+  }
+  function stopStt(silent) {
+    const r = stt; stt = null; if (r) { try { r.onend = null; r.stop(); } catch (e) {} }
+    $("stt-bar").classList.remove("open"); $("stt-btn").classList.remove("on");
+    composerInput.value = composerInput.value.replace(/\s+$/, ""); updateSendEnabled(); if (!silent) { saveDraft(); composerInput.focus(); }
+  }
+  $("stt-btn").addEventListener("click", () => stt ? stopStt() : startStt());
+  $("stt-stop").addEventListener("click", () => stopStt());
+  sendBtn.addEventListener("click", () => { if (stt) stopStt(true); }, true);
+
+  // ---------------- ✅ must-acknowledge ----------------
+  let ackNext = false;
+  function setAck(on) { ackNext = !!on; $("ack-bar").classList.toggle("open", ackNext); }
+  $("ack-btn").addEventListener("click", () => { $("plus-menu").classList.remove("open"); setAck(!ackNext); composerInput.focus(); });
+  $("ack-x").addEventListener("click", () => setAck(false));
+  const ackMap = {}, ackAsked = new Set(), ackQueue = new Set(); let ackTimer = null;
+  function queueAck(id) { if (ackAsked.has(id)) return; ackAsked.add(id); ackQueue.add(id); clearTimeout(ackTimer); ackTimer = setTimeout(flushAcks, 120); }
+  async function flushAcks() {
+    const ids = Array.from(ackQueue); ackQueue.clear();
+    for (let i = 0; i < ids.length; i += 150) {
+      const part = ids.slice(i, i + 150); part.forEach(id => ackMap[id] = ackMap[id] || new Map());
+      const { data } = await sb.from("message_acks").select("message_id,user_id,acked_at").in("message_id", part);
+      (data || []).forEach(r => ackMap[r.message_id].set(r.user_id, r.acked_at));
+    }
+    render(true);
+  }
+  function ackAudience(m) {   // everyone who should acknowledge: members of that chat except the sender
+    const g = m.group_id ? groupById(m.group_id) : null;
+    const ids = g && g.kind !== "announce" ? g.members : contacts.map(c => c.id);
+    return ids.filter(id => id && id !== m.sender_id);
+  }
+  async function doAck(m) {
+    (ackMap[m.id] = ackMap[m.id] || new Map()).set(myId, new Date().toISOString()); render(true);
+    const { error } = await sb.from("message_acks").insert({ message_id: m.id, user_id: myId });
+    if (error && !/duplicate key/i.test(error.message || "")) { ackMap[m.id].delete(myId); render(true); showBanner("Couldn't confirm: " + error.message + (/message_acks|schema cache/.test(error.message) ? " — run the latest schema.sql in Supabase first." : ""), true); return; }
+    refreshAckPending();
+  }
+  function openAckList(m) {
+    const done = ackMap[m.id] || new Map(), aud = ackAudience(m);
+    $("ackl-title").textContent = "✅ Acknowledged " + aud.filter(id => done.has(id)).length + " / " + aud.length;
+    const box = $("ackl-list"); box.innerHTML = "";
+    const add = (id, ok) => { const it = v57El("div", "side-item"); it.appendChild(personIcon(id)); const tx = v57El("div", "side-text");
+      tx.appendChild(v57El("div", "side-name", nameOf(id))); tx.appendChild(v57El("div", "side-sub", ok ? "✅ " + new Date(done.get(id)).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) : "⏳ Not yet")); it.appendChild(tx); box.appendChild(it); };
+    aud.filter(id => !done.has(id)).forEach(id => add(id, false)); aud.filter(id => done.has(id)).forEach(id => add(id, true));
+    const pend = aud.filter(id => !done.has(id));
+    $("ackl-remind").style.display = (m.sender_id === myId || amAppAdmin()) && pend.length && canPost() && (m.group_id || null) === currentGroupId ? "" : "none";
+    $("ackl-remind").onclick = () => {
+      $("ackl-modal").classList.remove("open");
+      const names = pend.map(id => "@" + nameOf(id)).join(" ");
+      const msg = { id: newId(), sender_id: myId, group_id: currentGroupId, text: names + " — please read and tap ✅ Understood on the message above.", created_at: new Date().toISOString(), _status: "sending", reply_to: m.id, mentions: pend, urgent: true };
+      messages.push(msg); render(); mainEl.scrollTop = mainEl.scrollHeight; deliver(msg);
+    };
+    v54Modal("ackl-modal");
+  }
+  { const prevRow = rowExtras; rowExtras = (m, col) => {
+      prevRow(m, col);
+      if (!m.ack_required || m.deleted || m._status) return;
+      queueAck(m.id);
+      const bub = col.querySelector(".bubble"); if (bub && !bub.querySelector(".ack-tag")) { const t = v57El("div", "urgent-tag ack-tag", "✅ PLEASE ACKNOWLEDGE"); bub.insertBefore(t, bub.firstChild); }
+      const done = ackMap[m.id], aud = ackAudience(m), n = done ? aud.filter(id => done.has(id)).length : 0;
+      const bar = v57El("div", "ack-row");
+      if (m.sender_id !== myId && done && !done.has(myId)) { const b = v57El("button", "small-btn primary", "✅ Understood"); b.addEventListener("click", (e) => { e.stopPropagation(); doAck(m); }); bar.appendChild(b); }
+      else if (m.sender_id !== myId && done && done.has(myId)) bar.appendChild(v57El("span", "ack-me", "✅ You confirmed"));
+      const c = v57El("button", "ack-count", done ? n + " / " + aud.length + " acknowledged" : "…"); c.addEventListener("click", (e) => { e.stopPropagation(); if (done) openAckList(m); }); bar.appendChild(c);
+      col.appendChild(bar);
+    }; }
+  // waiting for MY acknowledgement (shown above the chat list)
+  let ackPending = [];
+  async function refreshAckPending() {
+    if (!myId) return;
+    const since = new Date(Date.now() - 7 * 86400000).toISOString();
+    const { data, error } = await sb.from("messages").select("id,group_id,sender_id,created_at").eq("ack_required", true).gte("created_at", since).neq("sender_id", myId).eq("deleted", false).order("created_at", { ascending: false }).limit(200);
+    if (error || !data) return;
+    const ids = data.map(x => x.id); let mineAcked = new Set();
+    if (ids.length) { const r = await sb.from("message_acks").select("message_id").eq("user_id", myId).in("message_id", ids); mineAcked = new Set((r.data || []).map(x => x.message_id)); }
+    ackPending = data.filter(x => !mineAcked.has(x.id) && (!x.group_id || groupById(x.group_id)));
+    const chip = $("ack-pending"); chip.style.display = ackPending.length ? "" : "none";
+    chip.textContent = "✅ " + ackPending.length + " message" + (ackPending.length > 1 ? "s" : "") + " waiting for your acknowledgement →";
+  }
+  $("ack-pending").addEventListener("click", async () => {
+    const x = ackPending[ackPending.length - 1]; if (!x) return; closeSidebar();
+    if ((x.group_id || null) !== currentGroupId) await openChat(x.group_id || null);
+    jumpTo(x.id);
+  });
+  setInterval(() => { if (myId) refreshAckPending(); }, 30 * 60000);
+
+  // ---------------- 📅 events + calendar ----------------
+  const eventsById = {}, rsvpsByEvent = {}, evLoading = new Set();
+  async function loadEvents(ids) {
+    ids = ids.filter(id => id && !evLoading.has(id)); if (!ids.length) return;
+    ids.forEach(id => evLoading.add(id));
+    const [ev, rs] = await Promise.all([sb.from("events").select("*").in("id", ids), sb.from("event_rsvps").select("*").in("event_id", ids)]);
+    ids.forEach(id => { if (!eventsById[id]) eventsById[id] = { _missing: true }; rsvpsByEvent[id] = []; });
+    (ev.data || []).forEach(e => eventsById[e.id] = e);
+    (rs.data || []).forEach(r => rsvpsByEvent[r.event_id].push(r));
+    await ensureProfiles(Array.from(new Set((ev.data || []).map(e => e.created_by).concat((rs.data || []).map(r => r.user_id)).filter(Boolean))));
+    render(true); if ($("cal-modal").classList.contains("open")) drawCalendar();
+  }
+  const evWhen = (e) => {
+    const s = new Date(e.starts_at), en = e.ends_at ? new Date(e.ends_at) : null;
+    const d = s.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short", year: s.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined });
+    const t = (x) => x.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    return d + " · " + t(s) + (en ? " – " + (localDay(en) === localDay(s) ? t(en) : en.toLocaleDateString(undefined, { day: "numeric", month: "short" }) + " " + t(en)) : "");
+  };
+  const gcalDate = (d) => new Date(d).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  function gcalLink(e) {
+    const end = e.ends_at || new Date(new Date(e.starts_at).getTime() + 3600000).toISOString();
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(e.title) + "&dates=" + gcalDate(e.starts_at) + "/" + gcalDate(end) +
+      (e.location ? "&location=" + encodeURIComponent(e.location) : "") + (e.notes ? "&details=" + encodeURIComponent(e.notes) : "");
+  }
+  function downloadIcs(e) {
+    const end = e.ends_at || new Date(new Date(e.starts_at).getTime() + 3600000).toISOString();
+    const esc = (x) => String(x || "").replace(/[\\,;]/g, (c) => "\\" + c).replace(/\n/g, "\\n");
+    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//KG Chatboat//EN", "BEGIN:VEVENT", "UID:" + e.id + "@kg-chatboat", "DTSTAMP:" + gcalDate(new Date()), "DTSTART:" + gcalDate(e.starts_at), "DTEND:" + gcalDate(end),
+      "SUMMARY:" + esc(e.title), e.location ? "LOCATION:" + esc(e.location) : "", e.notes ? "DESCRIPTION:" + esc(e.notes) : "", "END:VEVENT", "END:VCALENDAR"].filter(Boolean).join("\r\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" })); a.download = (e.title || "event").replace(/[^\w\- ]+/g, "").slice(0, 40) + ".ics"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  async function setRsvp(e, status) {
+    const list = rsvpsByEvent[e.id] = (rsvpsByEvent[e.id] || []).filter(r => r.user_id !== myId);
+    list.push({ event_id: e.id, user_id: myId, status }); render(true); if ($("cal-modal").classList.contains("open")) drawCalendar();
+    const { error } = await sb.from("event_rsvps").upsert({ event_id: e.id, user_id: myId, status, updated_at: new Date().toISOString() });
+    if (error) showBanner("Couldn't save: " + error.message, true);
+  }
+  function eventCard(m) {
+    const e = eventsById[m.event_id];
+    if (!e) { loadEvents([m.event_id]); return v57El("div", "ev-card", "📅 Loading event…"); }
+    if (e._missing) return v57El("div", "ev-card ev-gone", "📅 This event was cancelled.");
+    const past = new Date(e.ends_at || e.starts_at).getTime() < Date.now();
+    const c = v57El("div", "ev-card" + (past ? " past" : ""));
+    c.appendChild(v57El("div", "ev-title", "📅 " + e.title));
+    c.appendChild(v57El("div", "ev-line", "🕒 " + evWhen(e)));
+    if (e.location) c.appendChild(v57El("div", "ev-line", "📍 " + e.location));
+    if (e.notes) c.appendChild(v57El("div", "ev-notes", e.notes));
+    const rs = rsvpsByEvent[e.id] || [], mine = (rs.find(r => r.user_id === myId) || {}).status;
+    const bar = v57El("div", "ev-rsvp");
+    [["going", "✔ Going"], ["maybe", "? Maybe"], ["no", "✖ Can't"]].forEach(([st, label]) => {
+      const who = rs.filter(r => r.status === st), b = v57El("button", "small-btn" + (mine === st ? " primary" : ""), label + (who.length ? " · " + who.length : ""));
+      b.title = who.map(r => nameOf(r.user_id)).join(", ") || "Nobody yet"; b.disabled = past;
+      b.addEventListener("click", (ev) => { ev.stopPropagation(); setRsvp(e, st); }); bar.appendChild(b);
+    });
+    c.appendChild(bar);
+    const going = rs.filter(r => r.status === "going");
+    if (going.length) c.appendChild(v57El("div", "ev-who", "Going: " + going.map(r => r.user_id === myId ? "You" : nameOf(r.user_id).split(" ")[0]).join(", ")));
+    const links = v57El("div", "sc-links");
+    const g = v57El("a", "small-btn", "➕ Google Calendar"); g.href = gcalLink(e); g.target = "_blank"; g.rel = "noopener"; links.appendChild(g);
+    const ic = v57El("button", "small-btn", "⬇ .ics"); ic.title = "Add to Outlook / Apple / phone calendar"; ic.addEventListener("click", (ev) => { ev.stopPropagation(); downloadIcs(e); }); links.appendChild(ic);
+    if ((e.created_by === myId || amAppAdmin()) && !past) { const x = v57El("button", "small-btn danger", "Cancel event"); x.addEventListener("click", async (ev) => { ev.stopPropagation(); if (!confirm("Cancel “" + e.title + "” for everyone?")) return; const { error } = await sb.from("events").delete().eq("id", e.id); if (error) { showBanner("Couldn't cancel: " + error.message, true); return; } eventsById[e.id] = { _missing: true }; render(true); }); links.appendChild(x); }
+    c.appendChild(links);
+    if (e.remind_minutes != null && !past) c.appendChild(v57El("div", "ev-who", "⏰ Reminder in this chat " + (e.remind_minutes >= 1440 ? "1 day" : e.remind_minutes >= 60 ? (e.remind_minutes / 60) + " hour" + (e.remind_minutes > 60 ? "s" : "") : e.remind_minutes + " min") + " before"));
+    return c;
+  }
+  { const prev = extraCard; extraCard = (m) => m.event_id ? eventCard(m) : prev(m); }
+  function openEventForm() {
+    $("plus-menu").classList.remove("open");
+    if (!canPost()) { showBanner("Only admins can post here.", true); return; }
+    const t = new Date(Date.now() + 3600000); t.setMinutes(0, 0, 0);
+    $("ev-title").value = ""; $("ev-date").value = isoDay(t); $("ev-start").value = String(t.getHours()).padStart(2, "0") + ":00"; $("ev-end").value = "";
+    $("ev-loc").value = ""; $("ev-notes").value = ""; $("ev-remind").value = "30"; $("ev-msg").textContent = "";
+    $("ev-chat").textContent = "Posted in: " + chatTitleOf(groupById(currentGroupId)); v54Modal("ev-modal"); setTimeout(() => $("ev-title").focus(), 50);
+  }
+  $("event-btn").addEventListener("click", openEventForm);
+  $("ev-save").addEventListener("click", async () => {
+    const title = $("ev-title").value.trim(), d = $("ev-date").value, st = $("ev-start").value, en = $("ev-end").value;
+    if (!title || !d || !st) { $("ev-msg").textContent = "Enter a title, date and start time."; return; }
+    const starts = new Date(d + "T" + st), ends = en ? new Date(d + "T" + en) : null;
+    if (isNaN(starts)) { $("ev-msg").textContent = "Check the date and time."; return; }
+    if (ends && ends <= starts) { $("ev-msg").textContent = "End time must be after the start time."; return; }
+    const rm = $("ev-remind").value;
+    const row = { group_id: currentGroupId, title: title.slice(0, 120), starts_at: starts.toISOString(), ends_at: ends ? ends.toISOString() : null, location: $("ev-loc").value.trim() || null, notes: $("ev-notes").value.trim() || null, remind_minutes: rm === "" ? null : Number(rm), created_by: myId };
+    $("ev-save").disabled = true;
+    const { data, error } = await sb.from("events").insert(row).select().single();
+    $("ev-save").disabled = false;
+    if (error || !data) { $("ev-msg").textContent = "Couldn't create: " + (error ? error.message : "") + (error && /events|schema cache/.test(error.message) ? " — run the latest schema.sql in Supabase first." : ""); return; }
+    eventsById[data.id] = data; rsvpsByEvent[data.id] = [{ event_id: data.id, user_id: myId, status: "going" }];
+    sb.from("event_rsvps").upsert({ event_id: data.id, user_id: myId, status: "going" }).then(() => {});
+    $("ev-modal").classList.remove("open");
+    sendSpecial({ text: "", event_id: data.id });
+  });
+  let calTab = "up";
+  async function openCalendar() {
+    meMenu.classList.remove("open"); v54Modal("cal-modal"); $("cal-list").innerHTML = '<div class="side-empty">Loading…</div>';
+    const since = new Date(Date.now() - 60 * 86400000).toISOString();
+    const { data, error } = await sb.from("events").select("*").gte("starts_at", since).order("starts_at", { ascending: true }).limit(500);
+    if (error) { $("cal-list").innerHTML = ""; $("cal-list").appendChild(v57El("div", "side-empty", "Couldn't load: " + error.message + (/events|schema cache/.test(error.message) ? " — run the latest schema.sql first." : ""))); return; }
+    (data || []).forEach(e => eventsById[e.id] = e);
+    const ids = (data || []).map(e => e.id);
+    if (ids.length) { const r = await sb.from("event_rsvps").select("*").in("event_id", ids); ids.forEach(id => rsvpsByEvent[id] = []); (r.data || []).forEach(x => rsvpsByEvent[x.event_id].push(x)); }
+    $("cal-modal").dataset.ids = JSON.stringify(ids); drawCalendar();
+  }
+  function drawCalendar() {
+    let ids = []; try { ids = JSON.parse($("cal-modal").dataset.ids || "[]"); } catch (e) {}
+    const now = Date.now(), list = ids.map(id => eventsById[id]).filter(e => e && !e._missing)
+      .filter(e => calTab === "up" ? new Date(e.ends_at || e.starts_at).getTime() >= now - 3600000 : new Date(e.ends_at || e.starts_at).getTime() < now - 3600000);
+    if (calTab === "past") list.reverse();
+    document.querySelectorAll("#cal-tabs button").forEach(b => b.classList.toggle("active", b.dataset.t === calTab));
+    const box = $("cal-list"); box.innerHTML = "";
+    if (!list.length) { box.appendChild(v57El("div", "side-empty", calTab === "up" ? "No upcoming events. Create one from ＋ → 📅 Event in any chat." : "No past events in the last 60 days.")); return; }
+    let lastDay = "";
+    list.forEach(e => {
+      const dk = localDay(e.starts_at);
+      if (dk !== lastDay) { lastDay = dk; box.appendChild(v57El("div", "list-sep", dk === localDay(now) ? "Today" : dk === localDay(now + 86400000) ? "Tomorrow" : new Date(e.starts_at).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" }))); }
+      const rs = rsvpsByEvent[e.id] || [], mine = (rs.find(r => r.user_id === myId) || {}).status;
+      const it = v57El("div", "cal-item");
+      it.appendChild(v57El("div", "cal-time", new Date(e.starts_at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })));
+      const tx = v57El("div", "side-text"); tx.appendChild(v57El("div", "side-name", e.title));
+      tx.appendChild(v57El("div", "side-sub", [chatTitleOf(e.group_id ? groupById(e.group_id) : null), e.location ? "📍 " + e.location : "", rs.filter(r => r.status === "going").length + " going"].filter(Boolean).join(" · ")));
+      it.appendChild(tx);
+      it.appendChild(v57El("span", "cal-me " + (mine || "none"), mine === "going" ? "✔ Going" : mine === "maybe" ? "? Maybe" : mine === "no" ? "✖ Can't" : "Reply"));
+      it.addEventListener("click", async () => {
+        $("cal-modal").classList.remove("open");
+        const { data } = await sb.from("messages").select("id,group_id").eq("event_id", e.id).order("created_at", { ascending: true }).limit(1);
+        const gid = e.group_id || null; if (gid && !groupById(gid)) return;
+        if (gid !== currentGroupId) await openChat(gid);
+        if (data && data[0]) jumpTo(data[0].id);
+      });
+      box.appendChild(it);
+    });
+  }
+  $("cal-tabs").addEventListener("click", (e) => { const b = e.target.closest("button[data-t]"); if (b) { calTab = b.dataset.t; drawCalendar(); } });
+  $("menu-calendar").addEventListener("click", openCalendar);
+
+  // ---------------- 📈 team activity (admins) ----------------
+  let teamDays = 7, teamRows = [];
+  adminTabs.team = async () => {
+    const body = $("admin-body"); body.innerHTML = '<div class="side-empty">Loading…</div>';
+    const [ta, hr] = await Promise.all([sb.rpc("team_activity", { p_days: teamDays }), sb.rpc("activity_by_hour", { p_days: teamDays })]);
+    body.innerHTML = "";
+    const top = v57El("div", "team-top");
+    [[1, "Today"], [7, "7 days"], [30, "30 days"]].forEach(([d, l]) => { const b = v57El("button", "chip" + (d === teamDays ? " on" : ""), l); b.addEventListener("click", () => { teamDays = d; adminTabs.team(); }); top.appendChild(b); });
+    const xl = v57El("button", "small-btn", "⬇ Excel"); xl.style.marginLeft = "auto"; top.appendChild(xl); body.appendChild(top);
+    if (ta.error) { body.appendChild(v57El("div", "side-empty", "Couldn't load: " + ta.error.message + (/function|schema cache/.test(ta.error.message) ? " — run the latest schema.sql in Supabase first." : ""))); return; }
+    teamRows = ta.data || [];
+    const total = teamRows.reduce((a, r) => a + r.messages, 0), activeP = teamRows.filter(r => r.messages > 0).length, unans = teamRows.reduce((a, r) => a + r.unanswered, 0);
+    const reps = teamRows.filter(r => r.avg_reply_min != null), avgAll = reps.length ? reps.reduce((a, r) => a + Number(r.avg_reply_min) * r.replies, 0) / Math.max(1, reps.reduce((a, r) => a + r.replies, 0)) : null;
+    const fmtMin = (v) => v == null ? "–" : v < 1 ? "< 1 min" : v < 60 ? Math.round(v) + " min" : v < 1440 ? (v / 60).toFixed(1) + " h" : (v / 1440).toFixed(1) + " days";
+    const tl = v57El("div", "tiles");
+    [[total, "Messages"], [activeP + " / " + teamRows.length, "People active"], [fmtMin(avgAll), "Avg reply (private chats)"], [unans, "Unanswered private msgs", unans > 0]].forEach(([v, l, w]) => {
+      const d = v57El("div", "tile" + (w ? " warn" : "")); d.appendChild(v57El("div", "v", String(v))); d.appendChild(v57El("div", "l", l)); tl.appendChild(d); });
+    body.appendChild(tl);
+    body.appendChild(v57El("div", "sec-label", "Per person"));
+    const wrap = v57El("div", "team-wrap"), t = v57El("table", "team-table");
+    t.innerHTML = "<thead><tr><th>Name</th><th>Messages</th><th>Active days</th><th>Avg reply</th><th>Unanswered</th><th>Last seen</th></tr></thead>";
+    const tb = v57El("tbody");
+    teamRows.forEach(r => {
+      const tr = v57El("tr"); const st = statusOf(r.user_id);
+      const nm = v57El("td"); nm.appendChild(v57El("span", "st-dot st-" + st)); nm.appendChild(document.createTextNode(" " + r.name)); tr.appendChild(nm);
+      tr.appendChild(v57El("td", "num", String(r.messages))); tr.appendChild(v57El("td", "num", String(r.active_days)));
+      tr.appendChild(v57El("td", "num", fmtMin(r.avg_reply_min == null ? null : Number(r.avg_reply_min)) + (r.replies ? " (" + r.replies + ")" : "")));
+      const un = v57El("td", "num" + (r.unanswered ? " warn" : ""), String(r.unanswered)); tr.appendChild(un);
+      tr.appendChild(v57El("td", "", st !== "offline" ? "🟢 now" : r.last_seen ? fmtLastSeen(r.last_seen).replace(/^last seen /, "") : "–"));
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); wrap.appendChild(t); body.appendChild(wrap);
+    body.appendChild(v57El("div", "set-help", "Avg reply = how long someone takes to answer a private message (number of replies in brackets). Unanswered = private messages to that person with no reply for 2+ hours. Times are India time."));
+    const H = Array.from({ length: 24 }, () => 0); (hr.data || []).forEach(x => H[x.hr] = x.c);
+    body.appendChild(v57El("div", "sec-label", "Busiest hours"));
+    const max = Math.max(1, ...H), bars = v57El("div", "bars"), labs = v57El("div", "bar-labels");
+    H.forEach((v, i) => { const b = v57El("div", "b"); b.style.height = (v / max * 100) + "%"; b.title = (i % 12 || 12) + (i < 12 ? " AM" : " PM") + ": " + v + " messages"; bars.appendChild(b);
+      labs.appendChild(v57El("span", "", i % 3 === 0 ? String(i % 12 || 12) + (i < 12 ? "a" : "p") : "")); });
+    body.appendChild(bars); body.appendChild(labs);
+    xl.addEventListener("click", async () => {
+      const XLSX = await loadSheetJs();
+      const ws = XLSX.utils.json_to_sheet(teamRows.map(r => ({ Name: r.name, Messages: r.messages, "Active days": r.active_days, "Avg reply (min)": r.avg_reply_min == null ? "" : Number(r.avg_reply_min), Replies: r.replies, Unanswered: r.unanswered, "Last seen": r.last_seen ? new Date(r.last_seen).toLocaleString() : "" })));
+      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Team activity"); XLSX.writeFile(wb, "KG_team_activity_" + teamDays + "d_" + isoDay(Date.now()) + ".xlsx");
+    });
+  };
+
+  // ---------------- 🔐 app lock (PIN, this device) ----------------
+  const lockKey = () => "kg-lock:" + myId;
+  const getLock = () => { try { return JSON.parse(localStorage.getItem(lockKey()) || "null"); } catch (e) { return null; } };
+  async function pinHash(salt, pin) { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(salt + ":" + pin)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, "0")).join(""); }
+  let locked = false, lockTyped = "", lockFails = 0, lastTouch = Date.now(), hiddenAt = 0;
+  function paintLockMenu() { const l = myId && getLock(); $("menu-lock").textContent = l ? "🔐 App lock: ON (" + l.mins + " min)" : "🔐 App lock (PIN)"; }
+  function lockNow() {
+    const l = getLock(); if (!l || locked) return;
+    locked = true; lockTyped = ""; drawLockDots(); $("lock-msg").textContent = ""; $("lock-name").textContent = (myProfile && myProfile.name) || "";
+    $("lock-screen").classList.add("open"); try { document.activeElement && document.activeElement.blur(); } catch (e) {}
+  }
+  function drawLockDots() { const d = $("lock-dots"); d.innerHTML = ""; for (let i = 0; i < 4; i++) d.appendChild(v57El("span", i < lockTyped.length ? "on" : "")); }
+  async function lockKeyPress(k) {
+    if (!locked) return;
+    if (k === "⌫") { lockTyped = lockTyped.slice(0, -1); drawLockDots(); return; }
+    if (!/^\d$/.test(k) || lockTyped.length >= 4) return;
+    lockTyped += k; drawLockDots();
+    if (lockTyped.length < 4) return;
+    const l = getLock(), ok = l && (await pinHash(l.salt, lockTyped)) === l.hash;
+    if (ok) { locked = false; lockFails = 0; lastTouch = Date.now(); $("lock-screen").classList.remove("open"); return; }
+    lockFails++; lockTyped = ""; drawLockDots(); $("lock-dots").classList.remove("shake"); void $("lock-dots").offsetWidth; $("lock-dots").classList.add("shake");
+    if (lockFails >= 5) { try { localStorage.removeItem(lockKey()); } catch (e) {} locked = false; $("lock-screen").classList.remove("open"); logoutThisDevice(); return; }
+    $("lock-msg").textContent = "Wrong PIN · " + (5 - lockFails) + " tries left";
+  }
+  $("lock-pad").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) lockKeyPress(b.dataset.k); });
+  document.addEventListener("keydown", (e) => { if (!locked) return; e.preventDefault(); e.stopPropagation(); if (e.key === "Backspace") lockKeyPress("⌫"); else lockKeyPress(e.key); }, true);
+  $("lock-forgot").addEventListener("click", () => { if (!confirm("Forgot your PIN? You'll be logged out on this device and the PIN is removed. Sign in again with your email and password.")) return; try { localStorage.removeItem(lockKey()); } catch (e) {} locked = false; $("lock-screen").classList.remove("open"); logoutThisDevice(); });
+  ["pointerdown", "keydown", "touchstart", "wheel"].forEach(ev => window.addEventListener(ev, () => { if (!locked) lastTouch = Date.now(); }, { passive: true, capture: true }));
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    const l = myId && getLock(); if (l && hiddenAt && Date.now() - hiddenAt >= l.mins * 60000) lockNow();
+  });
+  setInterval(() => { const l = myId && getLock(); if (l && !locked && Date.now() - lastTouch >= l.mins * 60000) lockNow(); }, 15000);
+  $("menu-lock").addEventListener("click", () => {
+    meMenu.classList.remove("open");
+    const l = getLock();
+    $("ls-pin1").value = ""; $("ls-pin2").value = ""; $("ls-cur").value = ""; $("ls-msg").textContent = "";
+    $("ls-cur-wrap").style.display = l ? "" : "none"; $("ls-off").style.display = l ? "" : "none";
+    $("ls-mins").value = l ? String(l.mins) : "5";
+    $("ls-title").textContent = l ? "🔐 App lock is ON" : "🔐 Set an app lock PIN";
+    v54Modal("lock-set-modal");
+  });
+  async function checkCur() { const l = getLock(); if (!l) return true; return (await pinHash(l.salt, $("ls-cur").value.trim())) === l.hash; }
+  $("ls-save").addEventListener("click", async () => {
+    const l = getLock(), p1 = $("ls-pin1").value.trim(), p2 = $("ls-pin2").value.trim(), mins = Number($("ls-mins").value) || 5;
+    if (l && !(await checkCur())) { $("ls-msg").textContent = "Current PIN is wrong."; return; }
+    let salt = l ? l.salt : null, hash = l ? l.hash : null;
+    if (p1 || !l) {
+      if (!/^\d{4}$/.test(p1)) { $("ls-msg").textContent = "PIN must be exactly 4 digits."; return; }
+      if (p1 !== p2) { $("ls-msg").textContent = "The two PINs don't match."; return; }
+      salt = Array.from(crypto.getRandomValues(new Uint8Array(12))).map(x => x.toString(16).padStart(2, "0")).join(""); hash = await pinHash(salt, p1);
+    }
+    try { localStorage.setItem(lockKey(), JSON.stringify({ salt, hash, mins })); } catch (e) { $("ls-msg").textContent = "Couldn't save on this device."; return; }
+    $("lock-set-modal").classList.remove("open"); paintLockMenu(); lastTouch = Date.now();
+    toast("🔐 App lock ON — the app locks after " + mins + " minute" + (mins > 1 ? "s" : "") + " without use and when it's opened.");
+  });
+  $("ls-off").addEventListener("click", async () => {
+    if (!(await checkCur())) { $("ls-msg").textContent = "Type your current PIN to turn the lock off."; return; }
+    try { localStorage.removeItem(lockKey()); } catch (e) {}
+    $("lock-set-modal").classList.remove("open"); paintLockMenu(); toast("🔓 App lock turned off on this device.");
+  });
+  function afterEnterV57() {
+    paintLockMenu(); refreshAckPending();
+    const pw = window.__kgPwLogin && Date.now() - window.__kgPwLogin < 60000;
+    if (getLock() && !pw) lockNow();
+  }
+
+  // =====================================================================
   // ---------- v51: 🏢 Company profile (create it first → staff sign up only with the company email) ----------
   // =====================================================================
   const PUBLIC_MAIL = ["gmail.com","googlemail.com","yahoo.com","yahoo.co.in","yahoo.in","outlook.com","hotmail.com","live.com","msn.com","icloud.com","me.com","rediffmail.com","rediff.com","aol.com","proton.me","protonmail.com","zoho.com","zohomail.in","ymail.com","mail.com","gmx.com"];
@@ -6708,7 +7215,7 @@ if ("serviceWorker" in navigator) {
   function leaveChat() {
     if (realtimeChannel) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
     if (callChan) { try { sb.removeChannel(callChan); } catch (e) {} callChan = null; }
-    try { saveDraft(); closeThread(); } catch (e) {}
+    try { saveDraft(); closeThread(); if (stt) stopStt(true); } catch (e) {}
     stopPresence(); savedSet.clear();
     enteredFor = null; messages = []; currentGroupId = null;
   }
